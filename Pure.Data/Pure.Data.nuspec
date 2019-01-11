@@ -1,0 +1,20 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2011/08/nuspec.xsd">
+    <metadata>
+    <id>$id$</id>
+    <version>$version$</version>
+    <title>$title$</title>
+    <authors>$author$</authors>
+	<owners>$author$</owners>
+    <description>$description$</description>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <developmentDependency>false</developmentDependency>
+    <copyright>Copyright © 郭建斌 2015</copyright> 
+    </metadata>
+     <files> 
+         <file src="bin\Release\Pure.Data.dll"   target="lib\net45\Pure.Data.dll"   />
+       <file src="bin\Release\Pure.Data.XML" target="lib\net45\Pure.Data.xml"   />
+       
+       <file src="bin\Release\zh-CN\Pure.Data.resources.dll" target="lib\net45\zh-CN\Pure.Data.resources.dll"   />
+     </files> 
+</package>

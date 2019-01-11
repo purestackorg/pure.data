@@ -1,0 +1,50 @@
+﻿@using Pure.Data.Gen
+@using System.Linq
+@using Pure.Data.Gen.CodeServer.RazorPaser
+@inherits  RazorCustomizedTemplate<Pure.Data.Gen.Table> 
+ 
+@{
+    OutputContext CurrentOutputContext = Model.CurrentOutputContext;
+	Table tbl = Model;
+    string EntityName = tbl.ClassName + "Entity";
+    string NameSpace = CurrentOutputContext.ProjectConfig.NameSpace;
+	Column colPK = Model.Columns.FirstOrDefault(p => p.IsPK == true);
+}using System;
+using Pure.Data.Gen.Domain;
+namespace @(NameSpace).Domain
+{
+    /// <summary>
+    /// @tbl.Comment
+    ///</summary>
+    public class @(EntityName) {
+
+    @foreach (Column column in Model.Columns )
+    {
+        @:private @GetPropertyType(column ) _@column.PropertyName;
+        @:/// <summary>
+        @:/// @column.Comment
+        @:/// </summary>
+        @:public @GetPropertyType(column ) @Html.EnsureFirstUpperCharInString(column.PropertyName)
+        @:{
+        @:    get { return _@column.PropertyName; }
+        @:    set { _@column.PropertyName = value; }
+        @:}
+        
+    }
+    }
+}
+
+@functions{
+	
+	public static string GetPropertyType(Column col)
+	{
+		string result = col.PropertyType;
+		if(col.IsNullable && col.PropertyType != "string" )
+		{
+			result +="?";
+		}
+		 
+		return result;
+	}
+	
+}

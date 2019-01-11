@@ -1,0 +1,219 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<PureDataConfiguration xmlns="http://PureData.net/schemas/PureDataConfiguration.xsd">
+  <Settings
+    
+    ParameterPrefix="#{" 
+    ParameterSuffix="}"
+    ExecuteTimeout ="30"
+    DefaultPageSize="10"
+    AutoDisposeConnection ="true"
+    ValidateStopOnFirstFailure="false"
+    LoadMapperMode="FluentMapper"
+    EnableLobConverter="false"
+    LobConverterClassName="Pure.Data.Test.MyLobParameterConverter,Pure.Data.Test"
+    
+    EnableDebug="true"
+    EnableIntercept="true"
+    EnableLogError="true"
+    EnableInternalLog="true"
+    EnableOrmLog="true"
+    CategoryLogType="false"
+    OrmLogsPath=""
+    MaxServerLogSize="12000"
+    
+    EnableOrmCache="false"
+    CacheOrmTime="60"
+    CacheOrmSingleTime="60"
+    OrmCacheCheckPeriod="5"
+    
+    EnableSqlMap="false"
+    FormatSql="true"
+    IsWatchSqlMapFile="true"
+    NameSpacePrefix=""
+    WatchSqlMapInterval="3000"
+    
+    AutoMigrate="false"
+    AutoRemoveUnuseColumnInTable="true"
+    EnableAutoMigrateLog="true"
+    EnableAutoMigrateDebug="true"
+    CanUpdatedWhenTableExisted="true"
+    AutoMigrateOnContainTable=""
+    EnableGlobalIgnoreUpdatedColumns="true"
+    AutoFilterEmptyValueColumnsWhenTrack="true"
+    GlobalIgnoreUpdatedColumns="Id;Version;VersionRefId;SERIALNO;CreateTime;CreateUser"
+    
+    EnableCodeGen="false"
+    CodeGenType="DbFirst"
+    CodeGenClassNameMode="UpperAll"
+    CodeGenPropertyNameMode="UpperAll"
+    CodeGenProjectName="MyCodeGen"
+    CodeGenNameSpace="MyCodeGen.Test"
+    CodeGenTableFilter="LR_"
+    CodeGenBaseDirectory="E:\Benson\Source\RoGenerator\Pure\Pure.Data\Pure.Data.stardard\Pure.Data\PureGen\"
+    
+    EnableConnectionPool="false"
+    EnableLogConnectionPool="true"
+    ConnectionPoolMinSize="10"
+    ConnectionPoolMaxSize="200"
+    ConnectionPoolStepSize="10"
+
+  />
+
+  <DataSources >
+    <!--<DataSource Name="WriteDB"  ConnectionString="Database=test;server=localhost;port=3306;userid=root;pwd=root;sslmode=none" Provider="MYSQL"
+                IsMaster="true"  ParameterPrefix=":" Type="Write" Weight="100"  />-->
+    <!--<DataSource Name="WriteDB"  ConnectionString="Server=192.168.6.176;User ID=sa;Password=aaa0.0;Database=Test" Provider="SQLSERVER" 
+                IsMaster="true"  ParameterPrefix=":" Type="Write" Weight="100"  />-->
+    <DataSource Name="WriteDB"  ConnectionString="Server=.;User ID=sa;Password=aaa0.0;Database=LearunFramework_Base_61" Provider="System.Data.SqlClient" 
+                IsMaster="true"  ParameterPrefix=":" Type="Write" Weight="100"  />
+    <!--<DataSource Name="WriteDB"  ConnectionString="Data Source=E:\Benson\Source\RoGenerator\Pure\Pure.Data\Pure.Data\Pure.Data.Test\Data\sqlitetest.db;" Provider="SQLITE"
+            IsMaster="true"  ParameterPrefix=":" Type="Write" Weight="100"  />-->
+
+    <!--NET Framwork ORACLE -->
+    <!--<DataSource Name="ReadDB"  ConnectionString="Data Source=.;Persist Security Info=False;User ID=dbtest;Password=123456" Provider="System.Data.OracleClient"
+                IsMaster="false" ParameterPrefix=":" Type="Read" Weight="20"  />-->
+     
+    
+    <!--NET CORE ORACLE -->
+    <!--<DataSource Name="WriteDB"  ConnectionString="user id=ZXZJ;password=123456;data source=192.168.6.56/ORCL" Provider="System.Data.OracleClient"
+                       IsMaster="true" ParameterPrefix=":" Type="Write" Weight="20"  />-->
+   
+  </DataSources>
+
+  <MapperSources>
+    <!--<MapperSource Type="File" Path="Pure.Data.Test.exe"></MapperSource>-->
+    <MapperSource Type="ClassType" ClassName="PureGen.User,PureGen"></MapperSource>
+  </MapperSources>
+
+
+  <SqlMaps>
+    <!--<SqlMap Path="SqlMap/sql_dev.xml" Type="File"></SqlMap>-->
+    <SqlMap Type="Directory"  Path="SqlMap" ></SqlMap>
+  </SqlMaps>
+
+  <Interceptors>
+    <Interceptor Type="ConnectionInterceptor" AssemblyName="Pure.Data" ClassFullName="Pure.Data.ConnectionTestIntercept" ></Interceptor>
+    <!--<Interceptor Type="ExecutingInterceptor"  AssemblyName="" ClassFullName="" ></Interceptor>
+    <Interceptor Type="ExceptionInterceptor" AssemblyName="" ClassFullName="" ></Interceptor>
+    <Interceptor Type="DataInterceptor"  AssemblyName="" ClassFullName=""></Interceptor>
+    <Interceptor Type="TransactionInterceptor"  AssemblyName="" ClassFullName=""></Interceptor>-->
+  </Interceptors>
+
+
+  <CodeGenTemplates>
+    <!--实体类-->
+    <CodeGenTemplate
+      Enabled="false"
+      Name="Entity"
+      Append="false"
+      Encoding="utf-8"
+      OutputFileExtension=".cs"
+      TemplateFileName="\gen\template\Entity.cshtm"
+      FilePrefix=""
+      FileSuffix="Entity"
+      FileNameFormat=""
+      OutputDirectory="\PureGen\{%ObjectName%}\Entity"
+      ></CodeGenTemplate>
+    
+    <!--模板类-->
+    <CodeGenTemplate
+    Enabled="false"
+    Name="Mapper"
+    Append="false"
+    Encoding="utf-8"
+    OutputFileExtension=".cs"
+    TemplateFileName="\gen\template\Mapper.cshtm"
+    FilePrefix=""
+    FileSuffix="Mapper"
+    FileNameFormat=""
+    OutputDirectory="\PureGen\{%ObjectName%}\Mapper"
+      ></CodeGenTemplate>
+
+    <!--服务类-->
+    <CodeGenTemplate
+ Enabled="true"
+ Name="Service"
+ Append="false"
+ Encoding="utf-8"
+ OutputFileExtension=".cs"
+ TemplateFileName="\gen\template\Service.cshtm"
+ FilePrefix=""
+ FileSuffix="Service"
+ FileNameFormat=""
+ OutputDirectory="\PureGen\{%ObjectName%}\Service"
+      ></CodeGenTemplate>
+
+    <!--SQLMap-->
+    <CodeGenTemplate
+ Enabled="true"
+ Name="SQLMap"
+ Append="false"
+ Encoding="utf-8"
+ OutputFileExtension=".xml"
+ TemplateFileName="\gen\template\SQLMap.cshtm"
+ FilePrefix=""
+ FileSuffix=""
+ FileNameFormat=""
+ OutputDirectory="\PureGen\{%ObjectName%}\SQLMap"
+      ></CodeGenTemplate>
+
+    <!--Controller 控制器-->
+    <CodeGenTemplate
+   Enabled="true"
+   Name="Controller"
+   Append="false"
+   Encoding="utf-8"
+   OutputFileExtension=".cs"
+   TemplateFileName="\gen\template\MvcController.cshtm"
+   FilePrefix=""
+   FileSuffix="Controller"
+   FileNameFormat=""
+   OutputDirectory="\PureGen\{%ObjectName%}\Controllers"
+      ></CodeGenTemplate>
+
+    <!--列表视图-->
+    <CodeGenTemplate
+  Enabled="true"
+  Name="MvcViewList"
+  Append="false"
+  Encoding="utf-8"
+  OutputFileExtension=".cshtml"
+  TemplateFileName="\gen\template\MvcViewList.cshtm"
+  FilePrefix=""
+  FileSuffix=""
+  FileNameFormat="{%ObjectName%}\List"
+  OutputDirectory="\PureGen\{%ObjectName%}\Views"
+      ></CodeGenTemplate>
+
+    <!--表单视图-->
+    <CodeGenTemplate
+  Enabled="true"
+  Name="MVCViewForm"
+  Append="false"
+  Encoding="utf-8"
+  OutputFileExtension=".cshtml"
+  TemplateFileName="\gen\template\MVCViewForm.cshtm"
+  FilePrefix=""
+  FileSuffix=""
+  FileNameFormat="{%ObjectName%}\Form"
+  OutputDirectory="\PureGen\{%ObjectName%}\Views"
+      ></CodeGenTemplate>
+
+    <!--列表Js模块-->
+    <CodeGenTemplate
+   Enabled="true"
+   Name="JsListModule"
+   Append="false"
+   Encoding="utf-8"
+   OutputFileExtension=".js"
+   TemplateFileName="\gen\template\MvcJS.cshtm"
+   FilePrefix=""
+   FileSuffix="Module"
+   FileNameFormat=""
+   OutputDirectory="\PureGen\{%ObjectName%}\JsModules"
+      ></CodeGenTemplate>
+     
+
+  </CodeGenTemplates>
+
+</PureDataConfiguration>

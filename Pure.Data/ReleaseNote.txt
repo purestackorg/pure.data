@@ -1,0 +1,221 @@
+﻿ 
+ ---------------需要将xsd文件都放到vs安装目录下的Xml\Schemas文件夹里
+ 4.2  20181226
+ 修复sqlmap中ref引用查找失败问题
+
+ 4.0    20180831
+ SqlMap增加${XX}直接输出字符串，不是参数化SQL
+ 增加是否输出日志格式化Sql字符串，配置项 LogWithRawSql
+ 增加数据库连接池功能和配置项目,配置
+	EnableConnectionPool="false"
+    EnableLogConnectionPool="true"
+    MinIdle="5"
+    MaxIdle="30"
+    MaxTotal="-1"
+    InitialSize="0"
+    MaxWaitMillis="60000"
+    TimeBetweenEvictionRunsMillis="60000"
+    MinEvictableIdleTimeMillis="300000"
+    SoftMinEvictableIdleTimeMillis="-1"
+    EnableRemoveAbandoned="true"
+    RemoveAbandonedOnBorrow="true"
+    RemoveAbandonedOnMaintenance="true"
+    RemoveAbandonedTimeout="180"
+    NumTestsPerEvictionRun="3"
+    ValidationQuery="SELECT 1 FROM DUAL"
+    TestOnBorrow="false"
+    TestOnCreate="false"
+    TestOnReturn="false"
+    TestWhileIdle="false"
+ 
+
+  3.8   20180720
+新增可自定义代码生成器模块
+两种生成类型（codefirst和dbfrist）
+可自定义生成模板
+修复FluentSqlExpression第一次Where下，根据bool值判断 1=1和1=0
+修复级联方法调用WHERE LOWER(UPPER(a.Name)) = 'sfsdtgsh'
+
+
+ 3.7.3   20180716
+  修改oracle默认字符串长度50
+ AutoMap自动加入验证规则（验证字符串最大长度和是否允许为空）
+ 增加Predicates集合In操作符
+ 支持全局表前缀配置 tablePrefix 属性
+ 避免FluentSqlBuilder每次新建，耗费资源
+ 优化数据库Migrate执行效率
+ 新增CreateSerialNo创建通用流水号方法
+
+  3.7.2  20180706
+ 新增oracle中的Clob和Blob处理接口
+ 增加配置项目databaseConfig.EnableLobConverter， databaseConfig.LobConverterClassName
+ 新增Validate中LengthMinimum 和LengthMaximum， 且所有Length验证都可以过滤Null的字符串
+ 新增GetColumnString 获取列组成的字符串，用于Select 可视化列
+ 修复oracle自动迁移数据时候如果存在clob或者blob列时候，自动跳过。 且如果不存在则新增clob或者blob列
+ 新增自动删除删除无用的列，配置项AutoRemoveUnuseColumnInTable
+
+
+ 3.7.1  20180529
+ 新增Hilo算法,支持SqlServer/SqlServerCe/Oracle/MySQL/Sqlite/PostgreSQL
+ 新增监听PureDataConfiguration配置文件变化
+
+  3.7  20180514
+ 升级到Net Core版本，支持SqlServer/SqlServerCe/Oracle/MySQL/Sqlite/PostgreSQL/Firebird
+ 新增导出Insert语句和Xml文件功能
+ 新增生成实体和Mapper功能，且能自定义模板生成
+ 新增DeleteAll和Truncate方法
+ 新增GetMapByTableName方法
+
+ 3.6  20180404
+ 新增四种LoadMapperMode
+ 优化日志输出
+ 特殊转义字符:空格{#nbsp}， 换行{#newline}， 小于{#lt}， 小于或等于{#lte}， 大于{#gt}， 大于或等于{#gte}， 连接符&{#amp}， 单引号{#apos} ，双引号{#quot}
+ 
+  3.5.2   ----20180307
+ 自动过滤空值的更新track
+新增配置参数ParameterSuffix
+新增sqlmap特殊符号，{#nbsp}空格，{#newline}换行
+
+   3.5.0   ----20180202
+新增Valid验证定义
+新增ValidateStopOnFirstFailure配置
+新增i18n语言汉化
+
+   3.4.9   ----20180108
+新增ObjectId 和IdGen生成算法
+新增参数配置CanUpdatedWhenTableExisted：当表存在时候能否更新
+新增参数配置EnableInternalLog：是否启用内部日志输出
+
+
+   3.4.8   ----20171229
+新增IdGenerate,四种生成不同Id的方式
+
+   3.4.7   ----20171226
+新增DatabaseConfiguration_dev.XML 配置 
+优化分页只开一次数据连接
+新增sqlmap中Foreach，可以获取任意数组对象列表
+新增Sqlmap空格特殊字符{#nbsp}
+
+   3.4.6   ----20171222
+sql map增加Command Type选项
+sql map分页可自定义查询总记录数参数
+
+   3.4.5   ----20171221
+sql map 新增分页方法，可以自行调用
+sql map新增Variable变量
+   3.4.4   ----20171221
+修复数据库SQL MAP自动监听能够重新加载sql
+   3.4.3   ----20171221
+修复数据库连接开启事务后不能关闭
+
+   3.4.2   ----20171220
+修复数据库连接开启事务后不能关闭
+
+   3.4.1   ----20171220
+增加数据库连接池管理，自动配置拓展池容量，默认开启
+
+   3.4.0   ----20171215
+增加Emit实体转换
+增加NewBatchCommand批处理功能
+拓展SqlMapper，新增IDatabase的参数用于中断器配置，提高效率
+ 
+  3.3.9   ----20171215
+更新SqlMap的标签，并且优化解析效率
+修复SqlMapStatement的参数为IDictionary<string, Object>
+增加日志输出配置和Sql map文件目录配置
+add [For Tag] to support iterate.
+add IsNotEmpty & IsEmpty Tag array judge
+fixed the first Child Tag [Dynamic Tag] is [Include Tag] problem.
+
+ 3.3.8   ----20171208
+Database新增ExcuteList / ExcuteModel等方法
+
+
+3.3.7   ----20171208
+修复FluetSqlBuilder中MySql转换字符串确实“'”
+
+3.3.4   ----20171207
+优化Databse加载速度
+优化FluentSql
+
+
+3.3.3   ----20171206
+FluetSqlBuilder新增Where多个表对象Where<T2> / And<T2>等
+
+3.3.2   ----20171206
+FluetSqlBuilder新增Append FluetSqlBuilder对象
+FluetSqlBuilder新增NewBuilder 
+
+3.3.1   ----20171206 
+FluetSqlBuilder新增WhereIf, AndIf, OrIf, OrderByIf等
+FluetSqlBuilder新增Where多个表对象Where<T,T2> / And<T,T2>等
+
+
+3.3.0   ----20171206
+修复自动转换ExecuteList / ExecuteDataTable 等后释放DataReader
+
+
+3.2.9   ----20171204
+修复OrderExpression和GroupExpression后执行Execeute代理为空的错误
+
+3.2.8   ----20171204
+修复Join 中的 int? 可空类型转换
+新增ParameterFluentExpressionSQL 可以转换为select a.*, b.*
+
+3.2.7   ----20171129
+修复Join等方法
+修复Exist
+新增Not Like
+
+3.2.6   ----20171129
+修复Snapshot自动过滤版本、主键、只读、忽略字段
+
+3.2.5   ----20171129
+新增IsVersionColumn
+修改update时候自动增加版本
+
+3.2.4   ----20171127
+新增InsertByKV, UpdateByKV, DeleteByKV, QueryByKV, CountByKV, LongCountByKV
+新增DeleteById, DeleteByIds
+新增UpdateBySQL
+
+3.2.3    ----20171124
+修复MethodCallExpression
+修复Exists方法
+
+
+3.1.8    ----20170915
+修复DbConnectionFactory.CreateConnection取消Connection属性，避免共享connection
+
+3.1.7    ----20170914
+新增对象Track追踪功能，可以获取哪些变化的列用于更新
+新增Snapshotter.SetGlobalIgnoreUpdatedColumns设定全局忽略更新的列
+新增SqlCustomGenerator可以自定义SQL功能
+DataBaseConfig新增EnableGlobalIgnoreUpdatedColumns 、 GlobalIgnoreUpdatedColumns配置项
+修改OutputSQLIntercept、OutputExceptionIntercept等内置中断器为单例模式
+
+
+3.1.6    ----20170908
+修复Page分页Bug，默认以第1页起始
+修复Page中获取TotalCount的问题
+新增方法：
+ string GetSqlOfPage(int pageIndex, int pagesize, string sql, IDictionary<string, object> parameters);
+ string GetSqlOfCount(string sql);
+
+3.1.5    ----20170906
+FluentExpressionSQL新增SqlFuncs功能，里面包含若干SQL的转换方法
+
+3.1.4
+修复IDataReader转化为Model/List/Dictionary等后，可选择自定义关闭时间
+
+......
+
+/////功能//////
+1. Validation自动验证 
+2. 独立Section配置数据库连接，可配置读写分离、可加密连接字符串
+3. 主从读写分离
+4. 分表分库
+5. 一对多、多对多映射
+6. 批量导入、导出，生成SQL 脚本
+7. 数据备份与还原、数据导入导出
+8. 实体缓存

@@ -1,0 +1,135 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<PureDataConfiguration xmlns="http://PureData.net/schemas/PureDataConfiguration.xsd">
+  <Settings
+    
+    ParameterPrefix="#{" 
+    ParameterSuffix="}"
+    ExecuteTimeout ="30"
+    DefaultPageSize="10"
+    AutoDisposeConnection ="true"
+    ValidateStopOnFirstFailure="false"
+    LoadMapperMode="FluentMapper"
+    EnableLobConverter="false"
+    LobConverterClassName="Pure.Data.Test.MyLobParameterConverter,Pure.Data.Test"
+    
+    EnableDebug="true"
+    EnableIntercept="true"
+    EnableLogError="true"
+    EnableInternalLog="true"
+    EnableOrmLog="true"
+    LogWithRawSql="false"
+    CategoryLogType="false"
+    OrmLogsPath=""
+    MaxServerLogSize="12000"
+    
+    EnableOrmCache="false"
+    CacheOrmTime="60"
+    CacheOrmSingleTime="60"
+    OrmCacheCheckPeriod="5"
+    
+    EnableSqlMap="true"
+    FormatSql="true"
+    IsWatchSqlMapFile="true"
+    NameSpacePrefix="Pure.Data.Test."
+    WatchSqlMapInterval="3000"
+    
+    AutoMigrate="false"
+    AutoRemoveUnuseColumnInTable="true"
+    EnableAutoMigrateLog="true"
+    EnableAutoMigrateDebug="true"
+    CanUpdatedWhenTableExisted="true"
+    AutoMigrateOnContainTable="TB_USER"
+    EnableGlobalIgnoreUpdatedColumns="true"
+    AutoFilterEmptyValueColumnsWhenTrack="true"
+    GlobalIgnoreUpdatedColumns="Id;Version;VersionRefId;SERIALNO;CreateTime;CreateUser"
+    
+    EnableCodeGen="false"
+    CodeGenClassNameMode="UpperAll"
+    CodeGenProjectName="MyCodeGen"
+    CodeGenNameSpace="MyCodeGen.Test"
+    CodeGenTableFilter="A_;B_;T_;TB_"
+    
+    EnableConnectionPool="false"
+    EnableLogConnectionPool="false"
+    MinIdle="5"
+    MaxIdle="20"
+    MaxTotal="-1"
+    InitialSize="0"
+    MaxWaitMillis="60000"
+    TimeBetweenEvictionRunsMillis="60000"
+    MinEvictableIdleTimeMillis="300000"
+    SoftMinEvictableIdleTimeMillis="-1"
+    EnableRemoveAbandoned="true"
+    RemoveAbandonedOnBorrow="true"
+    RemoveAbandonedOnMaintenance="true"
+    RemoveAbandonedTimeout="180"
+    NumTestsPerEvictionRun="3"
+    ValidationQuery="SELECT 1 FROM DUAL"
+    TestOnBorrow="false"
+    TestOnCreate="false"
+    TestOnReturn="false"
+    TestWhileIdle="false"
+
+  />
+
+  <DataSources >
+    <!--<DataSource Name="WriteDB"  ConnectionString="Database=test;server=localhost;port=3306;userid=root;pwd=root;sslmode=none" Provider="MYSQL"
+                IsMaster="true"  ParameterPrefix=":" Type="Write" Weight="100"  />-->
+    <!--<DataSource Name="WriteDB"  ConnectionString="Server=192.168.6.176;User ID=sa;Password=aaa0.0;Database=Test" Provider="SQLSERVER" 
+                IsMaster="true"  ParameterPrefix=":" Type="Write" Weight="100"  />-->
+    <!--<DataSource Name="WriteDB"  ConnectionString="Data Source=E:\Benson\Source\RoGenerator\Pure\Pure.Data\Pure.Data\Pure.Data.Test\Data\sqlitetest.db;" Provider="SQLITE"
+            IsMaster="true"  ParameterPrefix=":" Type="Write" Weight="100"  />-->
+
+    <!--NET Framwork ORACLE -->
+    <!--<DataSource Name="ReadDB"  ConnectionString="Data Source=.;Persist Security Info=False;User ID=dbtest;Password=123456" Provider="System.Data.OracleClient"
+                IsMaster="false" ParameterPrefix=":" Type="Read" Weight="20"  />-->
+     
+    
+    <!--NET CORE ORACLE -->
+    <DataSource Name="WriteDB"  ConnectionString="user id=ZXZJ;password=123456;data source=192.168.6.56/ORCL;" Provider="ORACLE"
+                       IsMaster="true" ParameterPrefix=":" Type="Write" Weight="20"  />
+   
+  </DataSources>
+
+  <MapperSources>
+    <!--<MapperSource Type="File" Path="Pure.Data.Test.exe"></MapperSource>-->
+    <MapperSource Type="ClassType" ClassName="Pure.Data.Test.PrintHelper,Pure.Data.Test"></MapperSource>
+  </MapperSources>
+
+
+  <SqlMaps>
+    <!--<SqlMap Path="SqlMap/sql_dev.xml" Type="File"></SqlMap>-->
+    <SqlMap Type="Directory"  Path="SqlMap" ></SqlMap>
+    <!--<SqlMap Type="Directory"  Path="D:\Source\AGRYGL\GDCIC.AGRYGL\GDCIC.AGRYGL.Web\GDCIC.AGRYGL.Domain\DDD\" ></SqlMap>-->
+
+  </SqlMaps>
+
+  <Interceptors>
+    <Interceptor Type="ConnectionInterceptor" AssemblyName="Pure.Data" ClassFullName="Pure.Data.ConnectionTestIntercept" ></Interceptor>
+    <Interceptor Type="ExecutingInterceptor" AssemblyName="Pure.Data" ClassFullName="Pure.Data.OutputSQLIntercept" ></Interceptor>
+    <Interceptor Type="ExceptionInterceptor" AssemblyName="Pure.Data" ClassFullName="Pure.Data.OutputExceptionIntercept" ></Interceptor>
+    <!--<Interceptor Type="ExecutingInterceptor"  AssemblyName="" ClassFullName="" ></Interceptor>
+    <Interceptor Type="ExceptionInterceptor" AssemblyName="" ClassFullName="" ></Interceptor>
+    <Interceptor Type="DataInterceptor"  AssemblyName="" ClassFullName=""></Interceptor>
+    <Interceptor Type="TransactionInterceptor"  AssemblyName="" ClassFullName=""></Interceptor>-->
+  </Interceptors>
+
+
+  <CodeGenTemplates>
+    <CodeGenTemplate
+      Enabled="true"
+      Name="Entity"
+      Append="false"
+      Encoding="utf-8"
+      OutputFileExtension=".cs"
+      TemplateFileName="\gen\template\Entity.cshtml"
+      FilePrefix=""
+      FileSuffix=""
+      FileNameFormat=""
+      OutputDirectory=""
+      ></CodeGenTemplate>
+
+
+  </CodeGenTemplates>
+
+</PureDataConfiguration>

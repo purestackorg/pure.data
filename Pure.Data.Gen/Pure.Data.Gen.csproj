@@ -1,0 +1,68 @@
+<Project Sdk="Microsoft.NET.Sdk">
+ 
+
+  <PropertyGroup>
+    <!--开启多框架兼容设置TargetFrameworks，注意s后缀-->
+    <!--<TargetFrameworks>netstandard2.0;net45;</TargetFrameworks>-->
+    <TargetFrameworks> net45;</TargetFrameworks>
+
+    <!--测试某一个框架兼容去掉s-->
+    <!--<TargetFramework>net45;</TargetFramework>-->
+    <Description>PureData生成代理库</Description>
+    <Copyright>Copyright © Benson Kwok  2015</Copyright>
+    <Version>1.1.4</Version>
+    <Authors>benson</Authors>
+    <AssemblyVersion>1.1.4</AssemblyVersion>
+    <FileVersion>1.1.4</FileVersion>
+    <PackageReleaseNotes>PureData生成代理库</PackageReleaseNotes>
+  </PropertyGroup>
+
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <DefineConstants>TRACE;DEBUG;NET45</DefineConstants>
+    <!--<DefineConstants>TRACE;DEBUG;NET45;NETSTANDARD2_0</DefineConstants>-->
+
+    <WarningLevel>4</WarningLevel>
+
+    <DocumentationFile>bin\Debug\Pure.Data.Gen.xml</DocumentationFile>
+  </PropertyGroup>
+
+
+  <ItemGroup Condition=" '$(TargetFramework)' == 'net45' ">
+    <PackageReference Include="RazorEngine" Version="3.10.0" />
+  </ItemGroup>
+
+
+  <ItemGroup>
+    <ProjectReference Include="..\Pure.Data\Pure.Data.csproj" />
+  </ItemGroup>
+
+
+  <ItemGroup>
+    <None Update="Templates\Entity.cshtm">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Templates\Mapper.cshtm">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Templates\MvcController.cshtm">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Templates\MvcJS.cshtm">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Templates\MVCViewForm.cshtm">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Templates\MvcViewList.cshtm">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Templates\Service.cshtm">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Templates\SQLMap.cshtm">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
+</Project>

@@ -1,0 +1,286 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<xs:schema 
+  elementFormDefault="qualified" 
+  targetNamespace="http://PureData.net/schemas/PureDataConfiguration.xsd" 
+  xmlns:xs="http://www.w3.org/2001/XMLSchema"
+  xmlns="http://PureData.net/schemas/PureDataConfiguration.xsd"
+  xmlns:vs="http://schemas.microsoft.com/Visual-Studio-Intellisense" 
+  vs:friendlyname="PureData Configuration Schema"
+  vs:ishtmlschema="false"
+  vs:iscasesensitive="true"
+  vs:requireattributequotes="true"
+  vs:defaultnamespacequalifier=""
+  vs:defaultnsprefix=""
+  >
+  <xs:element name="PureDataConfiguration">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="Settings" >
+          <xs:complexType>
+
+            <xs:attribute name="ParameterPrefix" type="xs:string" default="$"/>
+            <xs:attribute name="ParameterSuffix" type="xs:string" default=""/>
+            <xs:attribute name="GlobalTablePrefix" type="xs:string" default=""/>
+            <xs:attribute name="ExecuteTimeout" type="xs:int" default="30" />
+            <xs:attribute name="DefaultPageSize" type="xs:int" default="10" />
+            <xs:attribute name="AutoDisposeConnection" type="xs:boolean"  default="true"/>
+            <xs:attribute name="ValidateStopOnFirstFailure" type="xs:boolean"  default="false"/>
+            <xs:attribute name="LoadMapperMode" use="required" >
+              <xs:simpleType>
+                <xs:restriction base="xs:NMTOKEN">
+                  <xs:enumeration value="FluentMapper"/>
+                  <xs:enumeration value="AttributeMapper"/>
+                  <xs:enumeration value="SqlMapper"/>
+                  <xs:enumeration value="All"/>
+                </xs:restriction>
+              </xs:simpleType>
+            </xs:attribute>
+            
+            <xs:attribute name="EnableDebug" type="xs:boolean"  default="true"/>
+            <xs:attribute name="EnableIntercept" type="xs:boolean"  default="true"/>
+            <xs:attribute name="EnableLogError" type="xs:boolean"  default="true"/>
+            <xs:attribute name="EnableOrmLog" type="xs:boolean"  default="true"/>
+            <xs:attribute name="EnableInternalLog" type="xs:boolean"  default="false"/>
+            <xs:attribute name="LogWithRawSql" type="xs:boolean"  default="false"/>
+            <xs:attribute name="CategoryLogType" type="xs:boolean"  default="false"/>
+            <xs:attribute name="OrmLogsPath" type="xs:string" />
+            <xs:attribute name="MaxServerLogSize" type="xs:int" default="10000" />
+            
+            <xs:attribute name="EnableOrmCache" type="xs:boolean"  default="false"/>
+            <xs:attribute name="CacheOrmTime" type="xs:int" default="60" />
+            <xs:attribute name="CacheOrmSingleTime" type="xs:int" default="60" />
+            <xs:attribute name="OrmCacheCheckPeriod" type="xs:int" default="5" />
+
+            
+            <xs:attribute name="EnableSqlMap" type="xs:boolean"  default="false"/>
+            <xs:attribute name="FormatSql" type="xs:boolean"  default="true"/>
+            <xs:attribute name="CanUpdatedWhenTableExisted" type="xs:boolean"  default="true"/>
+            <xs:attribute name="NameSpacePrefix" type="xs:string"  />
+            <xs:attribute name="IsWatchSqlMapFile" type="xs:boolean"  default="true" />
+            <xs:attribute name="WatchSqlMapInterval" type="xs:int" default="5000" />
+
+            <xs:attribute name="AutoMigrate" type="xs:boolean"  default="false"/>
+            <xs:attribute name="AutoRemoveUnuseColumnInTable" type="xs:boolean"  default="false"/>
+            <xs:attribute name="EnableAutoMigrateLog" type="xs:boolean"  default="true"/>
+            <xs:attribute name="EnableAutoMigrateDebug" type="xs:boolean"  default="true"/>
+            <xs:attribute name="AutoMigrateOnContainTable" type="xs:string" />
+            <xs:attribute name="AutoFilterEmptyValueColumnsWhenTrack" type="xs:boolean"  default="true"/>
+            <xs:attribute name="EnableGlobalIgnoreUpdatedColumns" type="xs:boolean"  default="true"/>
+            <xs:attribute name="GlobalIgnoreUpdatedColumns" type="xs:string" />
+
+            <xs:attribute name="EnableCodeGen" type="xs:boolean"  default="false"/>
+            <xs:attribute name="CodeGenType" use="required" >
+              <xs:simpleType>
+                <xs:restriction base="xs:NMTOKEN">
+                  <xs:enumeration value="CodeFirst"/>
+                  <xs:enumeration value="DbFirst"/>
+                </xs:restriction>
+              </xs:simpleType>
+            </xs:attribute>
+            <xs:attribute name="CodeGenBaseDirectory" type="xs:string" />
+            <xs:attribute name="CodeGenProjectName" type="xs:string" />
+            <xs:attribute name="CodeGenNameSpace" type="xs:string" />
+            <xs:attribute name="CodeGenTableFilter" type="xs:string" />
+            <xs:attribute name="CodeGenClassNameMode" use="required" >
+              <xs:simpleType>
+                <xs:restriction base="xs:NMTOKEN">
+                  <xs:enumeration value="UpperAll"/>
+                  <xs:enumeration value="PascalCase"/>
+                  <xs:enumeration value="CamelCase"/>
+                  <xs:enumeration value="TitleCase"/>
+                  <xs:enumeration value="HumanCase"/>
+                  <xs:enumeration value="UpperOrigin"/>
+                  <xs:enumeration value="LowerOrigin"/>
+                  <xs:enumeration value="Origin"/>
+                </xs:restriction>
+              </xs:simpleType>
+            </xs:attribute>
+            <xs:attribute name="CodeGenPropertyNameMode" use="required" >
+              <xs:simpleType>
+                <xs:restriction base="xs:NMTOKEN">
+                  <xs:enumeration value="UpperAll"/>
+                  <xs:enumeration value="PascalCase"/>
+                  <xs:enumeration value="CamelCase"/>
+                  <xs:enumeration value="TitleCase"/>
+                  <xs:enumeration value="HumanCase"/>
+                  <xs:enumeration value="UpperOrigin"/>
+                  <xs:enumeration value="LowerOrigin"/>
+                  <xs:enumeration value="Origin"/>
+                </xs:restriction>
+              </xs:simpleType>
+            </xs:attribute>
+
+
+            <!--<xs:attribute name="EnableConnectionPool" type="xs:boolean"  default="false"/>
+            <xs:attribute name="EnableLogConnectionPool" type="xs:boolean"  default="true"/>
+            <xs:attribute name="MinIdle" type="xs:int" default="0" />
+            <xs:attribute name="MaxIdle" type="xs:int" default="8" />
+            <xs:attribute name="InitialSize" type="xs:int" default="0" />
+            <xs:attribute name="MaxWaitMillis" type="xs:long" default="-1" />
+            <xs:attribute name="MaxTotal" type="xs:int" default="-1" />
+            <xs:attribute name="TimeBetweenEvictionRunsMillis" type="xs:long" default="-1" />
+            <xs:attribute name="MinEvictableIdleTimeMillis" type="xs:long" default="1800000" />
+            <xs:attribute name="EnableRemoveAbandoned" type="xs:boolean"  default="true"/>
+            <xs:attribute name="RemoveAbandonedOnBorrow" type="xs:boolean"  default="true"/>
+            <xs:attribute name="RemoveAbandonedOnMaintenance" type="xs:boolean"  default="true"/>
+            <xs:attribute name="RemoveAbandonedTimeout" type="xs:int" default="300" />
+            <xs:attribute name="NumTestsPerEvictionRun" type="xs:int" default="3" />
+            <xs:attribute name="SoftMinEvictableIdleTimeMillis" type="xs:long" default="-1" />
+            <xs:attribute name="TestOnBorrow" type="xs:boolean"  default="false"/>
+            <xs:attribute name="TestOnCreate" type="xs:boolean"  default="false"/>
+            <xs:attribute name="TestOnReturn" type="xs:boolean"  default="false"/>
+            <xs:attribute name="TestWhileIdle" type="xs:boolean"  default="false"/>
+            <xs:attribute name="ValidationQuery" type="xs:string" default="" />-->
+            
+
+            <xs:attribute name="EnableLobConverter" type="xs:boolean"  default="false" />
+            <xs:attribute name="LobConverterClassName" type="xs:string" />
+
+            
+            
+
+          </xs:complexType>
+        </xs:element>
+
+        <xs:element name="DataSources">
+          <xs:complexType>
+            <xs:choice>
+              <xs:element maxOccurs="unbounded" name="DataSource">
+                <xs:complexType>
+                  <xs:attribute name="Name" type="xs:string" use="required" />
+                  <xs:attribute name="ConnectionString" type="xs:string" use="required" />
+ 
+                  <xs:attribute name="Provider" use="required" >
+                    <xs:simpleType>
+                      <xs:restriction base="xs:NMTOKEN">
+                        <xs:enumeration value="System.Data.SqlClient"/>
+                        <xs:enumeration value="System.Data.SqlServerCe.4.0"/>
+                        <xs:enumeration value="System.Data.SQLite"/>
+                        <xs:enumeration value="MySql.Data.MySqlClient"/>
+                        <xs:enumeration value="System.Data.OracleClient"/>
+                        <xs:enumeration value="Oracle.DataAccess.Client"/>
+                        <xs:enumeration value="Oracle.ManagedDataAccess.Client"/>
+                        <xs:enumeration value="Npgsql"/>
+                        <xs:enumeration value="FirebirdSql.Data.FirebirdClient"/>
+                        <xs:enumeration value="IBM.Data.DB2"/>
+                        <xs:enumeration value="IBM.Data.DB2.iSeries"/>
+                      </xs:restriction>
+                    </xs:simpleType>
+                  </xs:attribute>
+                  <xs:attribute name="IsMaster" type="xs:boolean"  use="required" />
+
+                  <xs:attribute name="ParameterPrefix" type="xs:string" use="optional" />
+
+                  <xs:attribute name="Type" use="optional" >
+                    <xs:simpleType>
+                      <xs:restriction base="xs:NMTOKEN">
+                        <xs:enumeration value="Write"/>
+                        <xs:enumeration value="Read"/>
+                        <xs:enumeration value="ReadAndWrite"/>
+                      </xs:restriction>
+                    </xs:simpleType>
+                  </xs:attribute>
+                  <xs:attribute name="Weight" type="xs:unsignedByte" use="optional" />
+
+
+                </xs:complexType>
+              </xs:element>
+            </xs:choice>
+          </xs:complexType>
+        </xs:element>
+
+        <xs:element name="MapperSources">
+          <xs:complexType>
+            <xs:choice>
+              <xs:element maxOccurs="unbounded" name="MapperSource">
+                <xs:complexType>
+                  <xs:attribute name="Type" use="required" >
+                    <xs:simpleType>
+                      <xs:restriction base="xs:NMTOKEN">
+                        <xs:enumeration value="File"/>
+                        <xs:enumeration value="ClassType"/>
+                      </xs:restriction>
+                    </xs:simpleType>
+                  </xs:attribute>
+                  <xs:attribute name="Path" type="xs:string" use="optional" />
+                  <xs:attribute name="ClassName" type="xs:string" use="optional" />
+                </xs:complexType>
+              </xs:element>
+            </xs:choice>
+          </xs:complexType>
+        </xs:element>
+
+
+        <xs:element name="SqlMaps">
+          <xs:complexType>
+            <xs:choice>
+              <xs:element maxOccurs="unbounded" name="SqlMap">
+                <xs:complexType>
+                  <xs:attribute name="Path" type="xs:string" use="required" />
+                        <xs:attribute name="Type" use="optional" >
+                        <xs:simpleType>
+                          <xs:restriction base="xs:NMTOKEN">
+                            <xs:enumeration value="File"/>
+                            <xs:enumeration value="Directory"/>
+                          </xs:restriction>
+                        </xs:simpleType>
+                      </xs:attribute>
+                </xs:complexType>
+              </xs:element>
+            </xs:choice>
+          </xs:complexType>
+        </xs:element>
+
+        <xs:element name="Interceptors">
+          <xs:complexType>
+            <xs:choice>
+              <xs:element maxOccurs="unbounded" name="Interceptor">
+                <xs:complexType>
+                  <xs:attribute name="AssemblyName" type="xs:string" use="required" />
+                  <xs:attribute name="ClassFullName" type="xs:string" use="required" />
+                  <xs:attribute name="Type" use="required" >
+                    <xs:simpleType>
+                      <xs:restriction base="xs:NMTOKEN">
+                        <xs:enumeration value="ConnectionInterceptor"/>
+                        <xs:enumeration value="ExecutingInterceptor"/>
+                        <xs:enumeration value="ExceptionInterceptor"/>
+                        <xs:enumeration value="DataInterceptor"/>
+                        <xs:enumeration value="TransactionInterceptor"/>
+                      </xs:restriction>
+                    </xs:simpleType>
+                  </xs:attribute>
+                </xs:complexType>
+              </xs:element>
+            </xs:choice>
+          </xs:complexType>
+        </xs:element>
+
+
+        <xs:element name="CodeGenTemplates">
+          <xs:complexType>
+            <xs:choice>
+              <xs:element maxOccurs="unbounded" name="CodeGenTemplate">
+                <xs:complexType>
+                  <xs:attribute name="Enabled" type="xs:boolean" use="required"   />
+                  <xs:attribute name="Name" type="xs:string" use="required" />
+                  <xs:attribute name="OutputFileExtension" type="xs:string" use="required"  />
+                  <xs:attribute name="FilePrefix" type="xs:string" use="optional" />
+                  <xs:attribute name="FileSuffix" type="xs:string" use="optional" />
+                  <xs:attribute name="FileNameFormat" type="xs:string" use="optional" />
+                  <xs:attribute name="TemplateFileName" type="xs:string" use="required" />
+                  <!--<xs:attribute name="Template" type="xs:string" use="optional"  />-->
+                  <xs:attribute name="OutputDirectory" type="xs:string" use="optional" />
+                  <xs:attribute name="Append" type="xs:boolean" use="optional"  default="false" />
+                  <xs:attribute name="Encoding" type="xs:string" use="optional"  default="utf-8" />
+ 
+                </xs:complexType>
+              </xs:element>
+            </xs:choice>
+          </xs:complexType>
+        </xs:element>
+        
+        
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+</xs:schema>

@@ -1,0 +1,42 @@
+﻿@using GDCIC.Core.CodeServer
+@using GDCIC.Core.CodeServer.Model
+@using GDCIC.Core.CodeServer.Config
+@using System.Linq
+@using GDCIC.Core.CodeServer.RazorPaser
+@inherits  RazorCustomizedTemplate<GDCIC.Core.CodeServer.Model.Table> 
+ 
+@{
+    OutputContext CurrentOutputContext = Model.CurrentOutputContext;
+    string RepoName = CurrentOutputContext.Owner == "" ? "RogenDB" : CurrentOutputContext.Owner;
+    string ConnectionStringName = CurrentOutputContext.Owner == "" ? "RogenDB" : CurrentOutputContext.Owner;
+    bool GenerateOperations = true;
+    bool TrackModifiedColumns = true;
+    bool GeneratePocos = true;
+	Table tbl = Model;
+	string TableName = tbl.Name;
+	string ClassName = tbl.ClassName+"Entity";
+    string MapperName = tbl.ClassName + "Mapper";
+    string NameSpace = CurrentOutputContext.GeneraterConfig.NameSpace + ".Domain";
+}
+using System;
+using Pure.Data;
+namespace @NameSpace
+{
+    /// <summary>
+    /// @tbl.Comment 数据表映射模板
+    ///</summary>
+    public class @(MapperName):ClassMapper<@(ClassName)> {
+        public @(MapperName)()
+        {
+            Table("@(TableName)");
+            Description("@tbl.Comment");
+            Map(m => m.Id).Key(KeyType.TriggerIdentity); 
+        @foreach (Column column in Model.Columns.Where(p=>p.PropertyName.ToUpper() != "ID"))
+        {
+            @:Map(m => m.@column.PropertyName).Description("@column.Comment").Size(@(column.Length/2));
+              
+        }
+            AutoMap();
+        }
+    }
+}

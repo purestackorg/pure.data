@@ -1,0 +1,209 @@
+﻿@using Pure.Data.Gen
+@using System.Linq
+@using Pure.Data.Gen.CodeServer.RazorPaser
+@inherits  RazorCustomizedTemplate<Pure.Data.Gen.Table>
+@{
+    OutputContext CurrentOutputContext = Model.CurrentOutputContext;
+    Table tbl = Model;
+    string TableName = tbl.Name;
+    string EntityName = tbl.ClassName + "Entity";
+    string MapperName = tbl.ClassName + "Mapper";
+    string ServiceName = tbl.ClassName + "Service";
+    string ControllerName = tbl.ClassName + "Controller";
+    string ContextName = CurrentOutputContext.ProjectConfig.Name + "DbContext";
+    string NameSpace = CurrentOutputContext.ProjectConfig.NameSpace ;
+}
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Web;
+using System.Web.Mvc;
+using @(NameSpace).Domain;
+using @(NameSpace).Web.Base;
+using GDCIC.Core;
+namespace @(NameSpace).Web
+{
+    public class @(ControllerName) : AdminBaseController
+    {
+		public @(ServiceName) service { get; private set; }
+
+		public @(ControllerName)(@(ServiceName) oSvr)
+		{
+			service = oSvr;
+		}
+
+		public ActionResult List()
+		{
+			return View();
+		}
+
+		public ActionResult Form()
+		{
+			var ID = GetRequestValue<string>("ID", "");
+			ViewBag.ID = ID;
+
+			@(EntityName) obj = null ;
+			if (ID !=null && ID != "")
+			{
+			obj = service.Get(ID);
+			}
+
+			return View(obj);
+		}
+
+		public ActionResult GetList(@(EntityName) dataFilter)
+		{
+			try
+			{
+				JqGridRequestDTO gridRequest = JqGridRequestDTO.Bind();
+				var queryParameters = dataFilter.ToExpandoByObject();
+
+				var strAsc = gridRequest.SortText.ToUpper();
+				int total = 0;
+				var data = service.GetPageData(gridRequest.PageIndex, gridRequest.PageSize, out total, gridRequest.OrderText, strAsc, gridRequest.Keyword, queryParameters );
+
+				var totalPage = (long)Math.Ceiling((double)total / gridRequest.PageSize);
+				JqGridResponseDTO gridResponse = new JqGridResponseDTO(data, total, totalPage, gridRequest.PageIndex);
+				return new CustomJsonResult(gridResponse);
+
+			}
+			catch (Exception ex)
+			{
+				var result = new JqGridResponseDTO(null, 0, 0, 1);
+				return ErrorJson(result, ex);
+			 }
+
+		}
+
+
+		[ValidateInput(false)]
+		public ActionResult Add(@(EntityName) data)
+		{
+			try
+			{
+				var validResult = service.Validate(data);
+				if (!validResult.IsValid)
+				{
+					return Error(validResult);
+				}
+
+				data.CREATEUSERID = CurrentUser.ID;
+				data.CREATETIME = DateTime.Now;
+				data.UPDATEUSERID = CurrentUser.ID;
+				data.UPDATETIME = DateTime.Now;
+				data = service.Insert(data);
+
+				return Success("新增数据成功");
+			}
+			catch (Exception ex)
+			{
+				return Error(ex.Message, ex);
+			}
+		}
+
+		[ValidateInput(false)]
+		public ActionResult Edit(@(EntityName) data)
+		{
+
+			try
+			{
+				var validResult = service.Validate(data);
+				if (!validResult.IsValid)
+				{
+					return Error(validResult);
+				}
+
+				var obj = service.Get(data.ID);
+				if (obj != null)
+				{
+
+					var snap = service.Track(obj);
+
+					data.UPDATEUSERID = CurrentUser.ID;
+					data.UPDATETIME = DateTime.Now;
+
+					snap.Update(data);
+
+					return Success("修改数据成功");
+				}
+				else
+				{
+					return Error("不存在数据在ID=" + data.ID);
+
+				}
+
+			}
+			catch (Exception ex)
+			{
+				return Error(ex.Message, ex);
+
+			}
+		}
+
+		public ActionResult Del(string ID)
+		{
+			try
+			{
+				if (ID != null && ID != "")
+				{
+					service.Delete(ID);
+					return Success("删除数据成功");
+				}
+				return Error("删除数据失败");
+			}
+			catch (Exception ex)
+			{
+				return Error(ex.Message, ex);
+			}
+
+		}
+
+		public ActionResult BatchDel(string IDS)
+		{
+			try
+			{
+				string[] listIDs = IDS.Split(',');
+
+				var list = listIDs;//Array.ConvertAll<string, int>(listIDs, id => Convert.ToInt32(id));
+				service.Delete(p => p.ID.In(list));
+				return Success("删除数据成功");
+
+			}
+			catch (Exception ex)
+			{
+				return Error(ex.Message, ex);
+			}
+		}
+
+		public ActionResult ChangeStatus(string ID)
+		{
+			string msg = string.Empty;
+			try
+			{
+				if(ID != null && ID != "")
+				{
+					var obj = service.Get(ID);
+					if (obj != null)
+					{
+						if (obj.STATUSCODE == 0)
+						{
+							obj.STATUSCODE = 1;
+						}
+						else
+						{
+							obj.STATUSCODE = 0;
+						}
+						service.Update(obj);
+					}
+				}
+
+				return Success("状态更改成功");
+			}
+			catch (Exception ex)
+			{
+				return Error(ex.Message, ex);
+			}
+		}
+
+	}
+}

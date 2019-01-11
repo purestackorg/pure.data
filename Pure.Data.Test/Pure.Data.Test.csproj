@@ -1,0 +1,50 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>netcoreapp2.0</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Remove="PureDataConfiguration.xml" />
+    <None Remove="SqlMap\sql_dev.xml" />
+    <None Remove="SqlMap\sql_dev22.xml" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="SqlMap\sql_dev22.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="SqlMap\sql_dev.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="PureDataConfiguration.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Data.Sqlite" Version="2.0.1" />
+    <PackageReference Include="MySql.Data" Version="8.0.11" />
+    <PackageReference Include="Oracle.ManagedDataAccess.Core" Version="2.12.0-beta2" />
+    <PackageReference Include="System.Security.Permissions" Version="4.4.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Pure.Data\Pure.Data.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="puredata_backup\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="Pure.Ext">
+      <HintPath>..\lib\Pure.Ext.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+
+</Project>

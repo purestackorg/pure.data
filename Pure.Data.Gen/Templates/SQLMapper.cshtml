@@ -1,0 +1,35 @@
+﻿@using GDCIC.Core.CodeServer
+@using GDCIC.Core.CodeServer.Model
+@using GDCIC.Core.CodeServer.Config
+@using System.Linq
+@using GDCIC.Core.CodeServer.RazorPaser
+@inherits RazorCustomizedTemplate<GDCIC.Core.CodeServer.Model.Table>
+
+@{
+    OutputContext CurrentOutputContext = Model.CurrentOutputContext;
+    string RepoName = CurrentOutputContext.Owner == "" ? "RogenDB" : CurrentOutputContext.Owner;
+    string ConnectionStringName = CurrentOutputContext.Owner == "" ? "RogenDB" : CurrentOutputContext.Owner;
+    bool GenerateOperations = true;
+    bool TrackModifiedColumns = true;
+    bool GeneratePocos = true;
+    Table tbl = Model;
+    string TableClassName = tbl.ClassName;
+    string NameSpace = CurrentOutputContext.GeneraterConfig.NameSpace + ".Domain";
+    string SqlMapName = NameSpace + "." + TableClassName + "Service";
+}
+<?xml version="1.0" encoding="utf-8" ?>
+<SqlMap Scope="@(SqlMapName)" xmlns="http://PureData.net/schemas/SqlMap.xsd">
+    <Statements>
+
+        <Statement Id="@(TableClassName)_ShowColumns">
+            @(string.Join(", ", Model.Columns.Select(p => "A." + p.Name)))
+        </Statement>
+
+        <!--获取所有项目-->
+        <Statement Id="GetAllData">
+            SELECT <Include RefId="@(TableClassName)_ShowColumns" />
+            FROM B_PROJECT_FIRST A WHERE A.STATUSCODE = 1
+            ORDER BY UPDATETIME DESC
+        </Statement>
+
+</SqlMap>

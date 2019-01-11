@@ -1,0 +1,72 @@
+﻿@using Pure.Data.Gen
+@using System.Linq
+@using Pure.Data.Gen.CodeServer.RazorPaser
+@inherits  RazorCustomizedTemplate<Pure.Data.Gen.Table>
+@{
+    OutputContext CurrentOutputContext = Model.CurrentOutputContext;
+    Table tbl = Model;
+    string TableName = tbl.Name;
+	string ClassName = tbl.ClassName;
+    string EntityName = tbl.ClassName + "Entity";
+    string MapperName = tbl.ClassName + "Mapper";
+    string ServiceName = tbl.ClassName + "Service";
+    string ControllerName = tbl.ClassName + "Controller";
+    string ContextName = CurrentOutputContext.ProjectConfig.Name + "DbContext";
+    string NameSpace = CurrentOutputContext.ProjectConfig.NameSpace ;
+	string ServiceJsModuleName = tbl.ClassName+"Module";
+	string TableComment =  tbl.Comment;
+}using System;
+using System.Collections.Generic;
+using System.Linq;
+using GDCIC.Core.Data;
+using GDCIC.Core.Domain;
+using Pure.Data;
+namespace @(NameSpace).Domain
+{
+    /// <summary>
+    /// @tbl.Comment 应用服务
+    ///</summary>
+	public class @(ServiceName) : PDRepositoryBase<@(ContextName), @(EntityName)>, IApplicationService
+    {
+        public @(ServiceName)(@(ContextName) ctx)
+            : base(ctx)
+        {
+
+        }
+
+		public List<@(EntityName)> GetPageData(int pageIndex, int pageSize,  out int total, string sort, string asc, string keywords, dynamic queryParameters )
+        {
+            try
+            {
+                if (!keywords.IsNullOrEmpty())
+                {
+                    queryParameters.NAME = keywords;
+                }
+                queryParameters.PSORT = sort;
+                queryParameters.PASC = asc;
+
+                var sqlmap = Context.QuerySqlMap("@(ServiceName)", "GetPageData",
+                   queryParameters
+                    );
+
+                var data = sqlmap.ExecutePageList<@(EntityName)>(pageIndex, pageSize, out total);
+
+                return data;
+
+            }
+            catch (Exception ex)
+            {
+                Context.LogServiceMessage(ex, ex.Message);
+            }
+            finally
+            {
+                Context.Close();
+            }
+            total = 0;
+            return null;
+           
+        }
+
+    }
+	
+}

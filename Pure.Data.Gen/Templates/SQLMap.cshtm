@@ -1,0 +1,57 @@
+﻿@using Pure.Data.Gen
+@using System.Linq
+@using Pure.Data.Gen.CodeServer.RazorPaser
+@inherits  RazorCustomizedTemplate<Pure.Data.Gen.Table>
+@{
+    OutputContext CurrentOutputContext = Model.CurrentOutputContext;
+    Table tbl = Model;
+    string TableName = tbl.Name;
+	string ClassName = tbl.ClassName;
+    string EntityName = tbl.ClassName + "Entity";
+    string MapperName = tbl.ClassName + "Mapper";
+    string ServiceName = tbl.ClassName + "Service";
+    string ControllerName = tbl.ClassName + "Controller";
+    string ContextName = CurrentOutputContext.ProjectConfig.Name + "DbContext";
+    string NameSpace = CurrentOutputContext.ProjectConfig.NameSpace ;
+	string ServiceJsModuleName = tbl.ClassName+"Module";
+	string TableComment =  tbl.Comment;
+	string SqlMapName = NameSpace + ".Domain." + ServiceName;
+}
+<?xml version="1.0" encoding="utf-8" ?>
+<SqlMap Scope="@(SqlMapName)" xmlns="http://PureData.net/schemas/SqlMap.xsd">
+    <Statements>
+		<!--显示列，尽可能排除大字段列，提高效率-->
+        <Statement Id="@(ClassName)_ShowColumns">
+@(string.Join(",\r\n", Model.Columns.Select(p => "A." + p.Name)))
+        </Statement>
+
+        <!--获取所有项目-->
+        <Statement Id="GetAllData">
+            SELECT <Include RefId="@(ClassName)_ShowColumns" />
+            FROM @(TableName) A WHERE A.STATUSCODE = 1
+            ORDER BY UPDATETIME DESC
+        </Statement>
+
+		<!--分页查询数据-->
+		<Statement Id="GetPageData"  >
+			SELECT <Include RefId="@(ClassName)_ShowColumns" /> 
+			FROM @(TableName) A WHERE A.STATUSCODE=1 
+			<IsNotEmpty Prepend="AND" Property="NAME" >
+				INSTR(A.NAME,#{NAME})>0
+			</IsNotEmpty>
+			<IsNotEmpty Prepend="AND" Property="USERID">
+				A.USERID=#{USERID}
+			</IsNotEmpty>
+			<IsNotEmpty Prepend="AND" Property="ORGID">
+				A.ORGID=#{ORGID}
+			</IsNotEmpty>
+			<OrderBy>
+				<Variable Prepend="A." Property="PSORT"></Variable>
+				<Variable Prepend="{#nbsp}" Property="PASC"></Variable>
+			</OrderBy>
+		</Statement>
+
+
+
+	</Statements>
+</SqlMap>

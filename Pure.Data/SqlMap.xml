@@ -1,0 +1,136 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<SqlMap Scope="PURE.CUSTOM.NAMESPACE.TB_USER"  xmlns="http://PureData.net/schemas/SqlMap.xsd">
+  <!--以下是缓存配置-->
+  <Caches>
+ 
+    <!--<Cache Id="TB_USER.LruCache" Type="Lru">
+      <Parameter Key="CacheSize" Value="100"/>
+      <FlushInterval Hours="0" Minutes="10" Seconds="0"/>
+      <FlushOnExecute Statement="TB_USER.Insert"/>
+      <FlushOnExecute Statement="TB_USER.Update"/>
+    </Cache>-->
+
+  </Caches>
+  <!--以下是SQL片段-->
+  <Statements>
+    <!--查询参数条件,用于Include引用-->
+    <Statement Id="QueryParams">
+     <Variable Property="Name"></Variable>
+      <Dynamic Prepend="Where">
+        <IsTrue Property="Yes">
+          1=1
+        </IsTrue>
+        <IsFalse Prepend="And" Property="No">
+          2=2
+        </IsFalse>
+        <IsNotEmpty Property="Name" Prepend="And">
+          Name Like Concat('%',:Name,'-%')
+        </IsNotEmpty>
+
+
+        <Foreach Prepend="And" Property="LikeNames" Index="index" Item="Name" Open="(" Separator="Or" Close=")">
+          Name Like Concat('%',?Name,'%')
+        </Foreach>
+      </Dynamic>
+
+      <Switch Prepend="Order By" Property="OrderBy">
+        <Case CompareValue="1">
+          Id Desc
+        </Case>
+        <Case CompareValue="2">
+          Id Asc
+        </Case>
+        <Case CompareValue="3">
+          Name Desc
+        </Case>
+      </Switch>
+
+      
+    </Statement>
+    <!--获取数据列 - Include-->
+    <Statement Id="GetListInclude" Cache="TB_USER.LruCache">
+      SELECT T.* From TB_USER T
+      <Include RefId="QueryParams" />
+       
+    </Statement>
+    <!--新增-->
+    <Statement Id="Insert">
+      INSERT INTO TB_USER
+      (Name)
+      VALUES
+      (:Name)
+    </Statement>
+    <!--删除-->
+    <Statement Id="Delete">
+      Delete TB_USER
+      Where Id=:Id
+    </Statement>
+  
+    <!--更新-->
+    <Statement Id="Update">
+      UPDATE TB_USER
+      SET
+      Name = :Name
+      Where Id=:Id
+    </Statement>
+    <!--获取数据列-->
+    <Statement Id="GetList">
+      Select * From TB_USER T Where 1=1
+      <IsNotEmpty Prepend="And T.Id" Property="Ids" In="true" />
+      <IsNotEmpty Prepend="And" Property="Name">
+        And T.Name Like '%'+ :Name + '%'
+      </IsNotEmpty>
+      Order By Id Desc
+    </Statement>
+    <!--多条件组合查询-->
+    <Statement Id="GetListCombine">
+      Select  * From TB_USER T Where 1=1
+      <IsNotEmpty  Property="Name">
+        <IsGreaterEqual Property="Id" CompareValue="5">
+          <IsLessThan Property="Id" CompareValue="100">
+            And T.Name Like '%:Name%'
+            And T.Id >= :Id
+          </IsLessThan>
+        </IsGreaterEqual>
+      </IsNotEmpty>
+      Order By Id Desc
+    </Statement>
+    <!--获取分页数据-->
+    <Statement Id="GetListByPage">
+      Select TT.* From
+      (Select ROW_NUMBER() Over(Order By T.Id Desc) Row_Index,T.
+      * From TB_USER T
+      <Include RefId="QueryParams"/>) TT
+      Where TT.Row_Index Between ((:PageIndex-1)*:PageSize+1) An
+      d (:PageIndex*:PageSize)
+    </Statement>
+    <!--获取记录数-->
+    <Statement Id="GetRecord">
+      Select Count(1) From TB_USER T
+      <Include RefId="QueryParams"/>
+    </Statement>
+    <!--获取表映射实体-->
+    <Statement Id="GetEntity">
+      Select T.* From TB_USER T
+      Where 1=1
+      <IsNotEmpty Prepend="And" Property="Id">
+        T.Id=:Id
+      </IsNotEmpty>
+    </Statement>
+    <!--是否存在该记录-->
+    <Statement Id="IsExist">
+      Select Count(1) From TB_USER T
+      <Include RefId="QueryParams"/>
+    </Statement>
+
+
+    <!--Foreach 获取数据列-->
+    <Statement Id="GetListByFor"  >
+      Select * From TB_USER T Where 1=1
+      <Foreach Prepend="And" Property="LikeNames" Index="index" Item="item" Open="(" Separator="Or" Close=")">
+        Name Like Concat('%',:item.Name,'%') and Id > :index  and Id > :item.Id
+      </Foreach>
+    </Statement>
+    
+  </Statements>
+</SqlMap>

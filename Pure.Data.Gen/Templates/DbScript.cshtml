@@ -1,0 +1,30 @@
+﻿@using GDCIC.Core.CodeServer
+@using GDCIC.Core.CodeServer.Model
+@using GDCIC.Core.CodeServer.Config
+@using System.Linq
+@using GDCIC.Core.CodeServer.RazorPaser
+@inherits  RazorCustomizedTemplate<GDCIC.Core.CodeServer.Model.Table> 
+ 
+@{
+    OutputContext CurrentOutputContext = Model.CurrentOutputContext;
+	Table tbl = Model;
+    string TableName = tbl.Name;
+    string SequenceName = "S_" + TableName;
+    string TriggerName = "Trg_" + TableName;
+}
+--创建序列
+create sequence @(SequenceName)
+minvalue 1
+maxvalue 9999999999
+start with 1
+increment by 1
+cache 2
+order;
+
+---触发器
+CREATE OR REPLACE TRIGGER @(TriggerName)
+BEFORE INSERT ON @(TableName)
+FOR EACH ROW
+BEGIN
+SELECT  @(SequenceName).nextval INTO :new.Id FROM dual;
+END;

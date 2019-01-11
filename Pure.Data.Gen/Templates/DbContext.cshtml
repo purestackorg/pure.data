@@ -1,0 +1,62 @@
+﻿@using GDCIC.Core.CodeServer
+@using GDCIC.Core.CodeServer.Model
+@using GDCIC.Core.CodeServer.Config
+@using System.Linq
+@using GDCIC.Core.CodeServer.RazorPaser
+@inherits  RazorCustomizedTemplate<GDCIC.Core.CodeServer.Model.OutputContext> 
+ 
+@{
+    OutputContext CurrentOutputContext = Model;
+     
+	string ProjectName = CurrentOutputContext.ProjectConfig.Name;
+    string ContextName = CurrentOutputContext.ProjectConfig.Name + "DbContext";
+    string NameSpace = CurrentOutputContext.GeneraterConfig.NameSpace + ".Domain";
+}
+using GDCIC.Core.Data;
+using Pure.Data;
+using Pure.Profiler;
+namespace @NameSpace
+{
+    /// <summary>
+    /// @ProjectName 数据库上下文
+    ///</summary>
+	public class @(ContextName) : DbContext
+    {
+        public @(ContextName)()
+            : base("@(ProjectName)", config => {
+                config.ExecuteTimeout = GDCIC.Core.Toolset.AppConfigHelper.Get<int>("ExecuteTimeout", 30);
+                config.EnableOrmLog = GDCIC.Core.Toolset.AppConfigHelper.Get<bool>("EnableOrmLog", true);
+                config.EnableDebug = GDCIC.Core.Toolset.AppConfigHelper.Get<bool>("EnableDebug", true);// true;
+                config.EnableIntercept = GDCIC.Core.Toolset.AppConfigHelper.Get<bool>("EnableIntercept", true); //true;
+                config.KeepConnectionAlive = GDCIC.Core.Toolset.AppConfigHelper.Get<bool>("KeepConnectionAlive", false);  //false;
+                config.AutoMigrate = GDCIC.Core.Toolset.AppConfigHelper.Get<bool>("AutoMigrate", true);//true;
+                config.EnableAutoMigrateDebug = GDCIC.Core.Toolset.AppConfigHelper.Get<bool>("EnableAutoMigrateDebug", true);// true;
+                config.EnableAutoMigrateLog = GDCIC.Core.Toolset.AppConfigHelper.Get<bool>("EnableAutoMigrateLog", true);//true;
+                config.AutoMigrateOnContainTable = GDCIC.Core.Toolset.AppConfigHelper.Get<string>("AutoMigrateOnContainTable", "");
+                config.EnableGlobalIgnoreUpdatedColumns = GDCIC.Core.Toolset.AppConfigHelper.Get<bool>("EnableGlobalIgnoreUpdatedColumns", true);
+                config.GlobalIgnoreUpdatedColumns = GDCIC.Core.Toolset.AppConfigHelper.Get<string>("GlobalIgnoreUpdatedColumns", "");
+
+                if (config.EnableDebug == true)
+                {
+                    config.DbConnectionInit = (conn) =>
+                    {
+
+                        if ( ProfilingSession.Current == null)
+                        {
+                            return conn;
+                        } 
+                        var dbProfiler = new Pure.Profiler.Data.DbProfiler(Pure.Profiler.ProfilingSession.Current.Profiler);
+
+                        conn = new Pure.Profiler.Data.ProfiledDbConnection(conn, dbProfiler);
+                        return conn;
+                    };
+                }
+            })
+        {
+     
+        }
+         
+
+
+    }
+}

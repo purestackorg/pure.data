@@ -1,0 +1,106 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<SqlMap Scope="Pure.Data.Test.TB_USER"  xmlns="http://PureData.net/schemas/SqlMap.xsd">
+  <!--以下是缓存配置-->
+  <Caches>
+    <!--<Cache Id="T_Test.RedisCache" Type="Pure.Data.Cache.Redis.RedisCacheProvider,Pure.Data.Cache.Redis">
+      <Parameter Key="CacheSize" Value="1000"/>
+      <Parameter Key="ConnectionString" Value="192.168.31.103"/>
+      <Parameter Key="DatabaseId" Value="0"/>
+      <FlushInterval Hours="24" Minutes="0" Seconds="0"/>
+      <FlushOnExecute Statement="T_Test.Insert"/>
+      <FlushOnExecute Statement="T_Test.Update"/>
+    </Cache>-->
+
+    <Cache Id="TB_USER.LruCache" Type="Lru">
+      <Parameter Key="CacheSize" Value="120"/>
+      <FlushInterval Hours="0" Minutes="10" Seconds="0"/>
+      <FlushOnExecute Statement="TB_USER.Insert"/>
+      <FlushOnExecute Statement="TB_USER.Update"/>
+    </Cache>
+
+  </Caches>
+  <!--以下是SQL片段-->
+  <Statements>
+
+    <Statement Id="GetListTest"  >
+      Select * From TB_USER T Where 1=1
+      <IsGreaterThan Prepend="and" Property="ID" CompareValue="0">
+        ID &lt;= 99999999999999
+      </IsGreaterThan>
+      <IsNotEmpty Prepend="AND" Property="Name">
+        Name like '%${Name}%'
+      </IsNotEmpty>
+       
+      <IsNotEmpty Prepend="AND" Property="Name">
+        Name = #{Name}
+      </IsNotEmpty>
+      <!--<IsNotEmpty Prepend="AND" Property="Name">
+          Name = #{Name} 
+      </IsNotEmpty>
+      <IsNotEmpty Prepend="AND" Property="Name">
+        Name like '%#{Name}%'
+      </IsNotEmpty>
+      <IsGreaterThan Prepend="and" Property="ID" CompareValue="0">
+        ID = #{ID} 
+      </IsGreaterThan>
+      <IsNotEmpty Prepend="and Id" Property="Ids" In="true" />-->
+      
+      
+    </Statement>
+    
+    
+    
+    <!--获取数据列-->
+    <Statement Id="GetListByFor"  >
+      Select * From TB_USER T Where 1=1
+      <Foreach Prepend="And" Property="LikeNames" Index="index" Item="item" Open="(" Separator="Or" Close=")">
+        Name Like  '%#{item.Name}%' and Id > #{index}  and Id > #{item.Id}
+      </Foreach>
+      <IsNotEmpty Prepend="AND" Property="Name">
+        Name = #{Name} 
+      </IsNotEmpty>
+
+     
+
+      <!--Select * From TB_USER T Where 1=1 and id in
+      <Foreach Prepend="" Property="LikeNames"  Index="index" Item="item" Open="(" Separator="Or" Close=")">
+        #{item.Id
+      </Foreach>-->
+    </Statement>
+
+    <Statement Id="GetList">
+      Select * From TB_USER T Where 1=1
+      <IsNotEmpty Prepend="And T.Id" Property="Ids" In="true" />
+        
+    </Statement>
+
+    <Statement Id="GetListInclude">
+      Select <Include RefId="Test_QueryParams" /> From TB_USER T Where 1=1
+      
+      <Include RefId="Test_Condition" />
+
+
+    </Statement>
+    
+      <Statement Id="TestVari">
+      SELECT A.* FROM B_BZAPPLY A INNER JOIN   <Variable Property="tablename"></Variable> B ON A.SERIALNO=B.SERIALNO
+
+      <Dynamic Prepend="Where">
+        <IsTrue Prepend=" " Property="Yes">
+          <IsNotEmpty Property="Name"  >
+            1=1
+          </IsNotEmpty>
+          
+        </IsTrue>
+      </Dynamic>
+      
+      <OrderBy>
+        <Variable Property="ordertext" Prepend=""></Variable>
+        <Variable Property="orderdesc" Prepend="{#nbsp}{#nbsp}{#nbsp}{#nbsp}{#nbsp}{#nbsp}">{#nbsp}{#nbsp}{#nbsp}{#nbsp}{#nbsp}{#nbsp}</Variable>
+
+      </OrderBy>
+
+    </Statement> 
+
+  </Statements>
+</SqlMap>

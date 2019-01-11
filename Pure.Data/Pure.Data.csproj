@@ -1,0 +1,92 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <!--开启多框架兼容设置TargetFrameworks，注意s后缀-->
+    <!--<TargetFrameworks>netstandard2.0;net45;</TargetFrameworks>-->
+    
+    <!--测试某一个框架兼容去掉s-->
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <!--<TargetFramework>net45</TargetFramework>-->
+    <Description>Database Operation Library</Description>
+    <Copyright>Copyright © Benson Kwok  2015</Copyright>
+    <Version>4.1.0.5</Version>
+    <Authors>ice</Authors>
+    <AssemblyVersion>4.1.0.5</AssemblyVersion>
+    <FileVersion>4.1.0.5</FileVersion>
+    <PackageReleaseNotes>Database Operation Library</PackageReleaseNotes>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+  </PropertyGroup>
+  
+  
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <DefineConstants> NETSTANDARD2_0;NETSTANDARD;NETSTANDARD2_0;ASYNC</DefineConstants>
+    <!--<DefineConstants>TRACE;DEBUG;NETFRAMEWORK;NET45</DefineConstants>-->
+
+    <!--<DefineConstants>TRACE;DEBUG;NET45;NETSTANDARD2_0</DefineConstants>-->
+
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  
+
+  <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|netstandard2.0|AnyCPU'">
+    <DocumentationFile>bin\Debug\netstandard2.0\Pure.Data.xml</DocumentationFile>
+  </PropertyGroup>
+  
+  <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|net45|AnyCPU'">
+    <DocumentationFile>bin\Debug\net45\Pure.Data.xml</DocumentationFile>
+  </PropertyGroup>
+  
+  <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|net45|AnyCPU'">
+    <DocumentationFile>bin\Release\net45\Pure.Data.xml</DocumentationFile>
+    <DefineConstants>TRACE;net45;</DefineConstants>
+  </PropertyGroup>
+  
+  <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|netstandard2.0|AnyCPU'">
+    <DefineConstants>TRACE;NETSTANDARD2_0;RELEASE;NETSTANDARD;NETSTANDARD2_0;ASYNC</DefineConstants>
+    <DocumentationFile>bin\Release\netstandard2.0\Pure.Data.xml</DocumentationFile>
+  </PropertyGroup>
+  
+  <ItemGroup>
+    <Compile Remove="ImportAndExport\**" />
+    <EmbeddedResource Remove="ImportAndExport\**" />
+    <None Remove="ImportAndExport\**" />
+  </ItemGroup>
+
+  <ItemGroup Condition=" '$(TargetFramework)' == 'netstandard2.0' ">
+    <PackageReference Include="System.Configuration.ConfigurationManager" Version="4.4.1" />
+    <PackageReference Include="System.Data.SqlClient" Version="4.4.3" />
+    <PackageReference Include="System.Runtime.Extensions" Version="4.3.0" />
+  </ItemGroup>
+
+
+  <ItemGroup Condition=" '$(TargetFramework)' == 'net45' ">
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System" />
+    <Reference Include="System.Configuration" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Numerics" />
+    <Reference Include="System.XML" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Remove="Pure.Data.nuspec" />
+    <None Remove="PureDataConfiguration.xml" />
+    <None Remove="PureDataConfiguration.xsd" />
+    <None Remove="ReleaseNote.txt" />
+    <None Remove="SqlMap.xml" />
+    <None Remove="SqlMap.xsd" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="AdaptStardard\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.CSharp" Version="4.4.1" />
+    <PackageReference Include="System.Reflection" Version="4.3.0" />
+    <PackageReference Include="System.Reflection.Emit.ILGeneration" Version="4.3.0" />
+    <PackageReference Include="System.Reflection.Emit.Lightweight" Version="4.3.0" />
+  </ItemGroup>
+
+</Project>

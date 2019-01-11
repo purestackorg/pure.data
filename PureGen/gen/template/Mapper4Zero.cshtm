@@ -1,0 +1,54 @@
+﻿@using Pure.Data.Gen
+@using System.Linq
+@using Pure.Data.Gen.CodeServer.RazorPaser
+@inherits  RazorCustomizedTemplate<Pure.Data.Gen.Table>
+@{
+    OutputContext CurrentOutputContext = Model.CurrentOutputContext;
+    Table tbl = Model;
+    string TableName = tbl.Name;
+    string EntityName = tbl.ClassName + "Entity";
+    string MapperName = tbl.ClassName + "Mapper";
+    string NameSpace = CurrentOutputContext.ProjectConfig.NameSpace;
+	Column colPK = Model.Columns.FirstOrDefault(p => p.IsPK == true);
+}using System;
+using Pure.Data;
+namespace @(NameSpace).Domain
+{
+    /// <summary>
+    /// @tbl.Comment 数据表映射模板
+    /// </summary>
+    public class @(MapperName):ClassMapper<@(EntityName)>
+    {
+        public @(MapperName)()
+        {
+            Table("@(TableName)");
+            Description("@tbl.Comment");
+			@if(colPK == null){
+			@:Map(m => m.Id).Key(KeyType.Assigned);
+			}
+			else{
+			if(colPK.PropertyType != "string"){
+			@:Map(m => m.@colPK.PropertyName).Key(KeyType.Assigned).Description("@colPK.Comment");
+			}
+			else{
+			@:Map(m => m.@colPK.PropertyName).Key(KeyType.Assigned).Description("@colPK.Comment").Size(@(colPK.Length / 2));
+			}
+			}
+            @foreach (Column column in Model.Columns.Where(p => p.IsPK == false))
+            {
+                if (column.PropertyType != "string")
+                {
+			@:Map(m => m.@column.PropertyName).Description("@column.Comment");
+
+                }
+                else
+                {
+            @:Map(m => m.@column.PropertyName).Description("@column.Comment").Size(@(column.Length / 2));
+
+                }
+            }
+
+            AutoMap();
+        }
+    }
+}
