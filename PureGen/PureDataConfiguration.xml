@@ -37,7 +37,8 @@
     EnableAutoMigrateLog="true"
     EnableAutoMigrateDebug="true"
     CanUpdatedWhenTableExisted="true"
-    AutoMigrateOnContainTable="b_to_outer"
+    AutoMigrateOnContainTable=""
+    AutoMigrateWithoutTable="B_Answer"
     EnableGlobalIgnoreUpdatedColumns="true"
     AutoFilterEmptyValueColumnsWhenTrack="true"
     GlobalIgnoreUpdatedColumns="Id;Version;VersionRefId;SERIALNO;CreateTime;CreateUser"
@@ -119,6 +120,19 @@
       FileNameFormat=""
       OutputDirectory="\PureGen\{%ProjectName%}\Entity"
       ></CodeGenTemplate>-->
+    <CodeGenTemplate
+      OutputType="OutputContext"
+      Enabled="true"
+      Name="MysqlScript"
+      Append="false"
+      Encoding="utf-8"
+      OutputFileExtension=".sql"
+      TemplateFileName="\gen\template\MysqlScript.cshtm"
+      FilePrefix=""
+      FileSuffix="-script"
+      FileNameFormat=""
+      OutputDirectory="\PureGen\{%ObjectName%}"
+      ></CodeGenTemplate>
     
     <!--实体类-->
     <CodeGenTemplate
@@ -136,7 +150,8 @@
     
 
     <!--模板类-->
-    <!--<CodeGenTemplate
+    <CodeGenTemplate
+   OutputType="Table"
     Enabled="true"
     Name="Mapper"
     Append="false"
@@ -147,9 +162,10 @@
     FileSuffix="Mapper"
     FileNameFormat=""
     OutputDirectory="\PureGen\{%ProjectName%}\Mapper"
-      ></CodeGenTemplate>-->
+      ></CodeGenTemplate>
 
-    <CodeGenTemplate
+    <!--<CodeGenTemplate
+   OutputType="Table"
    Enabled="true"
    Name="Mapper"
    Append="false"
@@ -160,10 +176,11 @@
    FileSuffix="Mapper"
    FileNameFormat=""
    OutputDirectory="\PureGen\{%ObjectName%}"
-      ></CodeGenTemplate>
+      ></CodeGenTemplate>-->
 
     <!--服务类-->
     <CodeGenTemplate
+   OutputType="Table"
  Enabled="true"
  Name="Service"
  Append="false"
@@ -178,6 +195,7 @@
 
     <!--SQLMap-->
     <CodeGenTemplate
+   OutputType="Table"
  Enabled="true"
  Name="SQLMap"
  Append="false"
@@ -192,6 +210,7 @@
 
     <!--Controller 控制器-->
     <CodeGenTemplate
+   OutputType="Table"
    Enabled="true"
    Name="Controller"
    Append="false"
@@ -206,6 +225,7 @@
 
     <!--列表视图-->
     <CodeGenTemplate
+   OutputType="Table"
   Enabled="true"
   Name="MvcViewList"
   Append="false"
@@ -220,6 +240,7 @@
 
     <!--表单视图-->
     <CodeGenTemplate
+   OutputType="Table"
   Enabled="true"
   Name="MVCViewForm"
   Append="false"
@@ -234,6 +255,7 @@
 
     <!--列表Js模块-->
     <CodeGenTemplate
+   OutputType="Table"
    Enabled="true"
    Name="JsListModule"
    Append="false"

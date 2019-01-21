@@ -1068,5 +1068,125 @@ namespace Pure.Data.Migration.Providers
         {
             throw new NotImplementedException();
         }
+
+        //public virtual string GetColumnDefinition(IPropertyMap fieldDef)
+        //{
+        //    var fieldDefinition =
+        //        GetColumnTypeDefinition(fieldDef.PropertyInfo.PropertyType, fieldDef.ColumnSize, 0);
+
+        //    var sql = StringBuilderCache.Allocate();
+        //    sql.Append($"{GetQuotedColumnName(fieldDef.ColumnName)} {fieldDefinition}");
+
+        //    if (fieldDef.IsPrimaryKey)
+        //    {
+        //        sql.Append(" PRIMARY KEY");
+        //        if (fieldDef.KeyType == KeyType.Identity)
+        //        {
+        //            sql.Append(" ").Append("AUTOINCREMENT");
+        //        }
+        //    }
+        //    else
+        //    {
+        //        sql.Append(fieldDef.IsNullabled ? " NULL" : " NOT NULL");
+        //    }
+
+        //    if (fieldDef.IsUnique)
+        //    {
+        //        sql.Append(" UNIQUE");
+        //    }
+
+        //    var defaultValue = fieldDef.ColumnDefaultValue;// GetDefaultValue(fieldDef);
+        //    if (defaultValue != null)
+        //    {
+        //        sql.AppendFormat(" DEFAULT {0}", defaultValue);
+        //    }
+
+        //    return StringBuilderCache.ReturnAndFree(sql);
+        //}
+        //public virtual string GetQuotedColumnName(string columnName)
+        //{
+        //    return GetQuotedName( (columnName));
+        //}
+
+        //public virtual string GetQuotedName(string name)
+        //{
+        //    return $"\"{name}\"";
+        //}
+        //public virtual string GetQuotedTableName(IClassMapper modelDef)
+        //{
+        //    return GetQuotedTableName(modelDef.TableName, modelDef.SchemaName);
+        //}
+
+        //public virtual string GetQuotedTableName(string tableName, string schema = null)
+        //{
+        //    if (schema == null)
+        //        return GetQuotedName((tableName));
+
+        //    var escapedSchema =  (schema)
+        //        .Replace(".", "\".\"");
+
+        //    return GetQuotedName(escapedSchema)
+        //        + "."
+        //        + GetQuotedName( (tableName));
+        //}
+        public virtual string GetColumnTypeDefinition(Type columnType, int? fieldLength, int? scale)
+        {
+            DbType t = DbType.AnsiString;
+            columnType = columnType.GetNonNullableType();
+            if (columnType == typeof(int))
+            {
+                t = DbType.Int32;
+            }
+            else if (columnType == typeof(long))
+            {
+                t = DbType.Int64;
+            }
+            else if (columnType == typeof(short) || columnType == typeof(byte) )
+            {
+                t = DbType.Int16;
+            }
+            else if (columnType == typeof(bool))
+            {
+                t = DbType.Boolean;
+            }
+            else if (columnType == typeof(string))
+            {
+                t = DbType.String;
+            }
+            else if (columnType == typeof(float))
+            {
+                t = DbType.Single;
+            }
+            else if (columnType == typeof(double))
+            {
+                t = DbType.Double;
+            }
+            else if (columnType == typeof(decimal))
+            {
+                t = DbType.Decimal;
+            }
+            else if (columnType == typeof(DateTime))
+            {
+                t = DbType.DateTime;
+            }
+            else if (columnType == typeof(Guid))
+            {
+                t = DbType.Guid;
+            }
+            else if (columnType == typeof(byte[]))
+            {
+                t = DbType.Binary;
+            }
+            
+            return _dialect.GetTypeName(t, fieldLength.HasValue ? fieldLength.Value :0, 0, scale.HasValue ? scale.Value :0);
+             
+        }
+
+
+
+
+
+
+
     }
 }

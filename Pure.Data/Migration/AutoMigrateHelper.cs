@@ -106,6 +106,15 @@ namespace Pure.Data.Migration
                 {
                     hasContainTables = true;
                 }
+
+                string withoutTableStr = db.Config.AutoMigrateWithoutTable;
+                string[] withoutTables = withoutTableStr.ToLower().Split(new char[] { ';' }, StringSplitOptions.RemoveEmptyEntries);
+                bool hasWithoutTables = false;
+                if (withoutTables.Length > 0)
+                {
+                    hasWithoutTables = true;
+                }
+
                 foreach (var map in maps)
                 {
                     var tb = map.TableName;
@@ -116,6 +125,15 @@ namespace Pure.Data.Migration
                             continue;
                         }
                     }
+
+                    if (hasWithoutTables)
+                    {
+                        if (withoutTables.Contains(tb.ToLower()))
+                        {
+                            continue;
+                        }
+                    }
+
                     var oneMap = classmaps.FirstOrDefault(p => p.Value.TableName == tb);
                     var properties = oneMap.Value != null ? oneMap.Value.Properties : null;
                     IPropertyMap identiProperty = null;

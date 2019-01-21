@@ -403,5 +403,34 @@ namespace Pure.Data.Migration.Providers.SQLite
         }
 
 
+
+        //public string GetCreateTableStatement(IClassMapper mapper)
+        //{
+        //    var sbColumns = StringBuilderCache.Allocate();
+        //    var sbConstraints = StringBuilderCache.Allocate();
+
+        //    var modelDef = mapper; 
+        //    foreach (var fieldDef in modelDef.Properties)
+        //    { 
+
+        //        if (sbColumns.Length != 0) sbColumns.Append(", \n  ");
+
+        //        sbColumns.Append(GetColumnDefinition(fieldDef));
+                 
+        //    }
+              
+        //    var sql = $"CREATE VIRTUAL TABLE \"{GetQuotedTableName(modelDef)}\" USING FTS3 ({StringBuilderCache.ReturnAndFree(sbColumns)});";
+        //    return sql;
+        //}
+
+        //public override string GetColumnDefinition(IPropertyMap fieldDef)
+        //{
+        //    var ret = base.GetColumnDefinition(fieldDef);
+        //    if (fieldDef.IsVersionColumn)
+        //        return ret + " DEFAULT 1";
+
+        //    return ret;
+        //}
+
     }
 }

@@ -1,4 +1,5 @@
-﻿using Dapper;
+﻿#if ASYNC
+using Dapper;
 using System.Data;
 using System.Data.Common;
 using FluentExpressionSQL;
@@ -51,7 +52,7 @@ namespace Pure.Data
         }
 
 
-        #region 异步操作
+#region 异步操作
         /// <summary>
         /// 
         /// </summary>
@@ -385,7 +386,7 @@ namespace Pure.Data
         }
 
 
-        #region Ado.Ext
+#region Ado.Ext
         public static async Task<int> InsertAsync(this IDatabase db, string tableName, IDictionary<string, object> parameters)
         {
             //if (!db.OnInsertingInternal(new InsertContext(new { tableName = tableName, parameters = parameters })))
@@ -438,7 +439,7 @@ namespace Pure.Data
             return await db.ExecuteScalarAsync<long>(sql, realParameters);
         }
    
-        #endregion
+#endregion
 
 
 
@@ -586,7 +587,7 @@ namespace Pure.Data
 
 
 
-        #region Expression 
+#region Expression 
         public static async Task<IDataReader> ExecuteReaderAsync<TEntity>(this IDatabase db, FluentExpressionSQLCore<TEntity> expression) where TEntity : class
         {
             return await db.ExecuteReaderAsync(expression.ToSqlString());
@@ -748,10 +749,10 @@ namespace Pure.Data
         {
             return await db.CountAsync<TEntity>(condition) > 0;
         }
-        #endregion
+#endregion
 
 
-        #region page
+#region page
         public static async Task<PageDataResult<List<TEntity>>> GetPageBySQLAsync<TEntity>(this IDatabase db, int pageIndex, int pagesize, string sqltext, string orderText, IDictionary<string, object> parameters ) where TEntity : class
         {
             try
@@ -810,10 +811,12 @@ namespace Pure.Data
         }
 
       
-        #endregion
+#endregion
 
-        #endregion
+#endregion
 
     }
 
 }
+
+#endif

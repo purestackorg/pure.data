@@ -329,5 +329,65 @@ namespace Pure.Data.Migration.Providers.Mysql
             return propType;
         }
 
+        //public string GetCreateTableStatement(IClassMapper mapper)
+        //{
+        //    var sbColumns = StringBuilderCache.Allocate();
+        //    var sbConstraints = StringBuilderCache.Allocate();
+
+        //    var modelDef = mapper;// GetModel(tableType);
+        //    foreach (var fieldDef in  modelDef.Properties)
+        //    {
+        //        //if (fieldDef.CustomSelect != null)
+        //        //    continue;
+
+        //        if (sbColumns.Length != 0) sbColumns.Append(", \n  ");
+
+        //        sbColumns.Append(GetColumnDefinition(fieldDef));
+
+        //        //if (fieldDef.ForeignKey == null || OrmLiteConfig.SkipForeignKeys)
+        //        //    continue;
+
+        //        //var refModelDef = GetModel(fieldDef.ForeignKey.ReferenceType);
+        //        //sbConstraints.AppendFormat(
+        //        //    ", \n\n  CONSTRAINT {0} FOREIGN KEY ({1}) REFERENCES {2} ({3})",
+        //        //    GetQuotedName(fieldDef.ForeignKey.GetForeignKeyName(modelDef, refModelDef, NamingStrategy, fieldDef)),
+        //        //    GetQuotedColumnName(fieldDef.FieldName),
+        //        //    GetQuotedTableName(refModelDef),
+        //        //    GetQuotedColumnName(refModelDef.PrimaryKey.FieldName));
+
+        //        //if (!string.IsNullOrEmpty(fieldDef.ForeignKey.OnDelete))
+        //        //    sbConstraints.AppendFormat(" ON DELETE {0}", fieldDef.ForeignKey.OnDelete);
+
+        //        //if (!string.IsNullOrEmpty(fieldDef.ForeignKey.OnUpdate))
+        //        //    sbConstraints.AppendFormat(" ON UPDATE {0}", fieldDef.ForeignKey.OnUpdate);
+        //    }
+
+        //    //var uniqueConstraints = GetUniqueConstraints(modelDef);
+        //    //if (uniqueConstraints != null)
+        //    //{
+        //    //    sbConstraints.Append(",\n" + uniqueConstraints);
+        //    //}
+
+        //    var sql = string.Format(
+        //        "CREATE TABLE {0} \n(\n  {1}{2} \n); \n", GetQuotedTableName(modelDef),
+        //        StringBuilderCache.ReturnAndFree(sbColumns),
+        //        StringBuilderCacheAlt.ReturnAndFree(sbConstraints));
+
+        //    return sql;
+        //}
+
+        //public override string GetColumnDefinition(IPropertyMap fieldDef)
+        //{
+        //    var ret = base.GetColumnDefinition(fieldDef);
+        //    if (fieldDef.IsVersionColumn)
+        //        return ret + " DEFAULT 1";
+
+        //    return ret;
+        //}
+     
+
+
+      
+
     }
 }

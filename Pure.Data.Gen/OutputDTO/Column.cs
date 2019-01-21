@@ -11,7 +11,7 @@ namespace Pure.Data.Gen
 
         public string PropertyName { get; set; }
         public string PropertyType { get; set; }
-       // public string RawType { get; set; }
+        public string RawType { get; set; }
         public Type DataType { get; set; }
 
         public bool IsPK { get; set; }
@@ -31,10 +31,10 @@ namespace Pure.Data.Gen
         //public string Width { get; set; }
 
         /// <summary>精度</summary>
-        //public int Precision { get; set; }
+        public int Precision { get; set; }
 
         /// <summary>位数</summary>
-        //public int Scale { get; set; }
+        public int Scale { get; set; }
         //public string ComputedDefinition { get; set; }
 
         public Column()

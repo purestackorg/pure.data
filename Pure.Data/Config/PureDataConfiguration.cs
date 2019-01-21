@@ -426,6 +426,19 @@ namespace Pure.Data
             }
         }
 
+        private string _AutoMigrateWithoutContainTable = "";
+        [XmlAttribute]
+        public string AutoMigrateWithoutTable
+        {
+            get
+            {
+                return _AutoMigrateWithoutContainTable;
+            }
+            set
+            {
+                _AutoMigrateWithoutContainTable = value;
+            }
+        }
 
 
         private bool _EnableGlobalIgnoreUpdatedColumns = true;
@@ -956,8 +969,38 @@ namespace Pure.Data
 
     }
 
- 
 
+    /// <summary>
+    /// 输出类型
+    /// </summary>
+    public enum OutputType
+    {
+        /// <summary>
+        /// 输出表/视图
+        /// </summary>
+        Table = 1,
+        ///// <summary>
+        ///// 输出函数/存储过程
+        ///// </summary>
+        //DataFunction = 1,
+        ///// <summary>
+        ///// 输出Schema
+        ///// </summary>
+        //DataSchema = 3,
+        ///// <summary>
+        ///// 输出SQL: DDL
+        ///// </summary>
+        //SQL = 5,
+        /// <summary>
+        /// 输出上下文
+        /// </summary>
+        OutputContext = 2,
+        ///// <summary>
+        ///// 输出自定义对象
+        ///// </summary>
+        //Other = 9
+
+    }
     /// <summary>
     /// 代码生成模板
     /// </summary>
@@ -977,7 +1020,17 @@ namespace Pure.Data
         private bool _enabled;
         private bool _append;
         private string _encoding;
+        private OutputType _outputType;
+        [XmlAttribute]
+        public OutputType OutputType
+        {
+            get { return _outputType; }
+            set
+            {
+                _outputType = value;
 
+            }
+        }
         [XmlAttribute]
         public string OutputFileExtension
         {

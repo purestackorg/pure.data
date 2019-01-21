@@ -307,7 +307,7 @@ namespace Pure.Data
         /// <returns></returns>
         int UpdateOnly<T>(object bindedObj = null, IDictionary<string, object> _PrimaryKeyValues = null, params string[] onlyProperties) where T : class;
 
-
+#if ASYNC
         /// <summary>
         /// 更新对象指定列的内容
         /// </summary>
@@ -324,6 +324,8 @@ namespace Pure.Data
         /// <param name="onlyProperties"></param>
         /// <returns></returns>
         Task<int> UpdateOnlyAsync<T>(object bindedObj = null, IDictionary<string, object> _PrimaryKeyValues = null, params string[] onlyProperties) where T : class;
+
+#endif
 
         #endregion
 

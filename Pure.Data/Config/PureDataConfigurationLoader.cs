@@ -285,6 +285,7 @@ namespace Pure.Data
                     databaseConfig.EnableAutoMigrateLog = settings.EnableAutoMigrateLog;
                     databaseConfig.EnableAutoMigrateDebug = settings.EnableAutoMigrateDebug;
                     databaseConfig.AutoMigrateOnContainTable = settings.AutoMigrateOnContainTable;
+                    databaseConfig.AutoMigrateWithoutTable = settings.AutoMigrateWithoutTable;
                     if (!string.IsNullOrEmpty(settings.GlobalIgnoreUpdatedColumns))
                     {
                         databaseConfig.GlobalIgnoreUpdatedColumns = settings.GlobalIgnoreUpdatedColumns;

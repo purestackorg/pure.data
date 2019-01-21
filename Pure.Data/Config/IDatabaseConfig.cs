@@ -192,6 +192,10 @@ namespace Pure.Data
         /// 指定某些表能自动迁移（以;分割）
         /// </summary>
         string AutoMigrateOnContainTable { get; set; }
+        /// <summary>
+        /// 不迁移某些表（以;分割）
+        /// </summary>
+        string AutoMigrateWithoutTable { get; set; }
 
         /// <summary>
         /// 数据库连接初始化事件

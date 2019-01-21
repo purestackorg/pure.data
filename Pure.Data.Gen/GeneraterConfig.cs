@@ -1,6 +1,6 @@
 ﻿namespace Pure.Data.Gen
 {
-
+    
     public class GeneraterConfig
     {
 
@@ -23,10 +23,14 @@
 
         //private bool _isIncluding;
         private string _encoding;
+
+         
         public GeneraterConfig()
         {
             //_enabled = true; 
         }
+
+        public OutputType OutputType { get; set; }
 
         public string OutputFileExtension
         {

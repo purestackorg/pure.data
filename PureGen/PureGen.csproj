@@ -90,6 +90,9 @@
     <None Include="gen\template\Service.cshtm">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Include="gen\template\MysqlScript.cshtm">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Include="gen\template\SQLMap.cshtm">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>

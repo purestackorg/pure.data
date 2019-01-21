@@ -118,6 +118,7 @@ namespace FluentExpressionSQL
             {
                 return db.ExecuteScalar(sql);
             };
+#if ASYNC
             expressionSqlBuilder.ExecuteDelegateAsyncAction = (sql) =>
             {
                 return db.ExecuteAsync(sql);
@@ -130,6 +131,8 @@ namespace FluentExpressionSQL
             {
                 return db.ExecuteScalarAsync(sql);
             };
+#endif
+
             expressionSqlBuilder.Database = db;
 
 

@@ -395,6 +395,19 @@ namespace Pure.Data
                 _AutoMigrateOnContainTable = value;
             }
         }
+
+        private string _AutoMigrateWithoutContainTable = ""; 
+        public string AutoMigrateWithoutTable
+        {
+            get
+            {
+                return _AutoMigrateWithoutContainTable;
+            }
+            set
+            {
+                _AutoMigrateWithoutContainTable = value;
+            }
+        }
         private bool _AutoRemoveUnuseColumnInTable = false;
         /// <summary>
         /// 自动清空没用的属性列，用于CodeFirst模式
@@ -788,6 +801,7 @@ namespace Pure.Data
                     EnableAutoMigrateLog=" + EnableAutoMigrateLog + @"
                     EnableAutoMigrateDebug=" + EnableAutoMigrateDebug + @"
                     AutoMigrateOnContainTable=" + AutoMigrateOnContainTable + @"
+                    AutoMigrateWithoutTable=" + AutoMigrateWithoutTable + @"
                     EnableGlobalIgnoreUpdatedColumns=" + EnableGlobalIgnoreUpdatedColumns + @"
                     AutoFilterEmptyValueColumnsWhenTrack=" + AutoFilterEmptyValueColumnsWhenTrack + @"
                     GlobalIgnoreUpdatedColumns=" + GlobalIgnoreUpdatedColumns + @"
@@ -825,7 +839,7 @@ namespace Pure.Data
                     Interceptors=" + string.Join( ";", Interceptors.Select(p=> (p!=null? p.ToString():""))) + @"
                     MappingAssemblies=" + string.Join(";", MappingAssemblies.Select(p => (p != null ? p.ToString() : ""))) + @"
                     DataSources=" + string.Join(";", DataSources.Select(p => p.Name + "_" + p.Type + "_" + p.Weight)) + @"
-                    CodeGenTemplates=" + string.Join(";", CodeGenTemplates.Select(p => p.Name + "_" + p.Enabled + "_" + p.OutputDirectory)) + @"
+                    CodeGenTemplates=" + string.Join(";", CodeGenTemplates.Select(p => p.Name + "_" + p.OutputType + "_" + p.Enabled + "_" + p.OutputDirectory)) + @"
                     OutputAction=" + OutputAction + @"
                     DbConnectionInit=" + (DbConnectionInit != null? DbConnectionInit.ToString():"") + @"
                     -----------Load DatabaseConfig End-----------"+

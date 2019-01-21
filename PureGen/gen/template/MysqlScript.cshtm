@@ -1,0 +1,106 @@
+﻿@using Pure.Data.Gen
+@using System.Linq
+@using Pure.Data.Gen.CodeServer.RazorPaser
+@inherits  RazorCustomizedTemplate<Pure.Data.Gen.OutputContext>
+@{
+	OutputContext CurrentOutputContext = Model;
+    CurrentOutputContext.OutputFileName = CurrentOutputContext.ProjectConfig.DatabaseName + "-"+CurrentOutputContext.ProjectConfig.DatabaseType;
+}
+--@(CurrentOutputContext.ProjectConfig.DatabaseName)数据库脚本
+--type:@(CurrentOutputContext.ProjectConfig.DatabaseType)
+--provider:@(CurrentOutputContext.ProjectConfig.ProviderName)
+--at:@(CurrentOutputContext.RealOutputFileName)
+--time:@(DateTime.Now)
+@foreach (var table in CurrentOutputContext.Tables)
+{
+@:
+@:
+	@:-- Table:@(table.Name)
+	@:alter table @(table.Name)
+        @:drop primary key;
+	
+	@:drop table if exists @(table.Name);
+	
+	@:create table @(table.Name)
+	@:(
+	for (int idx = 0; idx < table.Columns.Count; idx++)
+    {
+		var column = table.Columns[idx];
+        var last = idx == table.Columns.Count - 1;
+		
+		@: @(column.Name) @(column.RawType) @(GetNullableStr(column)) @(GetAutoIncrementStr(column)) @(column.DefaultValue) comment '@(column.Comment)' @GetLastQuot(last, table)
+		 
+		
+	}
+	
+	if (table.PK != null )
+    {
+		@:primary key (@(OutPrimaryKeys(table)))
+	}
+	
+	
+	@:);
+	
+	
+	if (!string.IsNullOrEmpty(table.Comment))
+    {
+		@:alter table @(table.Name) comment '@(table.Comment)';
+    }
+	
+}
+
+
+
+
+@functions{
+	public static string GetLastQuot(bool last, Table table)
+	{
+		string result = "";
+		 if(!last || table.PK != null)
+		 {
+			 result = ",";
+		 }
+		 else{
+			 result = "";
+		 }
+		return result;
+	}
+	
+	public static string GetNullableStr(Column column)
+	{
+		string result = "";
+		 if(column.IsNullable)
+		 {
+			 result = "null";
+		 }
+		 else{
+			 result = "not null";
+		 }
+		return result;
+	}
+	
+	public static string GetAutoIncrementStr(Column column)
+	{
+		string result = "";
+		 if(column.IsAutoIncrement)
+		 {
+			 result = "auto_increment";
+		 }
+		 else{
+			 result = "";
+		 }
+		return result;
+	}
+	
+	public static string OutPrimaryKeys(Table table)
+	{
+		string result = "";
+		if(table.PK != null){
+	
+		result += (table.PK.Name);
+		}
+		 
+		return result;
+	}
+	
+}

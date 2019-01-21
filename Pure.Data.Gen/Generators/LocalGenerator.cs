@@ -93,6 +93,12 @@ namespace Pure.Data.Gen
                 config.Database = database;
                 List<Table> tables = null;
 
+                List<string> withoutTables = new List<string>();
+                if (database.Config.AutoMigrateWithoutTable != null && database.Config.AutoMigrateWithoutTable != "")
+                {
+                    withoutTables = database.Config.AutoMigrateWithoutTable.ToUpper().Split(new char[] { ';' }, StringSplitOptions.RemoveEmptyEntries).ToList();
+                }
+
                 if (database.Config.CodeGenType == CodeGenType.CodeFirst)
                 {
                     var mapperDict = database.GetAllMap();
@@ -108,8 +114,10 @@ namespace Pure.Data.Gen
                         throw new ArgumentException("找不到任何Mapper中的表");
                     }
 
+
+
                     ///转换表
-                    tables = ConvertClassMapperToTables(config, classMaps, filterTables);
+                    tables = ConvertClassMapperToTables(config, classMaps, filterTables, withoutTables);
                     //转换类名和属性名
                     tables = MakeClassName(config, tables);
 
@@ -133,7 +141,7 @@ namespace Pure.Data.Gen
                         throw new ArgumentException("找不到任何数据库中的表");
                     }
                     ///转换表
-                    tables = ConvertDatabaseTableToTables(config, tablesInDb, filterTables);
+                    tables = ConvertDatabaseTableToTables(config, tablesInDb, filterTables, withoutTables);
                     //转换类名和属性名
                     tables = MakeClassName(config, tables);
                     
@@ -193,51 +201,61 @@ namespace Pure.Data.Gen
                         context.GeneraterConfig = template;
                         // result.FileName = template.TemplateFileName;
                         templateKey = DbLoader.GetTemplateKey(template.Name, template.TemplateFileName);
-
-
-
                         string reallyOutputFileName = "";
-                        foreach (Table table in context.Tables)
+
+                        var outType = template.OutputType;
+                        if (outType == OutputType.Table)
                         {
-                            ////过滤表
-                            //if (filterTables != null && filterTables.Count > 0)
-                            //{
-                            //    if (!filterTables.Contains(table.Name.ToUpper() ))
-                            //    {
-                            //        continue;
-                            //    }
-                            //}
-
-                            try
+                            foreach (Table table in context.Tables)
                             {
-                                modelName = table.ClassName;
-                                context.ModelName = modelName;
-                                context.OutputFileName = DbLoader.FormatFileName(config, template, modelName, modelName);
+                                try
+                                {
+                                    modelName = table.ClassName;
+                                    context.ModelName = modelName;
+                                    context.OutputFileName = DbLoader.FormatFileName(config, template, modelName, modelName);
 
-                                table.CurrentOutputContext = context;
-                                var Model = table;
-                                outputContent = parser.Parse<Table>(templateContent, templateKey, Model);
-                                reallyOutputFileName = context.RealOutputFileName;
-                                parser.OutputResult(reallyOutputFileName, outputContent, template.Encoding, template.Append);
-
-
-                                //result.ParseResult.Add( parser.ParseAndOutput<Table>(outputFileName, templateContent, templateKey, table, template.Encoding, template.Append));
-                                stepmsg = "template = " + template.Name + " , table = " + table.Name + string.Format(" , Generate in Template {0}, Table Model {1} is OK : {2}", template.Name, table.Name, reallyOutputFileName);
+                                    table.CurrentOutputContext = context;
+                                    var Model = table;
+                                    outputContent = parser.Parse<Table>(templateContent, templateKey, Model);
+                                    reallyOutputFileName = context.RealOutputFileName;
+                                    parser.OutputResult(reallyOutputFileName, outputContent, template.Encoding, template.Append);
 
 
-                                OnLogReport(stepmsg);
+                                    //result.ParseResult.Add( parser.ParseAndOutput<Table>(outputFileName, templateContent, templateKey, table, template.Encoding, template.Append));
+                                    stepmsg = "template = " + template.Name + " , table = " + table.Name + string.Format(" , Generate in Template {0}, Table Model {1} is OK : {2}", template.Name, table.Name, reallyOutputFileName);
+
+
+                                    OnLogReport(stepmsg);
+                                }
+                                catch (Exception ex11)
+                                {
+
+                                    database.LogHelper.Error(ex11);
+
+                                    stepmsg = "template = " + template.Name + " , table = " + table.Name + " , Error: " + ex11.Message;
+                                    OnLogReport(stepmsg);
+                                }
+
+
                             }
-                            catch (Exception ex11)
-                            {
-
-                                database.LogHelper.Error(ex11);
-
-                                stepmsg = "template = " + template.Name + " , table = " + table.Name + " , Error: " + ex11.Message;
-                                OnLogReport(stepmsg);
-                            }
-
-                          
                         }
+                        else if (outType == OutputType.OutputContext)
+                        {
+                            modelName = template.Name; //string.IsNullOrEmpty(context.Owner) ? context.ProjectConfig.Name : context.Owner;
+                            context.OutputFileName = DbLoader.FormatFileName(config, template, modelName, modelName);
+                            //outputFileName = context.RealOutputFileName;// DbLoader.GetOutputFileName(config, template, modelName);
+                            outputContent = parser.Parse<OutputContext>(templateContent, templateKey, context);
+                            parser.OutputResult(context.RealOutputFileName, outputContent, template.Encoding, template.Append);
+                            //result.ParseResult.Add(outputContent);
+
+                            //result.ParseResult.Add(parser.ParseAndOutput<OutputContext>(context.RealOutputFileName, templateContent, templateKey, context, template.Encoding, template.Append));
+
+                            stepmsg = string.Format(" Template {0}, OutputContext Model {1} is OK", template.Name, modelName);
+                            //result.StepResult.Add(stepmsg);
+                            OnLogReport(stepmsg);
+                        }
+
+                       
 
 
                         stepmsg =string.Format("  {0} End", template.Name);
@@ -266,7 +284,7 @@ namespace Pure.Data.Gen
         }
 
 
-        public List<Table> ConvertDatabaseTableToTables(ProjectConfig config, List<TableInfo> mappers, List<string> filterTables = null)
+        public List<Table> ConvertDatabaseTableToTables(ProjectConfig config, List<TableInfo> mappers, List<string> filterTables = null, List<string> withoutTables = null)
         {
             List<Table> tables = new List<Table>();
             foreach (var mapper in mappers)
@@ -275,6 +293,13 @@ namespace Pure.Data.Gen
                 if (filterTables != null && filterTables.Count > 0)
                 {
                     if (!filterTables.Contains(mapper.TableName.ToUpper()))
+                    {
+                        continue;
+                    }
+                }
+                if (withoutTables != null && withoutTables.Count > 0)
+                {
+                    if (withoutTables.Contains(mapper.TableName.ToUpper()))
                     {
                         continue;
                     }
@@ -296,9 +321,15 @@ namespace Pure.Data.Gen
                     col.PropertyName = MakePropertyName(config, propertyInfo.PropertyName);
                     col.PropertyType = (propertyInfo.PropertyType);
                     col.DataType = propertyInfo.DataType;
+                    col.RawType = propertyInfo.RawType;
+
+
 
                     col.Comment = propertyInfo.ColumnDescription;
                     col.Length = propertyInfo.ColumnLength;
+                    col.Precision = propertyInfo.ColumnPrecision;
+                    col.Scale = propertyInfo.ColumnScale;
+
                     col.DefaultValue = propertyInfo.DefaultValue;
                     col.IsNullable = propertyInfo.IsNullable;
                     col.Ignore = false;// propertyInfo.Ignored;
@@ -322,7 +353,7 @@ namespace Pure.Data.Gen
 
 
 
-        public List<Table> ConvertClassMapperToTables(ProjectConfig config, List<IClassMapper> mappers, List<string> filterTables = null) {
+        public List<Table> ConvertClassMapperToTables(ProjectConfig config, List<IClassMapper> mappers, List<string> filterTables = null, List<string> withoutTables = null) {
             List<Table> tables = new List<Table>();
             foreach (var mapper in mappers)
             {
@@ -334,6 +365,15 @@ namespace Pure.Data.Gen
                         continue;
                     }
                 }
+
+                if (withoutTables != null && withoutTables.Count > 0)
+                {
+                    if (withoutTables.Contains(mapper.TableName.ToUpper()))
+                    {
+                        continue;
+                    }
+                }
+
                 Table table = new Table();
                 table.Name = mapper.TableName;
                 table.ClassName = table.Name;
@@ -350,6 +390,7 @@ namespace Pure.Data.Gen
                     col.PropertyName = MakePropertyName(config, propertyInfo.PropertyInfo.Name);
                     col.PropertyType = GetProperyTypeString(propertyInfo.PropertyInfo.PropertyType);
                     col.DataType = propertyInfo.PropertyInfo.PropertyType;
+
 
                     col.Comment = propertyInfo.ColumnDescription;
                     col.Length = propertyInfo.ColumnSize;

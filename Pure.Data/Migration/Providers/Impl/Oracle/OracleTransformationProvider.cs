@@ -563,5 +563,75 @@ AND UCC.POSITION = 1");
 
             return sysType;
         }
+
+
+        //public string GetCreateTableStatement(IClassMapper mapper)
+        //{
+        //    var sbColumns = StringBuilderCache.Allocate();
+        //    var sbConstraints = StringBuilderCacheAlt.Allocate();
+
+        //    var sbPk = new StringBuilder();
+
+        //    var modelDef = mapper;
+        //    foreach (var fieldDef in modelDef.Properties)
+        //    {
+        //        //if (fieldDef.CustomSelect != null)
+        //        //    continue;
+
+        //        if (fieldDef.IsPrimaryKey)
+        //        {
+        //            sbPk.AppendFormat(sbPk.Length != 0 ? ",{0}" : "{0}", GetQuotedColumnName(fieldDef.ColumnName));
+        //        }
+
+        //        if (sbColumns.Length != 0) sbColumns.Append(", \n  ");
+
+        //        var columnDefinition = GetColumnDefinition(fieldDef);
+        //        sbColumns.Append(columnDefinition);
+
+        //        //if (fieldDef.ForeignKey == null || OrmLiteConfig.SkipForeignKeys)
+        //        //    continue;
+
+        //        //var refModelDef = GetModel(fieldDef.ForeignKey.ReferenceType);
+        //        //sbConstraints.AppendFormat(
+        //        //    ", \n\n  CONSTRAINT {0} FOREIGN KEY ({1}) REFERENCES {2} ({3})",
+        //        //    GetQuotedName(fieldDef.ForeignKey.GetForeignKeyName(modelDef, refModelDef, NamingStrategy, fieldDef)),
+        //        //    GetQuotedColumnName(fieldDef.FieldName),
+        //        //    GetQuotedTableName(refModelDef),
+        //        //    GetQuotedColumnName(refModelDef.PrimaryKey.FieldName));
+
+        //        //sbConstraints.Append(GetForeignKeyOnDeleteClause(fieldDef.ForeignKey));
+        //    }
+
+        //    if (sbPk.Length != 0)
+        //        sbColumns.AppendFormat(", \n  PRIMARY KEY({0})", sbPk);
+
+        //    //var uniqueConstraints = GetUniqueConstraints(modelDef);
+        //    //if (uniqueConstraints != null)
+        //    //{
+        //    //    sbConstraints.Append(",\n" + uniqueConstraints);
+        //    //}
+
+        //    var sql = string.Format(
+        //        "CREATE TABLE {0} \n(\n  {1}{2} \n) \n", GetQuotedTableName(modelDef),
+        //        StringBuilderCache.ReturnAndFree(sbColumns),
+        //        StringBuilderCacheAlt.ReturnAndFree(sbConstraints));
+
+        //    return sql;
+
+              
+        //}
+
+        //public override string GetColumnDefinition(IPropertyMap fieldDef)
+        //{
+        //    var ret = base.GetColumnDefinition(fieldDef);
+        //    if (fieldDef.IsVersionColumn)
+        //        return ret + " DEFAULT 1";
+
+        //    return ret;
+        //}
+
+
+
+
     }
 }

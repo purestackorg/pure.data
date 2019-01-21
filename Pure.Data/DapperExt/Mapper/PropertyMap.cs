@@ -21,7 +21,8 @@ namespace Pure.Data
         bool Ignored { get; }
         bool IsPrimaryKey { get; }
         bool IsReadOnly { get; }
-      
+        bool IsUnique { get; }
+
         KeyType KeyType { get; }
         PropertyInfo PropertyInfo { get; }
         IClassMapper Mapper { get; }
@@ -71,8 +72,9 @@ namespace Pure.Data
         public int ColumnSize { get; private set; }
         public object ColumnDefaultValue { get; private set; }
         public bool IsNullabled { get; private set; }
-     
-     
+        public bool IsUnique { get; private set; }
+
+        
         /// <summary>
         /// 主键类型
         /// </summary>

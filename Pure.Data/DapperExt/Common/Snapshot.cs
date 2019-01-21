@@ -592,7 +592,7 @@ namespace Pure.Data
         }
 
 
-
+#if ASYNC
 
         /// <summary>
         /// 更新对象变更的内容
@@ -624,6 +624,7 @@ namespace Pure.Data
             return await db.ExecuteAsync(sqlParamsContext.Sql, sqlParamsContext.Parameters);
              
         }
+#endif
 
 
         private string BuildWhereSql(IDatabase db, IClassMapper pd, IDictionary<string, object> primaryKeyValuePair, string paramPrefix, ref int index)
@@ -642,7 +643,7 @@ namespace Pure.Data
         }
 
 
-        #endregion
+#endregion
 
  
 

@@ -64,6 +64,7 @@
             <xs:attribute name="EnableAutoMigrateLog" type="xs:boolean"  default="true"/>
             <xs:attribute name="EnableAutoMigrateDebug" type="xs:boolean"  default="true"/>
             <xs:attribute name="AutoMigrateOnContainTable" type="xs:string" />
+            <xs:attribute name="AutoMigrateWithoutTable" type="xs:string" />
             <xs:attribute name="AutoFilterEmptyValueColumnsWhenTrack" type="xs:boolean"  default="true"/>
             <xs:attribute name="EnableGlobalIgnoreUpdatedColumns" type="xs:boolean"  default="true"/>
             <xs:attribute name="GlobalIgnoreUpdatedColumns" type="xs:string" />
@@ -272,6 +273,16 @@
                   <xs:attribute name="OutputDirectory" type="xs:string" use="optional" />
                   <xs:attribute name="Append" type="xs:boolean" use="optional"  default="false" />
                   <xs:attribute name="Encoding" type="xs:string" use="optional"  default="utf-8" />
+
+                  <xs:attribute name="OutputType" use="required" >
+                    <xs:simpleType>
+                      <xs:restriction base="xs:NMTOKEN">
+                        <xs:enumeration value="Table"/>
+                        <xs:enumeration value="OutputContext"/>
+                      </xs:restriction>
+                    </xs:simpleType>
+                  </xs:attribute>
+                  
  
                 </xs:complexType>
               </xs:element>

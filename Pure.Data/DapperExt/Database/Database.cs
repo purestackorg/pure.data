@@ -2503,6 +2503,7 @@ namespace Pure.Data
         }
 
 
+#if ASYNC
         /// <summary>
         /// 更新对象指定列的内容
         /// </summary>
@@ -2528,6 +2529,8 @@ namespace Pure.Data
             var sqlParamsContext = UpdateOnlyImpl<T>(bindedObj, _PrimaryKeyValues, onlyProperties);
             return await this.ExecuteAsync(sqlParamsContext.Sql, sqlParamsContext.Parameters);
         }
+
+#endif
 
         private string BuildWhereSql(IDatabase db, IClassMapper pd, IDictionary<string, object> primaryKeyValuePair, string paramPrefix, ref int index)
         {

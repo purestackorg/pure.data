@@ -44,6 +44,7 @@ namespace Pure.Data.Gen
                     genConfig.OutputDirectory = temp.OutputDirectory;
                     genConfig.Append = temp.Append;
                     genConfig.Encoding = temp.Encoding;
+                    genConfig.OutputType = temp.OutputType;
 
                     projectConfig.GeneraterConfigs.Add(genConfig);
 

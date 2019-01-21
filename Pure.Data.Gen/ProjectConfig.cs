@@ -12,6 +12,35 @@ namespace Pure.Data.Gen
     public class ProjectConfig
     {
         public IDatabase Database { get; set; }
+        public DatabaseType DatabaseType { get {
+                if (Database != null)
+                {
+                    return Database.DatabaseType;
+                }
+                return DatabaseType.None;
+            } }
+        public string DatabaseName
+        {
+            get
+            {
+                if (Database != null)
+                {
+                    return Database.DatabaseName;
+                }
+                return "";
+            }
+        }
+        public string ProviderName
+        {
+            get
+            {
+                if (Database != null)
+                {
+                    return Database.ProviderName;
+                }
+                return "";
+            }
+        }
         //private int _projectId;
         private string _name;
         //private string _connectionString;
