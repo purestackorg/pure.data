@@ -1202,7 +1202,7 @@ namespace Pure.Data
             return DapperImplementor.Insert<T>(Connection, entity, transaction, commandTimeout);
         }
 
-        public dynamic Insert<T>(T entity, int? commandTimeout) where T : class
+        public dynamic Insert<T>(T entity, int? commandTimeout=null) where T : class
         {
             if (!OnInsertingInternal(new InsertContext(entity)))
                 return 0;
@@ -1228,7 +1228,7 @@ namespace Pure.Data
             return DapperImplementor.Update<T>(Connection, entity, transaction, commandTimeout);
         }
 
-        public bool Update<T>(T entity, int? commandTimeout) where T : class
+        public bool Update<T>(T entity, int? commandTimeout=null) where T : class
         {
             if (!OnUpdatingInternal(new UpdateContext(entity)))
                 return false;
@@ -1254,14 +1254,14 @@ namespace Pure.Data
         #endregion
 
         #region Delete
-        public bool Delete<T>(T entity, IDbTransaction transaction, int? commandTimeout) where T : class
+        public bool Delete<T>(T entity, IDbTransaction transaction, int? commandTimeout=null) where T : class
         {
             if (!OnDeletingInternal(new DeleteContext(entity)))
                 return false;
             return DapperImplementor.Delete(Connection, entity, transaction, commandTimeout);
         }
 
-        public bool Delete<T>(T entity, int? commandTimeout) where T : class
+        public bool Delete<T>(T entity, int? commandTimeout=null) where T : class
         {
             if (!OnDeletingInternal(new DeleteContext(entity)))
                 return false;
