@@ -136,6 +136,10 @@ namespace Pure.Data.Migration
 
                     var oneMap = classmaps.FirstOrDefault(p => p.Value.TableName == tb);
                     var properties = oneMap.Value != null ? oneMap.Value.Properties : null;
+                    if (properties != null)
+                    {
+                        properties = properties.Where(p => p.Ignored == false).ToList();
+                    }
                     IPropertyMap identiProperty = null;
                     if (properties != null)
                     {
