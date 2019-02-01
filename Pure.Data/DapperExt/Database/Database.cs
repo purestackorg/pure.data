@@ -873,12 +873,12 @@ namespace Pure.Data
 
             return DapperImplementor.GetList<TEntity>(Connection, null, null, _transaction, null, true);
         }
-        public T Get<T>(dynamic id, IDbTransaction transaction, int? commandTimeout) where T : class
+        public T Get<T>(dynamic id, IDbTransaction transaction, int? commandTimeout = null) where T : class
         {
             return (T)DapperImplementor.Get<T>(Connection, id, transaction, commandTimeout);
         }
 
-        public T Get<T>(dynamic id, int? commandTimeout) where T : class
+        public T Get<T>(dynamic id, int? commandTimeout=null) where T : class
         {
             return (T)DapperImplementor.Get<T>(Connection, id, _transaction, commandTimeout);
         }
