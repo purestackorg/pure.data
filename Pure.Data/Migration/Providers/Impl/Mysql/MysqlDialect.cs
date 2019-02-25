@@ -49,7 +49,7 @@ namespace Pure.Data.Migration.Providers.Mysql
 			RegisterColumnType(DbType.String, 16777215, "MEDIUMTEXT");
 			RegisterColumnType(DbType.Time, "TIME");
 			
-            RegisterProperty(ColumnProperty.Unsigned, "UNSIGNED");
+            //RegisterProperty(ColumnProperty.Unsigned, "UNSIGNED");
             RegisterProperty(ColumnProperty.Identity, "AUTO_INCREMENT");
         }
 
