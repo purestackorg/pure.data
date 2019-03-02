@@ -30,7 +30,7 @@ namespace Pure.Data.SqlMap.Tags
             _parameterPrefix = context.ParameterPrefix;
             _parameterSuffix = context.ParameterSuffix;
             Context = context;
-            if (IsCondition(  context, context.Request))
+            if (IsCondition(  context, context.RequestParameters))
             {
                  
                 if (In)

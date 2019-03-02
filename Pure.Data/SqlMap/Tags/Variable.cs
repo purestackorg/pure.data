@@ -20,7 +20,7 @@ namespace Pure.Data.SqlMap.Tags
          
         public override String BuildSql(RequestContext context)
         {
-            Object reqVal = context.Request.GetValue(Property);
+            Object reqVal = context.RequestParameters.GetValue(Property);
             string str = "";
             if (reqVal != null)
             {

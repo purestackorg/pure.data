@@ -155,7 +155,8 @@ namespace Pure.Data.SqlMap
             var compareValue = xmlNode.GetValueInXmlAttributes("CompareValue");
 
             #region Init Tag
-            switch (xmlNode.Name)
+            string lowerXmlNodeName = xmlNode.Name.ToLower();
+            switch (lowerXmlNodeName)
             {
                 case "#text":
                 case "#cdata-section":
@@ -166,7 +167,8 @@ namespace Pure.Data.SqlMap
                             BodyText = bodyText
                         };
                     }
-                case "OrderBy":
+                //case "OrderBy":
+                case "orderby":
                     {
                         var bodyText = " " + xmlNode.GetInnerTextInXmlAttributes();
                         tag = new OrderBy
@@ -177,7 +179,8 @@ namespace Pure.Data.SqlMap
                         };
                         break;
                     }
-                case "Include":
+                //case "Include":
+                case "include":
                     {
                         var refId = xmlNode.GetValueInXmlAttributes("RefId");
                         var include_tag = new Include
@@ -188,7 +191,21 @@ namespace Pure.Data.SqlMap
                         tag = include_tag;
                         break;
                     }
-                case "IsEmpty":
+                //case "If":
+                case "if":
+                    {
+                        var Test = xmlNode.GetValueInXmlAttributes("Test");
+                        tag = new IfTag
+                        {
+                            Test = Test,
+                            Prepend = prepend,
+                            Property = property,
+                            ChildTags = new List<ITag>()
+                        };
+                        break;
+                    }
+                //case "IsEmpty":
+                case "isempty":
                     {
                         tag = new IsEmpty
                         {
@@ -200,7 +217,8 @@ namespace Pure.Data.SqlMap
                         break;
                     }
 
-                case "IsEqual":
+                //case "IsEqual":
+                case "isequal":
                     {
                         tag = new IsEqual
                         {
@@ -212,7 +230,8 @@ namespace Pure.Data.SqlMap
                         };
                         break;
                     }
-                case "IsGreaterEqual":
+                //case "IsGreaterEqual":
+                case "isgreaterequal":
                     {
                         tag = new IsGreaterEqual
                         {
@@ -225,7 +244,8 @@ namespace Pure.Data.SqlMap
                         };
                         break;
                     }
-                case "IsGreaterThan":
+                //case "IsGreaterThan":
+                case "isgreaterthan":
                     {
                         tag = new IsGreaterThan
                         {
@@ -237,7 +257,8 @@ namespace Pure.Data.SqlMap
                         };
                         break;
                     }
-                case "IsLessEqual":
+                //case "IsLessEqual":
+                case "islessequal":
                     {
                         tag = new IsLessEqual
                         {
@@ -249,7 +270,8 @@ namespace Pure.Data.SqlMap
                         };
                         break;
                     }
-                case "IsLessThan":
+                //case "IsLessThan":
+                case "islessthan":
                     {
                         tag = new IsLessThan
                         {
@@ -261,7 +283,8 @@ namespace Pure.Data.SqlMap
                         };
                         break;
                     }
-                case "IsNotEmpty":
+                //case "IsNotEmpty":
+                case "isnotempty":
                     {
                         tag = new IsNotEmpty
                         {
@@ -272,7 +295,8 @@ namespace Pure.Data.SqlMap
                         };
                         break;
                     }
-                case "IsNotEqual":
+                //case "IsNotEqual":
+                case "isnotequal":
                     {
                         tag = new IsNotEqual
                         {
@@ -284,7 +308,8 @@ namespace Pure.Data.SqlMap
                         };
                         break;
                     }
-                case "IsNotNull":
+                //case "IsNotNull":
+                case "isnotnull":
                     {
                         tag = new IsNotNull
                         {
@@ -295,7 +320,8 @@ namespace Pure.Data.SqlMap
                         };
                         break;
                     }
-                case "IsNull":
+                //case "IsNull":
+                case "isnull":
                     {
                         tag = new IsNull
                         {
@@ -306,7 +332,8 @@ namespace Pure.Data.SqlMap
                         };
                         break;
                     }
-                case "IsTrue":
+                //case "IsTrue":
+                case "istrue":
                     {
                         tag = new IsTrue
                         {
@@ -317,7 +344,8 @@ namespace Pure.Data.SqlMap
                         };
                         break;
                     }
-                case "IsFalse":
+                //case "IsFalse":
+                case "isfalse":
                     {
                         tag = new IsFalse
                         {
@@ -328,7 +356,8 @@ namespace Pure.Data.SqlMap
                         };
                         break;
                     }
-                case "IsProperty":
+                //case "IsProperty":
+                case "isproperty":
                     {
                         tag = new IsProperty
                         {
@@ -339,7 +368,8 @@ namespace Pure.Data.SqlMap
                         };
                         break;
                     }
-                case "Switch":
+                //case "Switch":
+                case "switch":
                     {
                         tag = new Switch
                         {
@@ -349,7 +379,8 @@ namespace Pure.Data.SqlMap
                         };
                         break;
                     }
-                case "Case":
+                //case "Case":
+                case "case":
                     {
                         var switchNode = xmlNode.ParentNode;
                         var switchProperty = switchNode.GetValueInXmlAttributes("Property");
@@ -363,7 +394,8 @@ namespace Pure.Data.SqlMap
                         };
                         break;
                     }
-                case "Default":
+                //case "Default":
+                case "default":
                     {
                         var switchNode = xmlNode.ParentNode;
                         var switchProperty = switchNode.GetValueInXmlAttributes("Property");
@@ -376,15 +408,90 @@ namespace Pure.Data.SqlMap
                         };
                         break;
                     }
-                case "Where":
+                //case "Choose":
+                case "choose":
                     {
-                        tag = new Where
+                        tag = new ChooseTag
+                        {
+                            //Property = property,
+                            //Prepend = prepend,
+                            ChildTags = new List<ITag>()
+                        };
+                        break;
+                    } 
+                case "when":
+                    {
+                        var Test = xmlNode.GetValueInXmlAttributes("Test");
+                        //var switchNode = xmlNode.ParentNode;
+                        //var switchProperty = switchNode.GetValueInXmlAttributes("Property");
+                        //var switchPrepend = switchNode.GetValueInXmlAttributes("Prepend");
+                        tag = new ChooseTag.ChooseWhenTag
+                        {
+                            Test = Test,
+                            //Property = switchProperty,
+                            //Prepend = switchPrepend,
+                            ChildTags = new List<ITag>()
+                        };
+                        break;
+                    } 
+                case "otherwise":
+                    {
+
+                        //var switchNode = xmlNode.ParentNode;
+                        //var switchProperty = switchNode.GetValueInXmlAttributes("Property");
+                        //var switchPrepend = switchNode.GetValueInXmlAttributes("Prepend");
+                        tag = new ChooseTag.ChooseOtherwiseTag
+                        {
+                            //Property = switchProperty,
+                            //Prepend = switchPrepend,
+                            ChildTags = new List<ITag>()
+                        };
+                        break;
+                    }
+              
+                case "trim":
+                    {
+                        var Prefix = xmlNode.GetValueInXmlAttributes("Prefix","", false);
+                        var Suffix = xmlNode.GetValueInXmlAttributes("Suffix", "", false);
+                        var PrefixOverrides = xmlNode.GetValueInXmlAttributes("PrefixOverrides");
+                        var SuffixOverrides = xmlNode.GetValueInXmlAttributes("SuffixOverrides");
+                        tag = new TrimTag
+                        {
+                            Prefix= Prefix,
+                            Suffix = Suffix,
+                            PrefixOverrides = PrefixOverrides,
+                            SuffixOverrides = SuffixOverrides,
+                            ChildTags = new List<ITag>()
+                        };
+                        break;
+                    }
+                case "set":
+                    {
+                        tag = new SetTag()
                         {
                             ChildTags = new List<ITag>()
                         };
                         break;
                     }
-                case "Dynamic":
+                case "where":
+                    {
+                        tag = new WhereTag
+                        {
+                            ChildTags = new List<ITag>()
+                        };
+                        break;
+                    }
+                //case "Where":
+                //case "where":
+                //    {
+                //        tag = new Where
+                //        {
+                //            ChildTags = new List<ITag>()
+                //        };
+                //        break;
+                //    }
+                //case "Dynamic":
+                case "dynamic":
                     {
                         tag = new Dynamic
                         {
@@ -393,7 +500,8 @@ namespace Pure.Data.SqlMap
                         };
                         break;
                     }
-                case "Variable":
+                //case "Variable":
+                case "variable":
                     {
                         var bodyText = xmlNode.GetInnerTextInXmlAttributes();
                         tag = new Variable
@@ -405,7 +513,24 @@ namespace Pure.Data.SqlMap
                         };
                         break;
                     }
-                case "Foreach":
+                //case "Bind":
+                case "bind":
+                    {
+                        var Name = xmlNode.GetValueInXmlAttributes("Name");
+                        var Value = xmlNode.GetValueInXmlAttributes("Value");
+                        //var bodyText = xmlNode.GetInnerTextInXmlAttributes();
+                        tag = new BindTag
+                        {
+                            Name = Name,
+                            Value = Value,
+                            Prepend = prepend,
+                            Property = property,
+                            ChildTags = new List<ITag>()
+                        };
+                        break;
+                    }
+                //case "Foreach":
+                case "foreach":
                     {
                         var open = xmlNode.GetValueInXmlAttributes("Open");
                         var separator = xmlNode.GetValueInXmlAttributes("Separator");
@@ -425,13 +550,16 @@ namespace Pure.Data.SqlMap
                         };
                         break;
                     }
-                case "Env":
+                //case "Env":
+                case "env":
                     {
                         var dbProvider = xmlNode.GetValueInXmlAttributes("DbProvider");
+                        var DbType = xmlNode.GetValueInXmlAttributes("DbType");
                         tag = new Env
                         {
                             Prepend = prepend,
                             DbProvider = dbProvider,
+                            DbType = DbType,
                             ChildTags = new List<ITag>()
                         };
                         break;

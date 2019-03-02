@@ -45,7 +45,7 @@ namespace Pure.Data.SqlMap.Tags
 
         public override string BuildSql(RequestContext context)
         {
-            if (IsCondition(context, context.Request))
+            if (IsCondition(context, context.RequestParameters))
             {
                 return BuildChildSql(context).ToString();
             }
@@ -59,7 +59,8 @@ namespace Pure.Data.SqlMap.Tags
             int item_index = 0;
             var reqVal = GetPropertyValue(context) as IEnumerable;
             //** 目前仅支持子标签为SqlText **
-            var bodyText = (ChildTags[0] as SqlText).BodyText;
+            var bodyText = base.BuildChildSql(context).ToString();// (ChildTags[0] as SqlText).BodyText; //为了支持foreach内部条件判断,20190302
+            //var bodyText = (ChildTags[0] as SqlText).BodyText;
             bool hasIndexText = false;
             string ParameterPrefix = context.ParameterPrefix;
             string ParameterSuffix = context.ParameterSuffix;

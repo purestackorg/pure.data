@@ -11,14 +11,29 @@ namespace Pure.Data.SqlMap.Tags
             return TagType.Env;
         } }
         public string DbProvider { get; set; }
-
+        public string DbType { get; set; }
+        
         public override bool IsCondition(RequestContext context, object paramObj)
         {
-            var dataBase = context.Database.ProviderName;
-            if (dataBase.ToUpper() == DbProvider.ToUpper())
+            if (!string.IsNullOrWhiteSpace(DbType))
             {
-                return true;
+                var dataBase = context.Database.DatabaseType;
+
+                if (dataBase.ToString().ToUpper() == DbType.ToUpper())
+                {
+                    return true;
+                }
             }
+            if (!string.IsNullOrWhiteSpace(DbProvider))
+            {
+                var dataBase = context.Database.ProviderName;
+
+                if (dataBase.ToUpper() == DbProvider.ToUpper())
+                {
+                    return true;
+                }
+            }
+            
             return false;
 
         }

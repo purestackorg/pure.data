@@ -54,7 +54,10 @@ namespace Pure.Data.SqlMap
 
 
         private object requestObj;
-        public IDictionary<string, Object> RequestParameters { get; set; }
+        /// <summary>
+        /// 实际参数列表
+        /// </summary>
+        public IDictionary<string, object> RequestParameters { get; set; }
 
         public object Request {  get { return requestObj; }
             set
@@ -66,7 +69,20 @@ namespace Pure.Data.SqlMap
                     RequestParameters = null;
                     return;
                 } 
-                RequestParameters = new SortedDictionary<string, Object>();
+                RequestParameters = new SortedDictionary<string, object>();
+                //if (obj is IDictionary<string, object>)
+                //{
+
+                //    var o = obj as IDictionary<string, object>;
+                //    if (o != null)
+                //    {
+                //        if (o.ContainsKey(propertyName))
+                //        {
+                //            return o[propertyName];
+                //        }
+                //    }
+
+                //}
                 if (requestObj is IEnumerable<KeyValuePair<string, object>> )
                 {
                     var reqDic = requestObj as IEnumerable<KeyValuePair<string, object>>;
@@ -83,6 +99,8 @@ namespace Pure.Data.SqlMap
                     RequestParameters.Add(property.Name, propertyVal);
                 }
             } }
+
+
  
 
     }

@@ -82,6 +82,11 @@
         <xs:element ref="Foreach" />
         <xs:element ref="Env" />
         <xs:element ref="Variable" />
+        <xs:element ref="Bind" />
+        <xs:element ref="Choose" />
+        <xs:element ref="If" />
+        <xs:element ref="Trim" />
+        <xs:element ref="Set" />
       </xs:choice>
       <xs:attribute name="CompareValue" type="xs:string" use="required" />
     </xs:complexType>
@@ -109,6 +114,11 @@
         <xs:element ref="Foreach" />
         <xs:element ref="Env" />
         <xs:element ref="Variable" />
+        <xs:element ref="Bind" />
+        <xs:element ref="Choose" />
+        <xs:element ref="If" />
+        <xs:element ref="Trim" />
+        <xs:element ref="Set" />
       </xs:choice>
     </xs:complexType>
   </xs:element>
@@ -120,6 +130,79 @@
       </xs:sequence>
       <xs:attribute name="Prepend" type="xs:string" use="optional" />
       <xs:attribute name="Property" type="xs:string" use="required" />
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="Choose">
+    <xs:complexType mixed="true">
+      <xs:sequence>
+        <xs:element ref="When"  minOccurs="1" maxOccurs="unbounded"/>
+        <xs:element ref="Otherwise"  minOccurs="0" maxOccurs="1"/>
+      </xs:sequence>
+      <!--<xs:attribute name="Prepend" type="xs:string" use="optional" />
+      <xs:attribute name="Property" type="xs:string" use="required" />-->
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="When">
+    <xs:complexType mixed="true">
+      <xs:choice minOccurs="0" maxOccurs="unbounded">
+        <xs:element ref="IsEmpty" />
+        <xs:element ref="IsEqual" />
+        <xs:element ref="IsGreaterEqual" />
+        <xs:element ref="IsGreaterThan" />
+        <xs:element ref="IsLessEqual" />
+        <xs:element ref="IsLessThan" />
+        <xs:element ref="IsNotEmpty" />
+        <xs:element ref="IsNotEqual" />
+        <xs:element ref="IsNotNull" />
+        <xs:element ref="IsNull" />
+        <xs:element ref="Include" />
+        <xs:element ref="Switch" />
+        <xs:element ref="IsTrue" />
+        <xs:element ref="IsFalse" />
+        <xs:element ref="IsProperty" />
+        <xs:element ref="Where" />
+        <xs:element ref="Foreach" />
+        <xs:element ref="Env" />
+        <xs:element ref="Variable" />
+        <xs:element ref="Bind" />
+        <xs:element ref="Choose" />
+        <xs:element ref="If" />
+        <xs:element ref="Trim" />
+        <xs:element ref="Set" />
+      </xs:choice>
+      <xs:attribute name="Test" type="xs:string" use="required" />
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="Otherwise">
+    <xs:complexType mixed="true">
+      <xs:choice maxOccurs="1" minOccurs="0">
+        <xs:element ref="IsEmpty" />
+        <xs:element ref="IsEqual" />
+        <xs:element ref="IsGreaterEqual" />
+        <xs:element ref="IsGreaterThan" />
+        <xs:element ref="IsLessEqual" />
+        <xs:element ref="IsLessThan" />
+        <xs:element ref="IsNotEmpty" />
+        <xs:element ref="IsNotEqual" />
+        <xs:element ref="IsNotNull" />
+        <xs:element ref="IsNull" />
+        <xs:element ref="Include" />
+        <xs:element ref="Switch" />
+        <xs:element ref="IsTrue" />
+        <xs:element ref="IsFalse" />
+        <xs:element ref="IsProperty" />
+        <xs:element ref="Where" />
+        <xs:element ref="Dynamic" />
+        <xs:element ref="Foreach" />
+        <xs:element ref="Env" />
+        <xs:element ref="Variable" />
+        <xs:element ref="Bind" />
+        <xs:element ref="Choose" />
+        <xs:element ref="If" />
+        <xs:element ref="Trim" />
+        <xs:element ref="Set" />
+      </xs:choice>
     </xs:complexType>
   </xs:element>
   <xs:element name="IsEmpty">
@@ -145,6 +228,11 @@
         <xs:element ref="Foreach" />
         <xs:element ref="Env" />
         <xs:element ref="Variable" />
+        <xs:element ref="Bind" />
+        <xs:element ref="Choose" />
+        <xs:element ref="If" />
+        <xs:element ref="Trim" />
+        <xs:element ref="Set" />
       </xs:choice>
       <xs:attribute name="Prepend" type="xs:string" use="optional" />
       <xs:attribute name="Property" type="xs:string" use="required" />
@@ -174,6 +262,11 @@
         <xs:element ref="Foreach" />
         <xs:element ref="Env" />
         <xs:element ref="Variable" />
+        <xs:element ref="Bind" />
+        <xs:element ref="Choose" />
+        <xs:element ref="If" />
+        <xs:element ref="Trim" />
+        <xs:element ref="Set" />
       </xs:choice>
       <xs:attribute name="Prepend" type="xs:string" use="optional" />
       <xs:attribute name="Property" type="xs:string" use="required" />
@@ -204,6 +297,11 @@
         <xs:element ref="Foreach" />
         <xs:element ref="Env" />
         <xs:element ref="Variable" />
+        <xs:element ref="Bind" />
+        <xs:element ref="Choose" />
+        <xs:element ref="If" />
+        <xs:element ref="Trim" />
+        <xs:element ref="Set" />
       </xs:choice>
       <xs:attribute name="Prepend" type="xs:string" use="optional" />
       <xs:attribute name="Property" type="xs:string" use="required" />
@@ -234,6 +332,11 @@
         <xs:element ref="Foreach" />
         <xs:element ref="Env" />
         <xs:element ref="Variable" />
+        <xs:element ref="Bind" />
+        <xs:element ref="Choose" />
+        <xs:element ref="If" />
+        <xs:element ref="Trim" />
+        <xs:element ref="Set" />
       </xs:choice>
       <xs:attribute name="Prepend" type="xs:string" use="optional" />
       <xs:attribute name="Property" type="xs:string" use="required" />
@@ -264,6 +367,11 @@
         <xs:element ref="Foreach" />
         <xs:element ref="Env" />
         <xs:element ref="Variable" />
+        <xs:element ref="Bind" />
+        <xs:element ref="Choose" />
+        <xs:element ref="If" />
+        <xs:element ref="Trim" />
+        <xs:element ref="Set" />
       </xs:choice>
       <xs:attribute name="Prepend" type="xs:string" use="optional" />
       <xs:attribute name="Property" type="xs:string" use="required" />
@@ -294,6 +402,11 @@
         <xs:element ref="Foreach" />
         <xs:element ref="Env" />
         <xs:element ref="Variable" />
+        <xs:element ref="Bind" />
+        <xs:element ref="Choose" />
+        <xs:element ref="If" />
+        <xs:element ref="Trim" />
+        <xs:element ref="Set" />
       </xs:choice>
       <xs:attribute name="Prepend" type="xs:string" use="optional" />
       <xs:attribute name="Property" type="xs:string" use="required" />
@@ -324,6 +437,11 @@
         <xs:element ref="Foreach" />
         <xs:element ref="Env" />
         <xs:element ref="Variable" />
+        <xs:element ref="Bind" />
+        <xs:element ref="Choose" />
+        <xs:element ref="If" />
+        <xs:element ref="Trim" />
+        <xs:element ref="Set" />
       </xs:choice>
       <xs:attribute name="Prepend" type="xs:string" use="optional" />
       <xs:attribute name="Property" type="xs:string" use="required" />
@@ -353,6 +471,11 @@
         <xs:element ref="Foreach" />
         <xs:element ref="Env" />
         <xs:element ref="Variable" />
+        <xs:element ref="Bind" />
+        <xs:element ref="Choose" />
+        <xs:element ref="If" />
+        <xs:element ref="Trim" />
+        <xs:element ref="Set" />
       </xs:choice>
       <xs:attribute name="Prepend" type="xs:string" use="optional" />
       <xs:attribute name="Property" type="xs:string" use="required" />
@@ -383,6 +506,11 @@
         <xs:element ref="Foreach" />
         <xs:element ref="Env" />
         <xs:element ref="Variable" />
+        <xs:element ref="Bind" />
+        <xs:element ref="Choose" />
+        <xs:element ref="If" />
+        <xs:element ref="Trim" />
+        <xs:element ref="Set" />
       </xs:choice>
       <xs:attribute name="Prepend" type="xs:string" use="optional" />
       <xs:attribute name="Property" type="xs:string" use="required" />
@@ -412,6 +540,11 @@
         <xs:element ref="Foreach" />
         <xs:element ref="Env" />
         <xs:element ref="Variable" />
+        <xs:element ref="Bind" />
+        <xs:element ref="Choose" />
+        <xs:element ref="If" />
+        <xs:element ref="Trim" />
+        <xs:element ref="Set" />
       </xs:choice>
       <xs:attribute name="Prepend" type="xs:string" use="optional" />
       <xs:attribute name="Property" type="xs:string" use="required" />
@@ -440,6 +573,11 @@
         <xs:element ref="Foreach" />
         <xs:element ref="Env" />
         <xs:element ref="Variable" />
+        <xs:element ref="Bind" />
+        <xs:element ref="Choose" />
+        <xs:element ref="If" />
+        <xs:element ref="Trim" />
+        <xs:element ref="Set" />
       </xs:choice>
       <xs:attribute name="Prepend" type="xs:string" use="optional" />
       <xs:attribute name="Property" type="xs:string" use="required" />
@@ -468,6 +606,11 @@
         <xs:element ref="Foreach" />
         <xs:element ref="Env" />
         <xs:element ref="Variable" />
+        <xs:element ref="Bind" />
+        <xs:element ref="Choose" />
+        <xs:element ref="If" />
+        <xs:element ref="Trim" />
+        <xs:element ref="Set" />
       </xs:choice>
       <xs:attribute name="Prepend" type="xs:string" use="optional" />
       <xs:attribute name="Property" type="xs:string" use="required" />
@@ -496,6 +639,11 @@
         <xs:element ref="Foreach" />
         <xs:element ref="Env" />
         <xs:element ref="Variable" />
+        <xs:element ref="Bind" />
+        <xs:element ref="Choose" />
+        <xs:element ref="If" />
+        <xs:element ref="Trim" />
+        <xs:element ref="Set" />
       </xs:choice>
       <xs:attribute name="Prepend" type="xs:string" use="optional" />
       <xs:attribute name="Property" type="xs:string" use="required" />
@@ -524,6 +672,11 @@
         <xs:element ref="Foreach" />
         <xs:element ref="Env" />
         <xs:element ref="Variable" />
+        <xs:element ref="Bind" />
+        <xs:element ref="Choose" />
+        <xs:element ref="If" />
+        <xs:element ref="Trim" />
+        <xs:element ref="Set" />
       </xs:choice>
     </xs:complexType>
   </xs:element>
@@ -550,6 +703,11 @@
         <xs:element ref="Foreach" />
         <xs:element ref="Env" />
         <xs:element ref="Variable" />
+        <xs:element ref="Bind" />
+        <xs:element ref="Choose" />
+        <xs:element ref="If" />
+        <xs:element ref="Trim" />
+        <xs:element ref="Set" />
       </xs:choice>
       <xs:attribute name="Prepend" type="xs:string" use="optional" />
     </xs:complexType>
@@ -564,6 +722,34 @@
   </xs:element>
   <xs:element name="Foreach">
     <xs:complexType mixed="true">
+      <xs:choice minOccurs="0" maxOccurs="unbounded">
+        <xs:element ref="IsEmpty" />
+        <xs:element ref="IsEqual" />
+        <xs:element ref="IsGreaterEqual" />
+        <xs:element ref="IsGreaterThan" />
+        <xs:element ref="IsLessEqual" />
+        <xs:element ref="IsLessThan" />
+        <xs:element ref="IsNotEmpty" />
+        <xs:element ref="IsNotEqual" />
+        <xs:element ref="IsNotNull" />
+        <xs:element ref="IsNull" />
+        <xs:element ref="Include" />
+        <xs:element ref="Switch" />
+        <xs:element ref="IsTrue" />
+        <xs:element ref="IsFalse" />
+        <xs:element ref="IsProperty" />
+        <xs:element ref="Where" />
+        <xs:element ref="Dynamic" />
+        <xs:element ref="Foreach" />
+        <xs:element ref="Env" />
+        <xs:element ref="Variable" />
+        <xs:element ref="Bind" />
+        <xs:element ref="Choose" />
+        <xs:element ref="If" />
+        <xs:element ref="Trim" />
+        <xs:element ref="Set" />
+      </xs:choice>
+
       <xs:attribute name="Prepend" type="xs:string" use="optional" />
       <xs:attribute name="Property" type="xs:string" use="required" />
       <xs:attribute name="Open" type="xs:string" use="required" />
@@ -572,6 +758,111 @@
       <xs:attribute name="Item" type="xs:string" use="required" />
       <xs:attribute name="Index" type="xs:string" use="optional" />
       
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="Bind">
+    <xs:complexType mixed="true">
+      <xs:attribute name="Name" type="xs:string" use="optional" />
+      <xs:attribute name="Value" type="xs:string" use="required" />
+      
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="Trim">
+    <xs:complexType mixed="true">
+      <xs:choice minOccurs="0" maxOccurs="unbounded">
+        <xs:element ref="IsEmpty" />
+        <xs:element ref="IsEqual" />
+        <xs:element ref="IsGreaterEqual" />
+        <xs:element ref="IsGreaterThan" />
+        <xs:element ref="IsLessEqual" />
+        <xs:element ref="IsLessThan" />
+        <xs:element ref="IsNotEmpty" />
+        <xs:element ref="IsNotEqual" />
+        <xs:element ref="IsNotNull" />
+        <xs:element ref="IsNull" />
+        <xs:element ref="Include" />
+        <xs:element ref="Switch" />
+        <xs:element ref="IsTrue" />
+        <xs:element ref="IsFalse" />
+        <xs:element ref="IsProperty" />
+        <xs:element ref="Where" />
+        <xs:element ref="Dynamic" />
+        <xs:element ref="Foreach" />
+        <xs:element ref="Variable" />
+        <xs:element ref="Bind" />
+        <xs:element ref="Choose" />
+        <xs:element ref="If" />
+        <xs:element ref="Trim" />
+        <xs:element ref="Set" />
+      </xs:choice>
+      <xs:attribute name="Prefix" type="xs:string" use="optional" />
+      <xs:attribute name="Suffix" type="xs:string" use="optional" />
+      <xs:attribute name="PrefixOverrides" type="xs:string" use="optional" />
+      <xs:attribute name="SuffixOverrides" type="xs:string" use="optional" />
+    
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="Set">
+    <xs:complexType mixed="true">
+      <xs:choice minOccurs="0" maxOccurs="unbounded">
+        <xs:element ref="IsEmpty" />
+        <xs:element ref="IsEqual" />
+        <xs:element ref="IsGreaterEqual" />
+        <xs:element ref="IsGreaterThan" />
+        <xs:element ref="IsLessEqual" />
+        <xs:element ref="IsLessThan" />
+        <xs:element ref="IsNotEmpty" />
+        <xs:element ref="IsNotEqual" />
+        <xs:element ref="IsNotNull" />
+        <xs:element ref="IsNull" />
+        <xs:element ref="Include" />
+        <xs:element ref="Switch" />
+        <xs:element ref="IsTrue" />
+        <xs:element ref="IsFalse" />
+        <xs:element ref="IsProperty" />
+        <xs:element ref="Where" />
+        <xs:element ref="Dynamic" />
+        <xs:element ref="Foreach" />
+        <xs:element ref="Variable" />
+        <xs:element ref="Bind" />
+        <xs:element ref="Choose" />
+        <xs:element ref="If" />
+        <xs:element ref="Trim" />
+        <xs:element ref="Set" />
+      </xs:choice> 
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="If">
+    <xs:complexType mixed="true">
+      <xs:choice minOccurs="0" maxOccurs="unbounded">
+        <xs:element ref="IsEmpty" />
+        <xs:element ref="IsEqual" />
+        <xs:element ref="IsGreaterEqual" />
+        <xs:element ref="IsGreaterThan" />
+        <xs:element ref="IsLessEqual" />
+        <xs:element ref="IsLessThan" />
+        <xs:element ref="IsNotEmpty" />
+        <xs:element ref="IsNotEqual" />
+        <xs:element ref="IsNotNull" />
+        <xs:element ref="IsNull" />
+        <xs:element ref="Include" />
+        <xs:element ref="Switch" />
+        <xs:element ref="IsTrue" />
+        <xs:element ref="IsFalse" />
+        <xs:element ref="IsProperty" />
+        <xs:element ref="Where" />
+        <xs:element ref="Dynamic" />
+        <xs:element ref="Foreach" />
+        <xs:element ref="Env" />
+        <xs:element ref="Variable" />
+        <xs:element ref="Bind" />
+        <xs:element ref="Choose" />
+        <xs:element ref="If" />
+        <xs:element ref="Trim" />
+        <xs:element ref="Set" />
+      </xs:choice>
+      <!--<xs:attribute name="Prepend" type="xs:string" use="optional" />-->
+      <xs:attribute name="Test" type="xs:string" use="required" />
     </xs:complexType>
   </xs:element>
   <xs:element name="Env">
@@ -596,9 +887,36 @@
         <xs:element ref="Dynamic" />
         <xs:element ref="Foreach" />
         <xs:element ref="Variable" />
+        <xs:element ref="Bind" />
+        <xs:element ref="Choose" />
+        <xs:element ref="If" />
+        <xs:element ref="Trim" />
+        <xs:element ref="Set" />
       </xs:choice>
       <xs:attribute name="Prepend" type="xs:string" use="optional" />
-      <xs:attribute name="DbProvider" type="xs:string" use="required" />
+      <xs:attribute name="DbProvider" type="xs:string" use="optional" />
+      <xs:attribute name="DbType" use="optional" >
+        <xs:simpleType>
+          <xs:restriction base="xs:NMTOKEN">
+            <xs:enumeration value="SqlServer"/>
+            <xs:enumeration value="SqlCe"/>
+            <xs:enumeration value="PostgreSQL"/>
+            <xs:enumeration value="MySql"/>
+            <xs:enumeration value="Oracle"/>
+            <xs:enumeration value="SQLite"/>
+            <xs:enumeration value="Access"/>
+            <xs:enumeration value="OleDb"/>
+            <xs:enumeration value="Firebird"/>
+            <xs:enumeration value="DB2"/>
+            <xs:enumeration value="DB2iSeries"/>
+            <xs:enumeration value="SybaseASA"/>
+            <xs:enumeration value="SybaseASE"/>
+            <xs:enumeration value="SybaseUltraLite"/>
+            <xs:enumeration value="DM"/> 
+          </xs:restriction>
+        </xs:simpleType>
+      </xs:attribute>
+      
     </xs:complexType>
   </xs:element>
   <xs:element name="OrderBy">
@@ -623,6 +941,11 @@
         <xs:element ref="Dynamic" />
         <xs:element ref="Foreach" />
         <xs:element ref="Variable" />
+        <xs:element ref="Bind" />
+        <xs:element ref="Choose" />
+        <xs:element ref="If" />
+        <xs:element ref="Trim" />
+        <xs:element ref="Set" />
       </xs:choice>
       
     </xs:complexType>
@@ -650,6 +973,11 @@
         <xs:element ref="Foreach" />
         <xs:element ref="Env" />
         <xs:element ref="Variable" />
+        <xs:element ref="Bind" />
+        <xs:element ref="Choose" />
+        <xs:element ref="If" />
+        <xs:element ref="Trim" />
+        <xs:element ref="Set" />
         <xs:element ref="OrderBy" />
       </xs:choice>
       <xs:attribute name="Id" type="xs:string" use="required" />

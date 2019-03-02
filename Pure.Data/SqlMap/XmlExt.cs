@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Xml;
-
+using System.Linq;
 namespace Pure.Data.SqlMap
 {
     public static class XmlExt
@@ -16,12 +16,12 @@ namespace Pure.Data.SqlMap
         /// <param name="collection"></param>
         /// <param name="key"></param>
         /// <returns></returns>
-        public static string GetValueInXmlAttributes(this XmlNode node, string key, string defaultVal = "")
+        public static string GetValueInXmlAttributes(this XmlNode node, string key, string defaultVal = "", bool trim = true)
         {
             string result = "";
             if (node != null && node.Attributes != null)
             {
-                result = node.Attributes[key] != null ? node.Attributes[key].Value.Trim() : defaultVal;
+                result = node.Attributes[key] != null ? (trim ? node.Attributes[key].Value.Trim(): node.Attributes[key].Value) : defaultVal;
                 result = formatStr(result);
 
             }

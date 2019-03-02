@@ -16,6 +16,7 @@ namespace Pure.Data.SqlMap.Tags
     {
         None,
         SqlText,
+        If,
         IsEmpty,
         IsEqual,
         IsGreaterEqual,
@@ -33,11 +34,17 @@ namespace Pure.Data.SqlMap.Tags
         Switch,
         SwitchCase,
         SwitchDefault,
+        Choose,
+        ChooseWhen,
+        ChooseOtherwise,
+        Trim,
+        Set,
         Where,
         Dynamic,
         For,
         Env,
         Variable,
+        Bind,
         OrderBy
     }
 }
