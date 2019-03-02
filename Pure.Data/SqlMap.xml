@@ -45,8 +45,11 @@
         </Case>
       </Switch>
 
-      
     </Statement>
+    
+    
+    
+    
     <!--获取数据列 - Include-->
     <Statement Id="GetListInclude" Cache="TB_USER.LruCache">
       SELECT T.* From TB_USER T
@@ -131,6 +134,134 @@
         Name Like Concat('%',:item.Name,'%') and Id > :index  and Id > :item.Id
       </Foreach>
     </Statement>
+
+
+    <!--Test属性中判断脚本
+特殊字符比较
+
+""标识字符串 
+''标识字符
+
+字符标识
+<if test="chr=='1'"></if>
+
+字符串标识
+<if test='str=="1"'></if>
+
+例如：<if test='id != null and id > 28'></if>
+
+ mybatis对于这种大于小于等等还有另一种形式。
+
+例如：<if test='id != null and id gt 28'></if>
+
+对应关系：
+
+    and            对应             &&
+ 
+    or            对应             ||
+    
+    gt            对应             >
+
+    gte         对应              >=
+
+    lt             对应              <(会报错  相关联的 "test" 属性值不能包含 '<' 字符)
+
+    lte          对应               <=(会报错  相关联的 "test" 属性值不能包含 '<' 字符)
+    
+    eq                  对应                ==
+
+   neq               对应                 !=
+ 
+    
+    -->
+    <!--If 条件标签-->
+    <Statement Id="GetListIfTest">
+      Select * From TB_USER T Where 1=1
+      <If Test='Ids!=null and Ids.Length > 0  '>
+        and T.Id in #{Ids}
+      </If> 
+      <If Test='Name != "6662" '>
+        and T.Name != '6662'
+      </If>
+
+    </Statement>
+
+    <!--Bind 标签-->
+    <Statement Id="GetListBindTest">
+      Select * From TB_USER T Where 1=1
+      <Bind Name="bindName1" Value="22"></Bind>
+      <Bind Name="bindName2" Value='"hello"'></Bind>
+
+      <If Test='bindName1 lte 1000 and bindName2 != null   and  bindName2.Length > 0  '>
+        and T.Id = #{bindName1}
+      </If> 
+
+    </Statement>
+    
+    <!--Choose 标签-->
+    <Statement Id="GetListChooseTest">
+      Select * From TB_USER T Where 1=1 
+      <Choose>
+        <When Test='Name != null and Name == "liweisi"'>
+          and Name=#{Name}
+        </When>
+        <When Test='ID > 0'>
+          and ID=#{ID}
+        </When>
+        <Otherwise>
+          and Name='otherwise'
+        </Otherwise>
+      </Choose>
+
+    </Statement>
+
+    <!--Trim 标签-->
+    <Statement Id="GetListTrimTest">
+      Select * From TB_USER T
+
+      <Trim Prefix="WHERE " PrefixOverrides="AND |OR ">
+        <If Test="Name!=null  ">
+          and Name=#{Name}
+        </If>
+        <If Test=" Nam!=null">
+          and Name=#{Nam}
+        </If>
+      </Trim>
+
+
+    </Statement>
+    
+    <!--Set and Where 标签-->
+    <Statement Id="updateUserSetTest" >
+      update TB_USER
+      <Set>
+        <If Test="Name!=null  ">
+          Name=#{Name}
+        </If>
+      </Set>
+      <Where>
+        <If Test="ID!=null  ">
+          ID=#{ID}
+        </If>
+      </Where>
+    </Statement>
+
+    <!--Foreach Include If 标签-->
+    <Statement Id="GetListForeachIncludeIfTest"  >
+      Select * From TB_USER T Where 1=1
+      <Foreach Prepend="And" Property="LikeNames" Index="index" Item="item" Open="(" Separator="Or" Close=")">
+        <If Test='Name=="546"' >
+          Name Like  '%#{item.Name}%' and Id > #{index}  and Id > #{item.Id}
+
+        </If>
+        <If Test="Nam != null" >
+          Name =#{item.Name}
+
+        </If>
+      </Foreach>
+    </Statement>
+    
+    
     
   </Statements>
 </SqlMap>

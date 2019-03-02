@@ -1,6 +1,11 @@
 ﻿ 
  ---------------需要将xsd文件都放到vs安装目录下的Xml\Schemas文件夹里
- 4.2  20181226
+ 4.2 20190302
+ 增加Trim If Choose When Otherwise Bind Set标签
+ 修正foreach中可以增加判断条件
+ 修正where标签
+
+ 4.1  20181226
  修复sqlmap中ref引用查找失败问题
 
  4.0    20180831
