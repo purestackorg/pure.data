@@ -1,5 +1,10 @@
 ﻿ 
  ---------------需要将xsd文件都放到vs安装目录下的Xml\Schemas文件夹里
+  4.2.0.1 20190305
+ 增加ExpressoResolverForLinqExtensions拓展动态执行脚本方法
+ 修复Include标签延迟解析，可以跨所有xml获取对应RefId的脚本，不需要在加载时候就解析
+ 修复RawSQL的生成算法
+
  4.2 20190302
  增加Trim If Choose When Otherwise Bind Set标签
  修正foreach中可以增加判断条件

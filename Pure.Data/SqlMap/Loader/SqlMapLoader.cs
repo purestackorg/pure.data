@@ -13,78 +13,79 @@ namespace Pure.Data.SqlMap
     {
         public abstract void Dispose();
 
-      //  public virtual SqlMapLoaderOption Config { get; set; }
-        public abstract void Load(IDatabase db );
+        //  public virtual SqlMapLoaderOption Config { get; set; }
+        public abstract void Load(IDatabase db);
 
 
         private static object olock = new object();
         public SqlMapInfo LoadSqlMap(IDatabase db, ConfigStream configStream)
         {
-           
-                using (configStream)
+
+            using (configStream)
+            {
+                var sqlMap = new SqlMapInfo
                 {
-                    var sqlMap = new SqlMapInfo
+
+                    Path = configStream.Path,
+                    Statements = new List<Statement> { },
+                    Caches = new List<SqlMapCache> { }
+                };
+                XmlDocument xmlDoc = new XmlDocument();
+
+                try
+                {
+                    //xmlDoc.LoadXml(configStream.Config);
+                    var text = FileLoader.LoadText(configStream.Path, db);
+                    xmlDoc.LoadXml(text);
+                    // xmlDoc.Load(configStream.Path);
+
+                    XmlNamespaceManager xmlNsM = new XmlNamespaceManager(xmlDoc.NameTable);
+                    xmlNsM.AddNamespace("ns", "http://PureData.net/schemas/SqlMap.xsd");
+                    sqlMap.Scope = xmlDoc.SelectSingleNode("//ns:SqlMap", xmlNsM)
+                        .Attributes["Scope"].Value;
+
+                    #region Init Caches
+                    var cacheNodes = xmlDoc.SelectNodes("//ns:Cache", xmlNsM);
+                    foreach (XmlElement cacheNode in cacheNodes)
                     {
-                       
-                        Path = configStream.Path,
-                        Statements = new List<Statement> { },
-                        Caches = new List<SqlMapCache> { }
-                    };
-                    XmlDocument xmlDoc = new XmlDocument();
-
-                    try
-                    {
-                        //xmlDoc.LoadXml(configStream.Config);
-                        var text = FileLoader.LoadText(configStream.Path, db);
-                        xmlDoc.LoadXml(text);
-                       // xmlDoc.Load(configStream.Path);
-
-                        XmlNamespaceManager xmlNsM = new XmlNamespaceManager(xmlDoc.NameTable);
-                        xmlNsM.AddNamespace("ns", "http://PureData.net/schemas/SqlMap.xsd");
-                        sqlMap.Scope = xmlDoc.SelectSingleNode("//ns:SqlMap", xmlNsM)
-                            .Attributes["Scope"].Value;
-
-                        #region Init Caches
-                        var cacheNodes = xmlDoc.SelectNodes("//ns:Cache", xmlNsM);
-                        foreach (XmlElement cacheNode in cacheNodes)
-                        {
-                            var cache = SqlMapCache.Load(cacheNode);
-                            sqlMap.Caches.Add(cache);
-                        }
-                        #endregion
-
-                        #region Init Statement
-                        var statementNodes = xmlDoc.SelectNodes("//ns:Statement", xmlNsM);
-                        foreach (XmlElement statementNode in statementNodes)
-                        {
-                            var statement = Statement.Load(statementNode, sqlMap);
-                            sqlMap.Statements.Add(statement);
-                        }
-                        #endregion
-
-
+                        var cache = SqlMapCache.Load(cacheNode);
+                        sqlMap.Caches.Add(cache);
                     }
-                    catch (Exception ex)
+                    #endregion
+
+                    #region Init Statement
+                    var statementNodes = xmlDoc.SelectNodes("//ns:Statement", xmlNsM);
+                    foreach (XmlElement statementNode in statementNodes)
                     {
+                        var statement = Statement.Load(statementNode, sqlMap);
+                        
+                        sqlMap.Statements.Add(statement);
+                    }
+                    #endregion
+
+
+                }
+                catch (Exception ex)
+                {
                     throw new PureDataException("SqlMapLoader", ex);
 
                 }
                 finally
-                    {
-                        xmlDoc.RemoveAll();
-                         
-                        xmlDoc = null;
-                        GC.Collect();
-                    }
+                {
+                    xmlDoc.RemoveAll();
 
-                    return sqlMap;
+                    xmlDoc = null;
+                    GC.Collect();
                 }
+
+                return sqlMap;
             }
-            
-            
+        }
+
+
     }
 
-    public class ConfigStream:IDisposable
+    public class ConfigStream : IDisposable
     {
         public string Path { get; set; }
 

@@ -120,18 +120,18 @@
 
     <Statement Id="GetListBindTest">
       Select * From TB_USER T Where 1=1
-      <Bind Name="bindName1" Value="22"></Bind>
+      <Bind Name="bindName1" Value='"22"+Name'></Bind>
+      <!--<Bind Name="bindName1" Value="22"></Bind>-->
       <Bind Name="bindName2" Value='"hello"'></Bind>
 
-      <If Test='bindName1 lte 1000 and bindName2 != null   and  bindName2.Length > 0  '>
-        and T.Id = #{bindName1}
+      <If Test='bindName1 != "" and bindName2 != null   and  bindName2.Length > 0  '>
+        and T.Name = #{bindName1}
       </If> 
 
     </Statement>
 
     <Statement Id="GetListChooseTest">
-      Select * From TB_USER T Where 1=1
-
+      Select * From TB_USER T Where 1=1 
       <Choose>
       <When Test='Name != null and Name == "liweisi"'>
         and Name=#{Name}
@@ -147,8 +147,7 @@
     </Statement>
 
     <Statement Id="GetListTrimTest">
-      Select * From TB_USER T
-
+      Select * From TB_USER T 
       <Trim Prefix="WHERE " PrefixOverrides="AND |OR ">
         <If Test="Name!=null  ">
           and Name=#{Name}
@@ -164,7 +163,10 @@
       update TB_USER
       <Set>
         <If Test="Name!=null  ">
-          Name=#{Name}
+          Name=#{Name},
+        </If>
+        <If Test="Name!=null  ">
+          Age=18,
         </If>
       </Set>
       <Where>
@@ -173,14 +175,48 @@
         </If>
       </Where>
     </Statement>
+<!--包括
+Where 
+Any 
+All 
+FirstOrDefault 
+First 
+LastOrDefault 
+Last 
+SingleOrDefault 
+Single 
+Count 
+LongCount 
+Average(Long,Double,Float,Decimal)
+Sum(Long,Double,Float,Decimal)
+Max(Long,Double,Float,Decimal)
+Min(Long,Double,Float,Decimal)
 
-    <Statement Id="GetListForeachIncludeIfTest"  >
+-->
+    <!--Linq部分函数支持-->
+    <Statement Id="GetListLinqTest"  >
       Select * From TB_USER T Where 1=1
+      <If Test="Name != ''" > 
+        and Name = ${Name}
+      </If>
+      <If Test='LikeNames.Where("p.Id>22").Count() > 0' >
+        <Bind Name="MaxID" Value='LikeNames.Max("p.Id")'></Bind>
+        and Id = ${MaxID}
+      </If>
+ 
+    </Statement>
+    
+      <Statement Id="GetListForeachIncludeIfTest"  >
+      Select * From TB_USER T Where 1=1
+      <If Test='LikeNames.Where("p.Id>22").Count() > 1' >
+        <Bind Name="MaxID" Value='LikeNames.Average("p.Id")'></Bind>
+        and Id = ${MaxID}
+      </If>
       <Foreach Prepend="And" Property="LikeNames" Index="index" Item="item" Open="(" Separator="Or" Close=")">
         <If Test='Name=="546"' >
           Name Like  '%#{item.Name}%' and Id > #{index}  and Id > #{item.Id}
-
         </If>
+
         <If Test="Nam != null" >
           Name =#{item.Name}
 
@@ -198,13 +234,25 @@
     </Statement>
 
     <Statement Id="GetListInclude">
-      Select <Include RefId="Test_QueryParams" /> From TB_USER T Where 1=1
-
+      Select <Include RefId="Test_QueryParams" /> From TB_USER T Where 1=1 
       <Include RefId="Test_Condition" />
+      <Include RefId="Test_Condition2" />
+      <Include RefId="Test_Condition3" />
 
 
     </Statement>
-
+    <Statement Id="Test_Condition2">
+      <Bind Name="bindCondition1" Value='"222"+Name'></Bind>
+      <If Test='bindCondition1 != null and bindCondition1 != "222"'>
+        and Name = #{bindCondition1}
+      </If>
+  
+    </Statement>
+     <Statement Id="Test_Condition3"> 
+        and Name = ${bindCondition1} 
+    </Statement>
+    
+      
     <Statement Id="TestVari">
       SELECT A.* FROM B_BZAPPLY A INNER JOIN   <Variable Property="tablename"></Variable> B ON A.SERIALNO=B.SERIALNO
 

@@ -47,33 +47,33 @@ namespace Pure.Data.SqlMap
 
 
             #region Init Include
-            foreach (var include in includes)
-            {
-                if (include.RefId == statement.Id)
-                {
-                    throw new Exception(string.Format("Statement.Load Include.RefId can not be self statement.id:{0}", include.RefId));
-                }
-                var refStatement = smartSqlMap.Statements.FirstOrDefault(m => m.Id == include.RefId);
-                if (refStatement != null)
-                {
-                    include.Ref = refStatement;
-                }
-                else
-                {
-                    //修复跨sqlmap的引用refId
-                    var refStatement2 = SqlMapManager.Instance.Statements.FirstOrDefault(p => p.Value.Id == include.RefId).Value;
-                    if (refStatement2 != null)
-                    {
-                        include.Ref = refStatement2;
-                    }
-                    else
-                    {
-                        throw new Exception(string.Format("Statement.Load can not find statement.id:{0}", include.RefId));
-                    }
+            //foreach (var include in includes)
+            //{
+            //    if (include.RefId == statement.Id)
+            //    {
+            //        throw new Exception(string.Format("Statement.Include tag's RefId can not be self statement.id:{0}", include.RefId));
+            //    }
+            //    var refStatement = smartSqlMap.Statements.FirstOrDefault(m => m.Id == include.RefId);
+            //    if (refStatement != null)
+            //    {
+            //        include.Ref = refStatement;
+            //    }
+            //    else
+            //    {
+            //        //修复跨sqlmap的引用refId
+            //        var refStatement2 = SqlMapManager.Instance.Statements.FirstOrDefault(p => p.Value.Id == include.RefId).Value;
+            //        if (refStatement2 != null)
+            //        {
+            //            include.Ref = refStatement2;
+            //        }
+            //        else
+            //        {
+            //            throw new Exception(string.Format("Statement.Include tag can not Include statement.id:{0}", include.RefId));
+            //        }
 
 
-                }
-            }
+            //    }
+            //}
             #endregion
 
             #region Init Tag
@@ -161,7 +161,7 @@ namespace Pure.Data.SqlMap
                 case "#text":
                 case "#cdata-section":
                     {
-                        var bodyText = " " + xmlNode.GetInnerTextInXmlAttributes() ;
+                        var bodyText = " " + xmlNode.GetInnerTextInXmlAttributes();
                         return new SqlText
                         {
                             BodyText = bodyText
@@ -174,7 +174,7 @@ namespace Pure.Data.SqlMap
                         tag = new OrderBy
                         {
                             ChildTags = new List<ITag>(),
-                            
+
                             BodyText = bodyText
                         };
                         break;
@@ -418,7 +418,7 @@ namespace Pure.Data.SqlMap
                             ChildTags = new List<ITag>()
                         };
                         break;
-                    } 
+                    }
                 case "when":
                     {
                         var Test = xmlNode.GetValueInXmlAttributes("Test");
@@ -433,7 +433,7 @@ namespace Pure.Data.SqlMap
                             ChildTags = new List<ITag>()
                         };
                         break;
-                    } 
+                    }
                 case "otherwise":
                     {
 
@@ -448,16 +448,16 @@ namespace Pure.Data.SqlMap
                         };
                         break;
                     }
-              
+
                 case "trim":
                     {
-                        var Prefix = xmlNode.GetValueInXmlAttributes("Prefix","", false);
+                        var Prefix = xmlNode.GetValueInXmlAttributes("Prefix", "", false);
                         var Suffix = xmlNode.GetValueInXmlAttributes("Suffix", "", false);
                         var PrefixOverrides = xmlNode.GetValueInXmlAttributes("PrefixOverrides");
                         var SuffixOverrides = xmlNode.GetValueInXmlAttributes("SuffixOverrides");
                         tag = new TrimTag
                         {
-                            Prefix= Prefix,
+                            Prefix = Prefix,
                             Suffix = Suffix,
                             PrefixOverrides = PrefixOverrides,
                             SuffixOverrides = SuffixOverrides,
@@ -595,23 +595,31 @@ namespace Pure.Data.SqlMap
         }
         public List<ITag> SqlTags { get; set; }
 
-        public bool HasCache { get {
-            return Cache != null;
-        } }
+        public bool HasCache
+        {
+            get
+            {
+                return Cache != null;
+            }
+        }
         public SqlMapCache Cache { get; set; }
 
         ICacheProvider _CacheProvider = null;
-        public ICacheProvider CacheProvider { get {
-            if (Cache != null)
+        public ICacheProvider CacheProvider
+        {
+            get
             {
-                if (_CacheProvider == null)
+                if (Cache != null)
                 {
-                    _CacheProvider = Cache.CreateCacheProvider(this);
+                    if (_CacheProvider == null)
+                    {
+                        _CacheProvider = Cache.CreateCacheProvider(this);
+                    }
                 }
-            }
 
-            return _CacheProvider;
-        } }
+                return _CacheProvider;
+            }
+        }
 
         public String BuildSql(RequestContext context)
         {
@@ -619,10 +627,46 @@ namespace Pure.Data.SqlMap
             StringBuilder sqlStrBuilder = new StringBuilder();
             foreach (ITag tag in SqlTags)
             {
+                if (tag.Type == TagType.Include)
+                {
+                   ReplaceIncludeTag(context, tag as Include);
+                }
                 sqlStrBuilder.Append(tag.BuildSql(context));
             }
-        
+
             return sqlStrBuilder.ToString();
         }
+
+        public Include ReplaceIncludeTag(RequestContext context, Include include)
+        {
+            if (include == null)
+            {
+                throw new Exception(string.Format("Statement.Include tag can not be null!"));
+            }
+            if (string.IsNullOrWhiteSpace(include.RefId))
+            {
+                throw new Exception(string.Format("Statement.Include tag's RefId can not be null!"));
+            }
+
+            if (include.RefId == context.SqlId)
+            {
+                throw new Exception(string.Format("Statement.Include tag's RefId can not be self statement.id:{0}", include.RefId));
+            }
+
+            //修复跨sqlmap的引用refId
+            var refStatement2 = SqlMapManager.Instance.Statements.FirstOrDefault(p => p.Value.Id == include.RefId).Value;
+            if (refStatement2 != null)
+            {
+                include.Ref = refStatement2; //替换为新的Tag
+            }
+            else
+            {
+                throw new Exception(string.Format("Statement.Include tag can not Include statement.id:{0}", include.RefId));
+            }
+
+            return include;
+
+        }
+
     }
 }

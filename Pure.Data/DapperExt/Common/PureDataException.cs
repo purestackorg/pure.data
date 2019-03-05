@@ -7,10 +7,12 @@ namespace Pure.Data
     /// </summary>
     public class PureDataException:Exception
     {
-         public PureDataException(string message, Exception innerException):base( message +" error: "+ innerException.Message, innerException)
+
+        public PureDataException(string message, Exception innerException) : base(message, innerException)
         {
 
         }
+      
     }
 
 }

@@ -260,7 +260,38 @@
         </If>
       </Foreach>
     </Statement>
-    
+
+
+    <!--包括
+              Where 
+              Any 
+              All 
+              FirstOrDefault 
+              First 
+              LastOrDefault 
+              Last 
+              SingleOrDefault 
+              Single 
+              Count 
+              LongCount 
+              Average(Long,Double,Float,Decimal)
+              Sum(Long,Double,Float,Decimal)
+              Max(Long,Double,Float,Decimal)
+              Min(Long,Double,Float,Decimal)
+
+-->
+    <!--Linq部分函数支持-->
+    <Statement Id="GetListLinqTest"  >
+      Select * From TB_USER T Where 1=1
+      <If Test="Name != ''" >
+        and Name = ${Name}
+      </If>
+      <If Test='LikeNames.Where("p.Id>22").Count() > 0' >
+        <Bind Name="MaxID" Value='LikeNames.Max("p.Id")'></Bind>
+        and Id = ${MaxID}
+      </If>
+
+    </Statement>
     
     
   </Statements>

@@ -195,7 +195,7 @@ namespace Pure.Data.SqlMap
         }
 
 
-        public static string ParseRawSQL(string Sql,string ParameterPrefix, object Parameters, ISqlDialectProvider SqlDialect ,bool forSqlMap, string parameterSuffix) {
+        public static string ParseRawSQL(string Sql,object Parameters, ISqlDialectProvider SqlDialect ,bool forSqlMap, string ParameterPrefix, string parameterSuffix) {
             string str = Sql;
             var prefix = ParameterPrefix;
             var dict = Parameters != null ? Parameters.ToDictionary() : null;
@@ -213,9 +213,27 @@ namespace Pure.Data.SqlMap
                         var list = item.Value as IEnumerable;
                         var sb = new StringBuilder(" (");
                         string strListItem = "";
+                        string itemText = "";
                         foreach (var itemEnu in list)
                         {
-                            sb.AppendFormat("{0},", SqlDialect.FormatValue(itemEnu));
+                            var itemVal = SqlDialect.FormatValue(itemEnu);
+                            if (itemVal == null)
+                            {
+                                itemText = "null";
+                            }
+                            if (itemVal.GetType() == typeof(string))
+                            {
+                                if (itemVal.ToString() == "")
+                                {
+                                    itemText = "null";
+                                }
+                            }
+                            else
+                            {
+                                itemText = itemVal.ToString();
+                            }
+                              
+                            sb.AppendFormat("{0},", itemText);
                         }
                         if (sb.Length == 0)
                         {
@@ -227,41 +245,52 @@ namespace Pure.Data.SqlMap
 
                         }
                         strListItem += ") ";
-                        if (forSqlMap == false)
-                        {
-                            str = str.Replace(prefix + item.Key, strListItem);
-                        }
-                        else
-                        {
-                            str = str.Replace(prefix + item.Key + parameterSuffix, strListItem);
-                            str = str.Replace(ParameterPrefixInject + item.Key + parameterSuffix, strListItem); 
-                        }
+
+                        str = str.Replace(prefix + item.Key + parameterSuffix, strListItem);
+                        str = str.Replace(ParameterPrefixInject + item.Key + parameterSuffix, strListItem);
+
+                        //if (forSqlMap == false)
+                        //{
+                        //    str = str.Replace(prefix + item.Key, strListItem);
+                        //}
+                        //else
+                        //{
+                        //    str = str.Replace(prefix + item.Key + parameterSuffix, strListItem);
+                        //    str = str.Replace(ParameterPrefixInject + item.Key + parameterSuffix, strListItem);
+                        //}
 
                     }
                     else
                     {
-                        if (forSqlMap == false)
+                        if (str.Contains(prefix + item.Key + parameterSuffix) || str.Contains(ParameterPrefixInject + item.Key + parameterSuffix))
                         {
-                            if (str.Contains(prefix + item.Key))
-                            {
-                                tmp = SqlDialect.FormatValue(item.Value);
-                                str = str.Replace(prefix + item.Key, tmp != null && tmp.ToString() != "" ? tmp.ToString() : "null");
-
-                            }
+                            tmp = SqlDialect.FormatValue(item.Value); //item.Value;// SqlDialect.FormatValue(item.Value);
+                            str = str.Replace(prefix + item.Key + parameterSuffix, tmp != null && tmp.ToString() != "" ? tmp.ToString() : "null");
+                            str = str.Replace(ParameterPrefixInject + item.Key + parameterSuffix, tmp != null && tmp.ToString() != "" ? tmp.ToString() : "null");
 
                         }
-                        else
-                        {
-                            //sql map ${xx}
-                            if (str.Contains(prefix + item.Key + parameterSuffix) || str.Contains(ParameterPrefixInject + item.Key + parameterSuffix))
-                            {
-                                tmp = item.Value;// SqlDialect.FormatValue(item.Value);
-                                str = str.Replace(prefix + item.Key + parameterSuffix, tmp != null && tmp.ToString() != "" ? tmp.ToString() : "");
-                                str = str.Replace(ParameterPrefixInject + item.Key + parameterSuffix, tmp != null && tmp.ToString() != "" ? tmp.ToString() : "");
+                        //if (forSqlMap == false)
+                        //{
+                        //    if (str.Contains(prefix + item.Key))
+                        //    {
+                        //        tmp = SqlDialect.FormatValue(item.Value);
+                        //        str = str.Replace(prefix + item.Key, tmp != null && tmp.ToString() != "" ? tmp.ToString() : "null");
 
-                            }
+                        //    }
 
-                        }
+                        //}
+                        //else
+                        //{
+                        //    //sql map ${xx}
+                        //    if (str.Contains(prefix + item.Key + parameterSuffix) || str.Contains(ParameterPrefixInject + item.Key + parameterSuffix))
+                        //    {
+                        //        tmp = SqlDialect.FormatValue(item.Value); //item.Value;// SqlDialect.FormatValue(item.Value);
+                        //        str = str.Replace(prefix + item.Key + parameterSuffix, tmp != null && tmp.ToString() != "" ? tmp.ToString() : "null");
+                        //        str = str.Replace(ParameterPrefixInject + item.Key + parameterSuffix, tmp != null && tmp.ToString() != "" ? tmp.ToString() : "null");
+
+                        //    }
+
+                        //}
                     }
 
                 }
@@ -281,7 +310,7 @@ namespace Pure.Data.SqlMap
                     var prefix = ParameterPrefix;// this.database.SqlGenerator.Configuration.Dialect.ParameterPrefix.ToString();
                     string str = Sql;
 
-                    str = ParseRawSQL(Sql, ParameterPrefix, Parameters, SqlDialect, true, ParameterSuffix);
+                    str = ParseRawSQL(Sql, Parameters, SqlDialect, true, ParameterPrefix, ParameterSuffix);
                     //var dict = Parameters != null ? Parameters.ToDictionary() : null;
                     //object tmp = null;
                     //Type type = null;

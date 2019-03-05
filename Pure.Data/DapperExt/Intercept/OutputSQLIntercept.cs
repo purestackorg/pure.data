@@ -28,7 +28,7 @@ namespace Pure.Data
                         }
                     }
 
-                    string str = SqlMap.SqlMapStatement.ParseRawSQL(cmd.CommandText, ParameterPrefix, ps, database.SqlDialectProvider, false, "");
+                    string str = SqlMap.SqlMapStatement.ParseRawSQL(cmd.CommandText,  ps, database.SqlDialectProvider, false, ParameterPrefix, "");
 
                     database.LogHelper.Debug(str);
 

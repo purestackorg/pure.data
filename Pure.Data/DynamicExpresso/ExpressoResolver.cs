@@ -29,7 +29,8 @@ namespace Pure.Data
         //private readonly ExpressoResolverOptions options;
         private  Interpreter  localEngine;
         private static object olock = new object();
-        private Interpreter Engine {
+        public Interpreter Interpreter
+        {
             get
             {
                 if (localEngine == null  )
@@ -38,7 +39,8 @@ namespace Pure.Data
                     {
                         if (localEngine == null)
                         {
-                            localEngine = new Interpreter();
+                            localEngine = new Interpreter()
+                                .Reference(typeof(ExpressoResolverForLinqExtensions));
                         }
                          
                         return localEngine;
@@ -77,6 +79,7 @@ namespace Pure.Data
                 { "lte","<=" },
                 { "eq","==" },
                 { "neq","!=" },
+                //{ "''","\"\"" },//自动转换为空字符串
                 //{ "''","\"" },//字符串
             };
 
@@ -96,7 +99,7 @@ namespace Pure.Data
 
         private string ConvertOperator(string code)
         {
-
+            code = code.Replace("''", "\"\"");//自动转换为空字符串
 
             var excludeMatchs = excludeRegex.Matches(code);
 
@@ -184,7 +187,7 @@ namespace Pure.Data
 
             try
             {
-                var value = Engine.Eval(code, parameters.ToArray());
+                var value = Interpreter.Eval(code, parameters.ToArray());
                 return value;// Convert.ChangeType(result, type);
 
             }

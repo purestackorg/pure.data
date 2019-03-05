@@ -32,6 +32,7 @@ namespace Pure.Data.Test
             //DDDTest.Test();
             //DIContainerAndSqlQueryTest.Test();
              SqlMapTest.Test();
+            //DynamicExpressoTest.Test();
             //ConfigurationTest.Test();
             ///BulkTest.Test();
             //MigratorTest.Test();
