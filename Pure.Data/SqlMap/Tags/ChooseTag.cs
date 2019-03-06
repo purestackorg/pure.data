@@ -63,7 +63,7 @@ namespace Pure.Data.SqlMap.Tags
                     throw new ArgumentNullException(nameof(Test));
                 }
 
-                var isTest = (bool)ExpressoResolver.Instance.Resolve(this.Test, context.RequestParameters);
+                var isTest = (bool)ExpressoResolver.Instance.Resolve(this.Test, context.ExpressoResolveParameters.ToArray());
                 return isTest;
 
                  

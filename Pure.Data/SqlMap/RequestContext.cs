@@ -1,7 +1,9 @@
-﻿using System;
+﻿using Pure.Data.DynamicExpresso;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Reflection;
+using System.Linq;
 
 namespace Pure.Data.SqlMap
 {
@@ -16,6 +18,7 @@ namespace Pure.Data.SqlMap
             Scope = scope;
             SqlId = sqlid;
             Request = param;
+            _ExpressoResolveParameters = new List<Parameter>();
             //Items = new Dictionary<Object, Object>();
         }
 
@@ -58,6 +61,39 @@ namespace Pure.Data.SqlMap
         /// 实际参数列表
         /// </summary>
         public IDictionary<string, object> RequestParameters { get; set; }
+        public void AddOrSetRequestParameter(string name ,object value)
+        {
+            RequestParameters[name] = value;
+
+            _ExpressoResolveParameters.Clear();//清空表达式解析参数
+        }
+
+        private List<Parameter> _ExpressoResolveParameters = null;
+        public List<Parameter> ExpressoResolveParameters {
+            get {
+                if (_ExpressoResolveParameters.Count == 0)
+                {
+                    Type pType = null;
+                    foreach (var item in this.RequestParameters)
+                    {
+                        if (item.Value != null)
+                        {
+                            pType = item.Value.GetType();
+                        }
+                        else
+                        {
+                            pType = typeof(string);
+                        }
+
+                        if (!_ExpressoResolveParameters.Any(p => p.Name == item.Key))
+                        {
+                            _ExpressoResolveParameters.Add(new Parameter(item.Key, pType, item.Value));
+                        } 
+                    };
+                }
+                return _ExpressoResolveParameters;
+            }
+        }
 
         public object Request {  get { return requestObj; }
             set

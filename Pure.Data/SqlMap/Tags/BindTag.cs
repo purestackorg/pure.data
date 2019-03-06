@@ -40,9 +40,9 @@ namespace Pure.Data.SqlMap.Tags
             //    str = reqVal.ToString();
             //}
 
-            var executeResult = ExpressoResolver.Instance.Resolve(this.Value, context.RequestParameters);// codeExecuter.Resolve(this.valueType, this.Value, context.Param);
+            var executeResult = ExpressoResolver.Instance.Resolve(this.Value, context.ExpressoResolveParameters.ToArray());// codeExecuter.Resolve(this.valueType, this.Value, context.Param);
 
-            context.RequestParameters[this.Name] = executeResult;
+            context.AddOrSetRequestParameter(this.Name,executeResult);
 
             return string.Empty;
 

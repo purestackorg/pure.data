@@ -24,6 +24,7 @@ namespace Pure.Data
         private readonly Regex excludeRegex;
         private readonly Regex operatorRegex;
         private readonly ConcurrentDictionary<string, string> codeCaches;
+        private readonly ConcurrentDictionary<string, Lambda> lambdaCaches;
         private readonly Dictionary<string, string> operatorMappings;
 
         //private readonly ExpressoResolverOptions options;
@@ -57,7 +58,7 @@ namespace Pure.Data
 
         public ExpressoResolver() {
             this.codeCaches = new ConcurrentDictionary<string, string>();
-
+            this.lambdaCaches = new ConcurrentDictionary<string, Lambda>();
             this.operatorMappings = this.CreateOperatorMappings();
 
             this.excludeRegex = new Regex("(['\"]).*?[^\\\\]\\1");
@@ -140,7 +141,8 @@ namespace Pure.Data
             });
         }
 
-        public object Resolve(string code, IDictionary<string, object> param)
+        //public object Resolve(string code, IDictionary<string, object> param)
+        public object Resolve(string code, params Parameter[] parameters)
         { 
             if (string.IsNullOrWhiteSpace(code))
             {
@@ -157,37 +159,34 @@ namespace Pure.Data
             code = this.codeCaches.GetOrAdd(code, (key) => this.ConvertOperator(code));
             //}
 
-           
-            var parameters = new List<Parameter>();
-            foreach (var item in param)
-            {
-                //if (item.Value is IDataParameter dataParameter)
-                //{
-                //    if (dataParameter == null)
-                //    {
-                //        parameters.Add(new Parameter(item.Key,  null));
-                       
-                //    }
-                //    else if (dataParameter.Direction == ParameterDirection.Input || dataParameter.Direction == ParameterDirection.InputOutput)
-                //    {
-                //        parameters.Add(new Parameter(item.Key, dataParameter.Value));
-                         
-                //    }
-                //}
-                //else
-                //{
-                //    parameters.Add(new Parameter(item.Key, item.Value));
-                    
-                //}
-                parameters.Add(new Parameter(item.Key, item.Value));
+            Lambda lambda = this.lambdaCaches.GetOrAdd(code, (key) => Interpreter.Parse(code, parameters));
+            
+            
 
+            //var parameters = new List<Parameter>();
+            //Type pType = null;
+            //foreach (var item in param)
+            //{ 
+            //    if (item.Value != null)
+            //    {
+            //        pType = item.Value.GetType();
+            //    }
+            //    else
+            //    {
+            //        pType = typeof(string);
+            //    }
+            //    if (!parameters.Any(p=>p.Name == item.Key))
+            //    {
+            //        parameters.Add(new Parameter(item.Key, pType, item.Value));
+            //    }
 
-
-            };
+            //};
 
             try
             {
-                var value = Interpreter.Eval(code, parameters.ToArray());
+                
+                var value = lambda.Invoke(parameters);
+                //var value = Interpreter.Eval(code, parameters);
                 return value;// Convert.ChangeType(result, type);
 
             }

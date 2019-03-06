@@ -42,7 +42,7 @@ namespace Pure.Data.SqlMap.Tags
             //return reqVal.ToString().Length > 0;
 
 
-            var isTest = (bool)ExpressoResolver.Instance.Resolve(this.Test, context.RequestParameters);
+            var isTest = (bool)ExpressoResolver.Instance.Resolve(this.Test, context.ExpressoResolveParameters.ToArray());
 
             return isTest;
              

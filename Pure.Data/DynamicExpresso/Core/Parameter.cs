@@ -10,10 +10,10 @@ namespace Pure.Data.DynamicExpresso
 	{
 		public Parameter(string name, object value)
 		{
-			if (value == null)
-				throw new ArgumentNullException("value");
+            if (value == null)
+                throw new ArgumentNullException("Parameter:[" + name +"]'s value can not be null!");
 
-			Name = name;
+            Name = name;
 			Type = value.GetType();
 			Value = value;
 

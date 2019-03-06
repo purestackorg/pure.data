@@ -23,9 +23,9 @@ namespace Pure.Data.Test
             string title = "DynamicExpressoTest";
             Console.Title = title;
 
-            CodeTimer.Time(title, 1, () => {
-
-                DynamicExpressoTestMethodTest().ConfigureAwait(false); 
+            CodeTimer.Time(title, 1000000, () => {
+                TestPerformance();
+                //DynamicExpressoTestMethodTest().ConfigureAwait(false); 
             });
 
 
@@ -60,6 +60,46 @@ namespace Pure.Data.Test
             Console.WriteLine("----------------------------------"+ tile + "--------------------------------------");
 
         }
+        private static void PrintLine2(  object tile)
+        {
+           // Console.WriteLine(tile);
+         
+        }
+        public static void TestPerformance() { 
+            //var data = ExpressoResolver.Instance.Resolve("\"22\"+\"-\"+Name+\"-\"+list.Count +\"-\"+list.Sum(\"p\")", new Parameter("Name", "000"), new Parameter("age", 123), new Parameter("list", new List<int> { 5, 6, 7, 8 }));
+            //PrintLine2(data);
+
+           // data = ExpressoResolver.Instance.Resolve("\"22\"+\"-\"+Name+\"-\"+list.Count +\"-\"+list.Sum(\"p\")", new Parameter("Name", Guid.NewGuid().ToString()), new Parameter("age", 123), new Parameter("list", new List<int> { 5, 6 }));
+           // PrintLine2(data);
+
+           // data = ExpressoResolver.Instance.Resolve("\"22\"+\"-\"+Name+\"-\"+list.Count +\"-\"+list.Sum(\"p\")", new Parameter("Name", Guid.NewGuid().ToString()), new Parameter("ag40e", 123), new Parameter("ag44e", 1623), new Parameter("list", new List<int> { 5, 6, 7 }));
+           // PrintLine2(data);
+
+           // data = ExpressoResolver.Instance.Resolve("\"22\"+Name", new Parameter("Name", "000"), new Parameter("age", 123));
+           //PrintLine2(data);
+           //  data = ExpressoResolver.Instance.Resolve("\"22\"+Name", new Parameter("Name", "1"));
+           //PrintLine2(data);
+           // data = ExpressoResolver.Instance.Resolve("\"22\"+Name", new Parameter("Name", "2"));
+           //PrintLine2(data);
+           // data = ExpressoResolver.Instance.Resolve("\"22\"+Name", new Parameter("Name", "3"));
+           //PrintLine2(data);
+           // data = ExpressoResolver.Instance.Resolve("\"22\"+Name", new Parameter("Name", "4"));
+            var data2 = ExpressoResolver.Instance.Resolve("1000+100.0*99-(600-3*15)%(((68-9)-3)*2-100)+10000%7*71  ");
+           //PrintLine2(data2);
+
+           //var data = ExpressoResolver.Instance.Resolve("Name != null and Name != \"\" ", new Parameter("Name", "3"));
+           // PrintLine2(data);
+           // data = ExpressoResolver.Instance.Resolve("Name != null and Name != \"\" ", new Parameter("Name", "54"));
+           // PrintLine2(data);
+
+            //var script = CSharpScript.Create<int>("X*Y", globalsType: typeof(Globals));
+            //script.Compile();
+            //for (int i = 0; i < 10; i++)
+            //{
+            //    Console.WriteLine((await script.RunAsync(new Globals { X = i, Y = i })).ReturnValue);
+            //}
+        }
+
 
         public static async Task DynamicExpressoTestMethodTest()
         {
@@ -72,9 +112,9 @@ namespace Pure.Data.Test
                 dd.Add(new UserInfo() { Name = "fdd", Id = 32 }); 
                 dd.Add(new UserInfo() { Name = "范德萨", Id = 122 });
                 var obj = new { Name = "fsdsd", ID = 2, Nam = "23", LikeNames = dd, Ids = new long[] { 1, 2, 3, 4 } };
-                var objDict = obj.ToDictionary();
-               var result = ExpressoResolver.Instance.Resolve(code, objDict);
-                Console.WriteLine(result);
+                // var objDict = obj.ToDictionary();
+                var result =new object();// ExpressoResolver.Instance.Resolve(code, objDict);
+               // Console.WriteLine(result);
                 var target = ExpressoResolver.Instance.Interpreter;
 
                 //类型比较

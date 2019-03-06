@@ -132,7 +132,8 @@ namespace Pure.Data.SqlMap.Tags
                 {
                     key_name = string.Format("{0}{1}{2}{3}{4}", ParameterPrefix, Index, FOR_KEY_SUFFIX, item_index, ParameterSuffix);
                     param_name = string.Format("{0}{1}{2}",   Index, FOR_KEY_SUFFIX, item_index);
-                    context.RequestParameters.Add(param_name, item_index);
+                    //context.RequestParameters.Add(param_name, item_index);
+                    context.AddOrSetRequestParameter(param_name, item_index);
 
                     item_sql = Regex.Replace(item_sql
                                       , strRegexIndex //("([?@:]" + Regex.Escape(Index) + @")(?!\w)(\s+(?i)unknown(?-i))?")
@@ -151,7 +152,8 @@ namespace Pure.Data.SqlMap.Tags
 
                         param_name = string.Format("{0}{1}{2}", propertyName.Value.Replace(".", "_"), FOR_KEY_SUFFIX, item_index);
 
-                        context.RequestParameters.Add(param_name, ovalue);
+                        //context.RequestParameters.Add(param_name, ovalue);
+                        context.AddOrSetRequestParameter(param_name, ovalue);
 
                         item_sql = item_sql.Replace(propertyName.Key, key_name);
                     }
@@ -162,7 +164,8 @@ namespace Pure.Data.SqlMap.Tags
                     key_name = string.Format("{0}{1}{2}{3}{4}", ParameterPrefix, Item, FOR_KEY_SUFFIX, item_index, ParameterSuffix);
                     param_name = string.Format("{0}{1}{2}", Item, FOR_KEY_SUFFIX, item_index);
 
-                    context.RequestParameters.Add(param_name, itemVal);
+                    //context.RequestParameters.Add(param_name, itemVal);
+                    context.AddOrSetRequestParameter(param_name, itemVal);
 
                     item_sql = Regex.Replace(item_sql
                                   , ("(" + ParameterPrefix + "" + Regex.Escape(Item) + @")(?!\w)(\s+(?i)unknown(?-i))?" + RegexParameterSuffix) //("([?@:]" + Regex.Escape(Item) + @")(?!\w)(\s+(?i)unknown(?-i))?")
