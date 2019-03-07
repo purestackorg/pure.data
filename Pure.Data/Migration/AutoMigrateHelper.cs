@@ -241,7 +241,7 @@ namespace Pure.Data.Migration
                             foreach (var property in properties)
                             {
                                 colComment = property.ColumnDescription;
-                                if (!string.IsNullOrEmpty(tableComment))
+                                if (!string.IsNullOrEmpty(colComment))
                                 {
                                     colName = property.ColumnName;
                                     _provider.AddColumnDescription(tb, colName, colComment);
@@ -296,7 +296,7 @@ namespace Pure.Data.Migration
                         foreach (var property in properties)
                         {
                             colComment = property.ColumnDescription;
-                            if (!string.IsNullOrEmpty(tableComment))
+                            if (!string.IsNullOrEmpty(colComment))
                             {
                                 colName = property.ColumnName;
                                 _provider.AddColumnDescription(tb, colName, colComment);

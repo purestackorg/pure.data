@@ -183,15 +183,15 @@ namespace Pure.Data.Migration.Providers.Mysql
 
         public override void AddColumnDescription(string table, string column, string description)
         {
-            //if (string.IsNullOrEmpty(description))
-            //    return;
-            //Column col = GetColumnByName(table, column);
-            ////ColumnPropertiesMapper mapper = _dialect.GetAndMapColumnProperties(col);
-            ////ChangeColumn(table, mapper.ColumnSql + string.Format(" COMMENT '{0}'", description));
-            //if (col != null)
-            //{
-            //    ChangeColumn(table, col.TypeString + string.Format(" COMMENT '{0}'", description));
-            //}
+            if (string.IsNullOrEmpty(description))
+                return;
+            Column col = GetColumnByName(table, column);
+            //ColumnPropertiesMapper mapper = _dialect.GetAndMapColumnProperties(col);
+            //ChangeColumn(table, mapper.ColumnSql + string.Format(" COMMENT '{0}'", description));
+            if (col != null)
+            {
+                ChangeColumn(table, column +" "+col.TypeString + string.Format(" COMMENT '{0}'", description.Replace("'", "''")));
+            }
             
         }
 

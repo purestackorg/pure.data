@@ -25,7 +25,7 @@ namespace Expression2SqlTest
             Map(m => m.Sex).Description("性别");
             Map(m => m.HasDelete).Description("是否删除");
             Map(m => m.Role).Description("角色");
-            Map(m => m.TestClob).Description("超大文本22").Lob(LobType.Clob);
+            Map(m => m.TestClob).Description("超大文本22").Size(65535).Lob(LobType.Clob);
           //  Map(m => m.TestClob2).Size(5000).Description("超大文本22").Lob(LobType.Clob);
             //  Map(m => m.VersionCol).Version().Description("版本");
             //Map(m => m.Address).Description("地址").Reference<Address>(z=>z.Id, ReferenceType.OneToOne);

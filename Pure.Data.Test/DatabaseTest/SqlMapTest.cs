@@ -20,7 +20,7 @@ namespace Pure.Data.Test
             string title = "SqlMapTest";
             Console.Title = title;
 
-            CodeTimer.Time(title, 100, () => {
+            CodeTimer.Time(title, 1, () => {
                  
                 SqlMapMethodTest().ConfigureAwait(false); 
             });
