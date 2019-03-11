@@ -71,13 +71,33 @@ namespace Pure.Data.DynamicExpresso
 
 		public object Invoke(IEnumerable<Parameter> parameters)
 		{
-			var args = (from usedParameter in UsedParameters
-				from actualParameter in parameters
-				where usedParameter.Name.Equals(actualParameter.Name, _parserArguments.Settings.KeyComparison)
-				select actualParameter.Value)
-				.ToArray();
+			//var args = (from usedParameter in UsedParameters
+			//	from actualParameter in parameters
+			//	where usedParameter.Name.Equals(actualParameter.Name, _parserArguments.Settings.KeyComparison)
+			//	select actualParameter.Value)
+			//	.ToArray();
+   //         return InvokeWithUsedParameters(args);
 
-			return InvokeWithUsedParameters(args);
+            //update 20190311 增加为空的参数时候自动补充默认参数
+            var waitToInvokeParams = new List<object>();
+            //if (parameters == null)
+            //{
+            //    parameters = new List<Parameter>();
+            //}
+            foreach (var userParam in UsedParameters)
+            {
+                var param = parameters.FirstOrDefault(p=>p.Name.Equals(userParam.Name, _parserArguments.Settings.KeyComparison));
+                if (param != null)
+                {
+                    waitToInvokeParams.Add(param.Value);
+                }
+                else
+                {
+                    waitToInvokeParams.Add(ReflectionHelper.GetDefaultValueForType(userParam.Type)); 
+                }
+            }
+            return InvokeWithUsedParameters(waitToInvokeParams.ToArray());
+
 		}
 
 		/// <summary>

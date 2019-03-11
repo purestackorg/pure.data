@@ -9,16 +9,16 @@ using System.Threading;
 using System.Linq;
 namespace Pure.Data
 {
-    public class ExpressoResolverOptions
-    {
-        public bool IsConvertEnum { get; set; }
+    //public class ExpressoResolverOptions
+    //{
+    //    public bool IsConvertEnum { get; set; }
 
-        public bool IsConvertOperator { get; set; }
+    //    public bool IsConvertOperator { get; set; }
 
-        public bool IsConvertDateTimeMin { get; set; }
+    //    public bool IsConvertDateTimeMin { get; set; }
 
-        public string[] ExcludeOperators { get; set; }
-    }
+    //    public string[] ExcludeOperators { get; set; }
+    //}
     public class ExpressoResolver : Singleton<ExpressoResolver>
     {
         private readonly Regex excludeRegex;
@@ -143,7 +143,8 @@ namespace Pure.Data
 
         //public object Resolve(string code, IDictionary<string, object> param)
         public object Resolve(string code, params Parameter[] parameters)
-        { 
+        {
+            code = code.Trim();//移除左右两端的空格
             if (string.IsNullOrWhiteSpace(code))
             {
                 throw new ArgumentNullException(nameof(code));
