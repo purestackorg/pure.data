@@ -32,7 +32,8 @@ namespace Pure.Data.DynamicExpresso
 		public string Name { get; private set; }
 		public Type Type { get; private set; }
 		public object Value { get; private set; }
+		public object DefaultValue { get;   set; }
 
-		public ParameterExpression Expression { get; private set; }
+        public ParameterExpression Expression { get; private set; }
 	}
 }

@@ -1,5 +1,8 @@
 ﻿ 
  ---------------需要将xsd文件都放到vs安装目录下的Xml\Schemas文件夹里
+      4.2.0.6 20190312
+ 优化ExpressoResolver设置和存储UserParameter默认值，进一步提高执行性能 
+
      4.2.0.5 20190311
  修复ExpressoResolver默认参数不传时候的问题
 

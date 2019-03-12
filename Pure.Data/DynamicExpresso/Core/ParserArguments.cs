@@ -97,7 +97,10 @@ namespace Pure.Data.DynamicExpresso
 			Parameter parameter;
 			if (_declaredParameters.TryGetValue(name, out parameter))
 			{
-				_usedParameters.Add(parameter);
+
+                parameter.DefaultValue = ReflectionHelper.GetDefaultValueForType(parameter.Type);//设置默认值
+
+                _usedParameters.Add(parameter);
 				expression = parameter.Expression; 
 				return true;
 			}

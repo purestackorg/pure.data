@@ -23,7 +23,7 @@ namespace Pure.Data.Test
             string title = "DynamicExpressoTest";
             Console.Title = title;
 
-            CodeTimer.Time(title, 1000000, () => {
+            CodeTimer.Time(title, 1000, () => {
                 TestPerformance();
                 //DynamicExpressoTestMethodTest().ConfigureAwait(false); 
             });
@@ -81,41 +81,42 @@ namespace Pure.Data.Test
 
         }
         public static void TestPerformance() {
-            //var data = ExpressoResolver.Instance.Resolve("\"22\"+\"-\"+Name+\"-\"+list.Count +\"-\"+list.Sum(\"p\")", new Parameter("Name", "000"), new Parameter("age", 123), new Parameter("list", new List<int> { 5, 6, 7, 8 }));
+            var data = new object();
+            // data = ExpressoResolver.Instance.Resolve("\"22\"+\"-\"+Name+\"-\"+list.Count +\"-\"+list.Sum(\"p\")", new Parameter("Name", "000"), new Parameter("age", 123), new Parameter("list", new List<int> { 5, 6, 7, 8 }));
             //PrintLine2(data);
 
-            // data = ExpressoResolver.Instance.Resolve("\"22\"+\"-\"+Name+\"-\"+list.Count +\"-\"+list.Sum(\"p\")", new Parameter("Name", Guid.NewGuid().ToString()), new Parameter("age", 123), new Parameter("list", new List<int> { 5, 6 }));
-            // PrintLine2(data);
+            //data = ExpressoResolver.Instance.Resolve("\"22\"+\"-\"+Name+\"-\"+list.Count +\"-\"+list.Sum(\"p\")", new Parameter("Name", Guid.NewGuid().ToString()), new Parameter("age", 123), new Parameter("list", new List<int> { 5, 6 }));
+            //PrintLine2(data);
 
-            // data = ExpressoResolver.Instance.Resolve("\"22\"+\"-\"+Name+\"-\"+list.Count +\"-\"+list.Sum(\"p\")", new Parameter("Name", Guid.NewGuid().ToString()), new Parameter("ag40e", 123), new Parameter("ag44e", 1623), new Parameter("list", new List<int> { 5, 6, 7 }));
-            // PrintLine2(data);
+            //data = ExpressoResolver.Instance.Resolve("\"22\"+\"-\"+Name+\"-\"+list.Count +\"-\"+list.Sum(\"p\")", new Parameter("Name", Guid.NewGuid().ToString()), new Parameter("ag40e", 123), new Parameter("ag44e", 1623), new Parameter("list", new List<int> { 5, 6, 7 }));
+            //PrintLine2(data);
 
-            // data = ExpressoResolver.Instance.Resolve("\"22\"+Name", new Parameter("Name", "000"), new Parameter("age", 123));
+            //data = ExpressoResolver.Instance.Resolve("\"22\"+Name", new Parameter("Name", "000"), new Parameter("age", 123));
             //PrintLine2(data);
-            //  data = ExpressoResolver.Instance.Resolve("\"22\"+Name", new Parameter("Name", "1"));
+            //data = ExpressoResolver.Instance.Resolve("\"22\"+Name", new Parameter("Name", "1"));
             //PrintLine2(data);
-            // data = ExpressoResolver.Instance.Resolve("\"22\"+Name", new Parameter("Name", "2"));
+            //data = ExpressoResolver.Instance.Resolve("\"22\"+Name", new Parameter("Name", "2"));
             //PrintLine2(data);
-            // data = ExpressoResolver.Instance.Resolve("\"22\"+Name", new Parameter("Name", "3"));
+            //data = ExpressoResolver.Instance.Resolve("\"22\"+Name", new Parameter("Name", "3"));
             //PrintLine2(data);
-            // data = ExpressoResolver.Instance.Resolve("\"22\"+Name", new Parameter("Name", "4"));
+            //data = ExpressoResolver.Instance.Resolve("\"22\"+Name", new Parameter("Name", "4"));
 
             //var data2 = ExpressoResolver.Instance.Resolve("1000+100.0*99-(600-3*15)%(((68-9)-3)*2-100)+10000%7*71  ");
             //PrintLine2(data2);
             //data2 = ExpressoResolver.Instance.Resolve("1000+100.0*99-(600-3*15)%(((68-9)-3)*2-100)+10000%7*71  ", BuildParameter("Name", "3"));
             //PrintLine2(data2);
 
-            var data = ExpressoResolver.Instance.Resolve("Name != null and Name != \"\" ", BuildParameter("Name", "3"), BuildParameter("gggs2", 134));
-            //PrintLine2(data);
-            //data = ExpressoResolver.Instance.Resolve("Name != null and Name != \"\" ", BuildParameter("NAMe", "5454"), BuildParameter("gggs2", 134));
-            //PrintLine2(data);
-            //data = ExpressoResolver.Instance.Resolve("Name != null and Name != \"\" ", BuildParameter("jjj2", 65));
-            //PrintLine2(data);
+            data = ExpressoResolver.Instance.Resolve("Name != null and Name != \"\" ", BuildParameter("Name", "3"), BuildParameter("gggs2", 134));
+            PrintLine2(data);
+            data = ExpressoResolver.Instance.Resolve("Name != null and Name != \"\" ", BuildParameter("NAMe", "5454"), BuildParameter("gggs2", 134));
+            PrintLine2(data);
+            data = ExpressoResolver.Instance.Resolve("Name != null and Name != \"\" ", BuildParameter("jjj2", 65));
+            PrintLine2(data);
 
-            //data = ExpressoResolver.Instance.Resolve("Dt != null and Dt > DateTime.Now ", BuildParameter("Dt", DateTime.Now.AddDays(1)), BuildParameter("gggs2", 134));
-            //PrintLine2(data);
-            //data = ExpressoResolver.Instance.Resolve("Dt != null and Dt > DateTime.Now  ", BuildParameter("jjj2", 65));
-            //PrintLine2(data);
+            data = ExpressoResolver.Instance.Resolve("Dt != null and Dt > DateTime.Now ", BuildParameter("Dt", DateTime.Now.AddDays(1)), BuildParameter("gggs2", 134));
+            PrintLine2(data);
+            data = ExpressoResolver.Instance.Resolve("Dt != null and Dt > DateTime.Now  ", BuildParameter("jjj2", 65));
+            PrintLine2(data);
 
             //var script = CSharpScript.Create<int>("X*Y", globalsType: typeof(Globals));
             //script.Compile();

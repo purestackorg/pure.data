@@ -93,7 +93,8 @@ namespace Pure.Data.DynamicExpresso
                 }
                 else
                 {
-                    waitToInvokeParams.Add(ReflectionHelper.GetDefaultValueForType(userParam.Type)); 
+                    waitToInvokeParams.Add(userParam.DefaultValue); 
+                    //waitToInvokeParams.Add(ReflectionHelper.GetDefaultValueForType(userParam.Type)); 
                 }
             }
             return InvokeWithUsedParameters(waitToInvokeParams.ToArray());
