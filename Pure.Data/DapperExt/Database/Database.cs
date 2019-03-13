@@ -38,7 +38,7 @@ namespace Pure.Data
                 return FluentExpressionSqlBuilderBoostraper.Instance.Load(this);
             }
         }
-        public SqlBuilder SqlBuilder { get { return new SqlBuilder(); } }
+        public SqlBuilder SqlBuilder { get { return new SqlBuilder(this); } }
 
         public string DatabaseName { get; private set; }
         public string ProviderName { get; private set; }

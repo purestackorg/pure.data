@@ -1,7 +1,9 @@
-﻿using System;
+﻿using Pure.Data;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
 namespace Dapper
@@ -15,6 +17,7 @@ namespace Dapper
         {
             public string Sql { get; set; }
             public object Parameters { get; set; }
+            public bool IsInclusive { get; set; }
         }
 
         class Clauses : List<Clause>
@@ -36,7 +39,20 @@ namespace Dapper
                 {
                     p.AddDynamicParams(item.Parameters);
                 }
-                return prefix + string.Join(joiner, this.Select(c => c.Sql)) + postfix;
+                return this.Any(a => a.IsInclusive)
+                   ? prefix +
+                     string.Join(joiner,
+                         this.Where(a => !a.IsInclusive)
+                             .Select(c => c.Sql)
+                             .Union(new[]
+                             {
+                                  " ( " +
+                                  string.Join(" OR ", this.Where(a => a.IsInclusive).Select(c => c.Sql).ToArray()) +
+                                  " ) "
+                             }).ToArray()) + postfix
+                   : prefix + string.Join(joiner, this.Select(c => c.Sql).ToArray()) + postfix;
+
+                //return prefix + string.Join(joiner, this.Select(c => c.Sql)) + postfix;
             }
         }
 
@@ -46,16 +62,20 @@ namespace Dapper
             readonly SqlBuilder builder;
             readonly object initParams;
             int dataSeq = -1; // Unresolved
+            private IDatabase Database { get; set; }
 
-            public Template(SqlBuilder builder, string sql, dynamic parameters)
+            public Template(SqlBuilder builder, string sql, dynamic parameters, IDatabase db)
             {
                 this.initParams = parameters;
                 this.sql = sql;
                 this.builder = builder;
+                this.Database = db;
             }
 
-            static System.Text.RegularExpressions.Regex regex =
-                new System.Text.RegularExpressions.Regex(@"\/\*\*.+\*\*\/", System.Text.RegularExpressions.RegexOptions.Compiled | System.Text.RegularExpressions.RegexOptions.Multiline);
+            //static System.Text.RegularExpressions.Regex regex =
+            //    new System.Text.RegularExpressions.Regex(@"\/\*\*.+\*\*\/", System.Text.RegularExpressions.RegexOptions.Compiled | System.Text.RegularExpressions.RegexOptions.Multiline);
+
+            private static readonly Regex regex = new Regex(@"\/\*\*.+?\*\*\/", RegexOptions.Compiled | RegexOptions.Multiline);
 
             void ResolveSql()
             {
@@ -86,63 +106,65 @@ namespace Dapper
                     {
                         foreach (var p in ParameterDict)
                         {
-                            sql = sql.Replace(prefixPara + p.Key, FormatValue(p.Value, dbType));
+                            sql = sql.Replace(prefixPara + p.Key, Database.SqlDialectProvider.FormatValue(p.Value).ToString());
+                            //sql = sql.Replace(prefixPara + p.Key, FormatValue(p.Value, dbType));
                         }
+                        
                     }
                 }
                 return sql;
             }
-            private string FormatValue(object o, Pure.Data.DatabaseType dbType)
-            {
-                if (o == null)
-                {
-                    return "''";
-                }
-                Type t = o.GetType();
-                if (t == typeof(string) || t == typeof(String))
-                {
-                    return string.Format("'{0}'", o);
-                }
-                else if (t ==typeof(DateTime))
-                {
-                    if (dbType == Pure.Data.DatabaseType.Oracle)
-                    {
-                        string result = ("TO_DATE('");
-                        result += o;
-                        result += ("','yy-mm-dd hh24:mi:ss')");
-                        return result;
-                    }
-                    else
-                    {
-                        return "'" + o + "'"; 
-                    }
+            //private string FormatValue(object o, Pure.Data.DatabaseType dbType)
+            //{
+            //    if (o == null)
+            //    {
+            //        return "''";
+            //    }
+            //    Type t = o.GetType();
+            //    if (t == typeof(string) || t == typeof(String))
+            //    {
+            //        return string.Format("'{0}'", o);
+            //    }
+            //    else if (t ==typeof(DateTime))
+            //    {
+            //        if (dbType == Pure.Data.DatabaseType.Oracle)
+            //        {
+            //            string result = ("TO_DATE('");
+            //            result += o;
+            //            result += ("','yy-mm-dd hh24:mi:ss')");
+            //            return result;
+            //        }
+            //        else
+            //        {
+            //            return "'" + o + "'"; 
+            //        }
                      
-                }
-                else if (t == typeof(Boolean) || t == typeof(bool))
-                {
-                    bool b = (bool)o;
-                    if (b == true)
-                    {
-                        return "1";  
-                    }
-                    else
-                    {
-                        return "0";
-                    }
-                }
-                else if (t.IsPrimitive && t != typeof(string))
-                {
-                    return o.ToString();
-                }
-                else if (t.IsEnum())
-                {
-                    return ((int)o).ToString();
-                }
-                else
-                {
-                    return string.Format("'{0}'", o);
-                }
-            }
+            //    }
+            //    else if (t == typeof(Boolean) || t == typeof(bool))
+            //    {
+            //        bool b = (bool)o;
+            //        if (b == true)
+            //        {
+            //            return "1";  
+            //        }
+            //        else
+            //        {
+            //            return "0";
+            //        }
+            //    }
+            //    else if (t.IsPrimitive && t != typeof(string))
+            //    {
+            //        return o.ToString();
+            //    }
+            //    else if (t.IsEnum())
+            //    {
+            //        return ((int)o).ToString();
+            //    }
+            //    else
+            //    {
+            //        return string.Format("'{0}'", o);
+            //    }
+            //}
 
             public IDictionary<string, object> ParameterDict
             {
@@ -178,19 +200,25 @@ namespace Dapper
 
             public string RawSql { get { ResolveSql(); return rawSql; } }
             public object Parameters { get { ResolveSql(); return parameters; } }
+
+
+
+
+
         }
 
-
-        public SqlBuilder()
+        private IDatabase Database { get;  set; }
+        public SqlBuilder(IDatabase db)
         {
+            Database = db;
         }
 
         public Template AddTemplate(string sql, dynamic parameters = null)
         {
-            return new Template(this, sql, parameters);
+            return new Template(this, sql, parameters, Database);
         }
 
-        void AddClause(string name, string sql, object parameters, string joiner, string prefix = "", string postfix = "")
+        void AddClause(string name, string sql, object parameters, string joiner, string prefix = "", string postfix = "", bool isInclusive = false)
         {
             Clauses clauses;
             if (!data.TryGetValue(name, out clauses))
@@ -198,10 +226,15 @@ namespace Dapper
                 clauses = new Clauses(joiner, prefix, postfix);
                 data[name] = clauses;
             }
-            clauses.Add(new Clause { Sql = sql, Parameters = parameters });
+            clauses.Add(new Clause { Sql = sql, Parameters = parameters, IsInclusive = isInclusive });
             seq++;
         }
 
+        public SqlBuilder Intersect(string sql, dynamic parameters = null)
+        {
+            AddClause("intersect", sql, parameters, joiner: "\nINTERSECT\n ", prefix: "\n ", postfix: "\n");
+            return this;
+        }
         public SqlBuilder InnerJoin(string sql, dynamic parameters = null)
         {
             AddClause("innerjoin", sql, parameters, joiner: "\nINNER JOIN ", prefix: "\nINNER JOIN ", postfix: "\n");
@@ -223,6 +256,11 @@ namespace Dapper
         public SqlBuilder Where(string sql, dynamic parameters = null)
         {
             AddClause("where", sql, parameters, " AND ", prefix: "WHERE ", postfix: "\n");
+            return this;
+        }
+        public SqlBuilder OrWhere(string sql, dynamic parameters = null)
+        {
+            AddClause("where", sql, parameters, " OR ", prefix: "WHERE ", postfix: "\n", isInclusive:true);
             return this;
         }
 

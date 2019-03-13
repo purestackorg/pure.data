@@ -165,7 +165,7 @@ namespace Pure.Data
 
             string sql = SqlGenerator.Insert(classMap);
 
-            SqlBuilder sqlbuilder = new SqlBuilder();
+            SqlBuilder sqlbuilder = new SqlBuilder(Database);
             var tem = sqlbuilder.AddTemplate(sql, keyValues);
             sql = tem.ToSqlString(SqlGenerator.Configuration.Dialect.ParameterPrefix.ToString(), SqlGenerator.Configuration.Dialect.databaseType);
             parameters = tem.Parameters;
