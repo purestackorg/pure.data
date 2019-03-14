@@ -1052,6 +1052,7 @@ this IDbConnection cnn, string sql, dynamic param = null, IDbTransaction transac
 
             DbCommand cmd = null;
             bool wasClosed = cnn.State == ConnectionState.Closed;
+            bool disposeCommand = true;
             try
             {
                 cmd = (DbCommand)command.SetupCommand(cnn, paramReader);
@@ -1062,6 +1063,7 @@ this IDbConnection cnn, string sql, dynamic param = null, IDbTransaction transac
                 DoPostExecute(cnn, cmd, command);
 
                 wasClosed = false;
+                disposeCommand = false;
                 return reader;
             }
             catch (Exception x)
@@ -1081,7 +1083,8 @@ this IDbConnection cnn, string sql, dynamic param = null, IDbTransaction transac
                     CloseConnection(cnn, command, wasClosed);
                 }
 
-                if (cmd != null) cmd.Dispose();
+                //if (cmd != null) cmd.Dispose();
+                if (cmd != null && disposeCommand) cmd.Dispose();
             }
         }
 
