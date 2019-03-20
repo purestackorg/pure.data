@@ -6,6 +6,28 @@ using System.Reflection;
 
 namespace Pure.Data
 {
+    public enum ReferenceType
+    {
+        None,
+        OneToOne,
+        Foreign,
+        ManyToMany
+    }
+    public enum ComputedColumnType
+    {
+        /// <summary>
+        /// Always considered as a computed column
+        /// </summary>
+        Always,
+        /// <summary>
+        /// Only considered a Computed column for inserts, Updates will not consider this column to be computed
+        /// </summary>
+        ComputedOnInsert,
+        /// <summary>
+        /// Only considered a Computed column for updates, Inserts will not consider this column to be computed
+        /// </summary>
+        ComputedOnUpdate
+    }
     /// <summary>
     /// Maps an entity property to its corresponding column in the database.
     /// </summary>
@@ -30,9 +52,14 @@ namespace Pure.Data
         bool IsVersionColumn { get; }
 
         LobType LobType { get; }
-        //bool IsReference { get; }
-        //ReferenceType? ColumnReferenceType { get; }
-        //MemberInfo ReferenceMember { get; }
+
+        bool IsResultColumn { get; }
+        bool IsComputeColumn { get; }
+        ComputedColumnType? ComputedColumnType { get;   }
+         
+        bool IsReference { get; }
+        ReferenceType? ColumnReferenceType { get; }
+        MemberInfo ReferenceMember { get; }
 
     }
 
@@ -51,8 +78,9 @@ namespace Pure.Data
 
             IsVersionColumn = false;
             LobType = LobType.None;
-            //IsReference = false;
-            //ColumnReferenceType = ReferenceType.None;
+
+            IsReference = false;
+            ColumnReferenceType = ReferenceType.None;
         }
 
         /// <summary>
@@ -100,11 +128,16 @@ namespace Pure.Data
         public PropertyInfo PropertyInfo { get; private set; }
 
         public bool IsVersionColumn { get; private set; }
-        //public bool IsReference { get; private set; }
-        //public ReferenceType? ColumnReferenceType { get; private set; }
-        //public MemberInfo ReferenceMember { get; private set; }
+        public bool IsResultColumn { get; private set; }
+        public bool IsComputeColumn { get; private set; }
+        public ComputedColumnType? ComputedColumnType { get; private set; }
 
- 
+        
+        public bool IsReference { get; private set; }
+        public ReferenceType? ColumnReferenceType { get; private set; }
+        public MemberInfo ReferenceMember { get; private set; }
+
+
 
         /// <summary>
         /// Fluently sets the column name for the property.
@@ -193,20 +226,26 @@ namespace Pure.Data
             IsReadOnly = true;
             return this;
         }
+      
 
-        //public PropertyMap Reference(ReferenceType referenceType = ReferenceType.Foreign)
-        //{
-        //    IsReference = true;
-        //    ColumnReferenceType = referenceType;
-        //    return this;
-        //}
+       
+        public PropertyMap Reference(ReferenceType referenceType = ReferenceType.Foreign)
+        {
+            if (referenceType == ReferenceType.ManyToMany)
+            {
+                throw new Exception("Use Many(x => x.Items) instead of Column(x => x.Items) for one to many relationships");
+            }
+            IsReference = true;
+            ColumnReferenceType = referenceType;
+            return this;
+        }
 
-        //public PropertyMap Reference<TModel>(Expression<Func<TModel, object>> joinColumn, ReferenceType referenceType = ReferenceType.Foreign)
-        //{
-        //    Reference(referenceType);
-        //    ReferenceMember = MemberHelper<TModel>.GetMembers(joinColumn).Last();
-        //    return this;
-        //}
+        public PropertyMap Reference<TModel>(Expression<Func<TModel, object>> joinColumn, ReferenceType referenceType = ReferenceType.Foreign)
+        {
+            Reference(referenceType);
+            this.ReferenceMember = MemberHelper<TModel>.GetMembers(joinColumn).Last();
+            return this;
+        }
 
 
         public bool IsPrimaryKey

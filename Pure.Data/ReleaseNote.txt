@@ -258,3 +258,11 @@ FluentExpressionSQL新增SqlFuncs功能，里面包含若干SQL的转换方法
 6. 批量导入、导出，生成SQL 脚本
 7. 数据备份与还原、数据导入导出
 8. 实体缓存
+9.iqtoolkit实现IQueryable
+
+参考
+Dapper实现一对多对象关系聚合导航属性
+https://www.cnblogs.com/felixnet/p/7365667.html
+https://blog.csdn.net/wyljz/article/details/68926745
+https://www.cnblogs.com/yankliu-vip/p/4182892.html
+https://www.cnblogs.com/guokun/p/5843871.html
