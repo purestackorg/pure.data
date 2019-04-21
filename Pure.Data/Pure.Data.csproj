@@ -5,8 +5,8 @@
     <!--<TargetFrameworks>netstandard2.0;net45;</TargetFrameworks>-->
     
     <!--测试某一个框架兼容去掉s-->
-    <TargetFramework>netstandard2.0</TargetFramework>
-    <!--<TargetFramework>net45</TargetFramework>-->
+    <!--<TargetFramework>netstandard2.0</TargetFramework>-->
+    <TargetFramework>net45</TargetFramework>
     <Description>Database Operation Library</Description>
     <Copyright>Copyright © Benson Kwok  2015</Copyright>
     <Version>4.2.0.8</Version>
@@ -19,8 +19,8 @@
   
   
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-    <DefineConstants> NETSTANDARD2_0;NETSTANDARD;NETSTANDARD2_0;ASYNC</DefineConstants>
-    <!--<DefineConstants>TRACE;DEBUG;NETFRAMEWORK;NET45;ASYNC</DefineConstants>-->
+    <!--<DefineConstants> NETSTANDARD2_0;NETSTANDARD;NETSTANDARD2_0;ASYNC</DefineConstants>-->
+    <DefineConstants>TRACE;DEBUG;NETFRAMEWORK;NET45;ASYNC</DefineConstants>
 
     <!--<DefineConstants>TRACE;DEBUG;NET45;NETSTANDARD2_0</DefineConstants>-->
 

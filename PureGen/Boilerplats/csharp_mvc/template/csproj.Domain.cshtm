@@ -1,0 +1,17 @@
+﻿@using Pure.Data.Gen
+@using System.Linq
+@using Pure.Data.Gen.CodeServer.RazorPaser
+@inherits  RazorCustomizedTemplate<Pure.Data.Gen.OutputContext>
+@{
+	OutputContext CurrentOutputContext = Model;
+	string ProjectName = CurrentOutputContext.ProjectConfig.Name;
+	string NameSpace = CurrentOutputContext.ProjectConfig.NameSpace;
+    //CurrentOutputContext.OutputFileName = CurrentOutputContext.ProjectConfig.DatabaseName + "-"+CurrentOutputContext.ProjectConfig.DatabaseType;
+}
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+  </PropertyGroup>
+
+</Project>

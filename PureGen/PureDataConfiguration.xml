@@ -64,7 +64,10 @@
     <!--<DataSource Name="WriteDB"  ConnectionString="Database=test;server=localhost;port=3306;userid=root;pwd=root;sslmode=none" Provider="MYSQL"
                 IsMaster="true"  ParameterPrefix=":" Type="Write" Weight="100"  />-->
 
-    <DataSource Name="WriteDB"  ConnectionString="Database=AGRYGL;server=192.168.6.52;port=3306;userid=AGRYGL;pwd=123456;sslmode=none" Provider="MySql.Data.MySqlClient"
+    <!--<DataSource Name="WriteDB"  ConnectionString="Database=AGRYGL;server=192.168.6.52;port=3306;userid=AGRYGL;pwd=123456;sslmode=none" Provider="MySql.Data.MySqlClient"
+                  IsMaster="true"  ParameterPrefix="?" Type="Write" Weight="100"  />-->
+    
+        <DataSource Name="WriteDB"  ConnectionString="Database=vueblog2;server=localhost;port=3306;userid=root;pwd=root;sslmode=none" Provider="MySql.Data.MySqlClient"
                   IsMaster="true"  ParameterPrefix="?" Type="Write" Weight="100"  />
     <!--<DataSource Name="WriteDB"  ConnectionString="Server=192.168.6.176;User ID=sa;Password=aaa0.0;Database=Test" Provider="SQLSERVER" 
                 IsMaster="true"  ParameterPrefix=":" Type="Write" Weight="100"  />-->
@@ -88,13 +91,13 @@
 
   <MapperSources>
     <!--<MapperSource Type="File" Path="Pure.Data.Test.exe"></MapperSource>-->
-    <MapperSource Type="ClassType" ClassName="PureGen.User,PureGen"></MapperSource>
+    <!--<MapperSource Type="ClassType" ClassName="PureGen.User,PureGen"></MapperSource>-->
   </MapperSources>
 
 
   <SqlMaps>
     <!--<SqlMap Path="SqlMap/sql_dev.xml" Type="File"></SqlMap>-->
-    <SqlMap Type="Directory"  Path="SqlMap" ></SqlMap>
+    <!--<SqlMap Type="Directory"  Path="SqlMap" ></SqlMap>-->
   </SqlMaps>
 
   <Interceptors>

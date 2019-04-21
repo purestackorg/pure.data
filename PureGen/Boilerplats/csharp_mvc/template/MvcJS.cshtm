@@ -1,0 +1,376 @@
+﻿@using Pure.Data.Gen
+@using System.Linq
+@using Pure.Data.Gen.CodeServer.RazorPaser
+@inherits  RazorCustomizedTemplate<Pure.Data.Gen.Table>
+@{
+    OutputContext CurrentOutputContext = Model.CurrentOutputContext;
+    Table tbl = Model;
+    string TableName = tbl.Name;
+	string ClassName = tbl.ClassName;
+    string EntityName = tbl.ClassName + "Entity";
+    string MapperName = tbl.ClassName + "Mapper";
+    string ServiceName = tbl.ClassName + "Service";
+    string ControllerName = tbl.ClassName + "Controller";
+    string ContextName = CurrentOutputContext.ProjectConfig.Name + "DbContext";
+    string NameSpace = CurrentOutputContext.ProjectConfig.NameSpace ;
+	string ServiceJsModuleName = tbl.ClassName+"Module";
+	string TableComment =  tbl.Comment;
+}
+/*
+// CreatedOn:@(DateTime.Now.ToString("yyyy-MM-dd HH:mm"))
+// Description:@(TableComment) 模块
+*/
+
+var @(ServiceJsModuleName) = function () {
+
+    //列表列设置
+    var CustomColumnModel = function () {
+        var __cols = [
+			{
+				name: 'ID',
+				index: 'ID',
+				hidden: true
+			},
+		@foreach (Column column in Model.Columns.Where(p=>p.PropertyName.ToUpper() != "ID" && p.PropertyName.ToUpper() != "CREATEUSERID" && p.PropertyName.ToUpper() != "CREATETIME" && p.PropertyName.ToUpper() != "UPDATEUSERID" && p.PropertyName.ToUpper() != "UPDATETIME" && p.PropertyName.ToUpper() != "REMARK" && p.PropertyName.ToUpper() != "SHOWORDER" && p.PropertyName.ToUpper() != "STATUSCODE"))
+		{
+			@:{
+			@:	index: '@column.PropertyName',name: '@column.PropertyName', label: '@column.Comment', align: 'center'
+			@:},
+		}
+			{
+				index: 'STATUSCODE',
+				name: 'STATUSCODE',
+				align: 'center',
+				label: '状态',
+				formatter: function (cellvalue, options, rowObject) {
+					if (cellvalue == "1") {
+						return "<span class='label label-success label-mini' onclick='@(ServiceJsModuleName).DataServer.ChangeStatus(\"" + rowObject.ID + "\")'>有效</span>";
+					}
+					else {
+						return "<span class='label label-warning label-mini' onclick='@(ServiceJsModuleName).DataServer.ChangeStatus(\"" + rowObject.ID + "\")'>无效</span>";
+					}
+
+				},
+				unformat: function (cellvalue, options, cell) {
+					if (cellvalue == "<span class='label label-success label-mini'>有效</span>") {
+						return "1";
+					}
+					else {
+						return "0";
+					}
+				}
+			},
+			{
+				label: '操作', width: 100, align: 'center',
+				formatter: function (cellvalue, options, rowObject) {
+
+
+					var a = "<button class='btn btn-primary btn-xs gridOptCol' onclick='@(ServiceJsModuleName).DataServer.Edit(\"" + rowObject.ID + "\")'><i class='fa fa-pencil'></i></button>";
+					var b = "&nbsp;<button class='btn btn-danger btn-xs gridOptCol' onclick='@(ServiceJsModuleName).DataServer.Delete(\"" + rowObject.ID + "\")'><i class='fa fa-trash-o'></i></button>";
+					
+					var c = "&nbsp;<button class='btn btn-default btn-xs gridOptCol' onclick='@(ServiceJsModuleName).DataServer.ViewDetail\"" + rowObject.ID + "\")'><i class='fa fa-search'></i></button>";
+					
+					
+
+					return a + b + c;
+				},
+			}
+        ];
+
+        return __cols;
+
+    }();
+
+    //初始化Grid方法
+    var __MainGrid = null;//初始化后的列表对象
+    var InitMainGrid = function (maingridId, maingridPagerId) {
+        //绑定到自定义拓展的Grid方法
+        MainGridInitializer.prototype = new Grid();
+        __MainGrid = new MainGridInitializer(maingridId, maingridPagerId);
+        __MainGrid.reload();//先刷新
+        __MainGrid.autoResize();//自适应
+        @(ServiceJsModuleName).MainGrid = __MainGrid; //注入MainGrid
+        return __MainGrid;
+    };
+
+    //列表初始化程序
+    var MainGridInitializer = function (maingridId, maingridPagerId) {
+        var url = @(ServiceJsModuleName).Config.Url_List;
+         
+        this.maingridDom = $(maingridId);// $('#maingrid');
+        var params = {};
+  
+        $.extend(params, jqGridModel, {
+			pager: maingridPagerId,
+            sortname: 'UPDATETIME',//默认的排序列名
+            sortorder: "desc",//默认的排序方式（asc升序，desc降序）
+            colModel: CustomColumnModel,
+            ondblClickRow: function (id) { //双击行
+                var rowObject = @(ServiceJsModuleName).MainGrid.getRowData(id);
+                @(ServiceJsModuleName).DataServer.DoubleRowClickAction(rowObject);
+            },
+            url: url
+        });
+
+        this.maingrid = this.maingridDom
+			.jqGrid(params).jqGrid('navGrid', maingridPagerId, // "#grid-pager", 
+			{
+			    edit: false, add: false, del: false, refresh: false, search: false
+			});
+
+        //刷新列表
+        this.reload = function (strParams) {
+            var url = @(ServiceJsModuleName).Config.Url_List;
+			var linkStr = url.indexOf("?") > -1 ? "&" : "?";
+            if (strParams) {
+                //
+                strParams =  strParams;
+            }
+            else {
+                var keywords = $("#txtKeyword").val();
+                strParams = "keyword=" + keywords;
+            }
+
+            this.maingrid.jqGrid("setGridParam", { url: url + linkStr + strParams })
+				.trigger("reloadGrid", [{ page: 1 }]);  //重载JQGrid
+        };
+    };
+
+
+    //配置
+    var Config = function () {
+        var __config = {
+			Url_List: SYS_CONTEXT.GV_CONFIG.APP_REALBASE_URL + '/@(ClassName)/GetList',
+			Url_Del: SYS_CONTEXT.GV_CONFIG.APP_REALBASE_URL + '/@(ClassName)/Del',
+			Url_Add: SYS_CONTEXT.GV_CONFIG.APP_REALBASE_URL + '/@(ClassName)/Add',
+			Url_Edit: SYS_CONTEXT.GV_CONFIG.APP_REALBASE_URL + '/@(ClassName)/Edit',
+			Url_BatchDel: SYS_CONTEXT.GV_CONFIG.APP_REALBASE_URL + '/@(ClassName)/BatchDel',
+			Url_ChangeStatus: SYS_CONTEXT.GV_CONFIG.APP_REALBASE_URL + '/@(ClassName)/ChangeStatus',
+			Url_ToExcel: SYS_CONTEXT.GV_CONFIG.APP_REALBASE_URL + '/@(ClassName)/ExportToExcel',
+			Url_Form: SYS_CONTEXT.GV_CONFIG.APP_REALBASE_URL + '/@(ClassName)/Form',
+			Url_Detail: SYS_CONTEXT.GV_CONFIG.APP_REALBASE_URL + '/@(ClassName)/Detail'
+        };
+
+        return __config;
+    }();
+
+
+    //通用服务方法
+    var Utils = (function ($, Config) {
+        var __Utils = {};
+        
+        var IsHighSearch = false;//是否高级查询
+        //高级查询弹出窗
+        __Utils.ShowHighSearchWin = function () {
+
+            ShowContent($(".divHighSearch"), "高级搜索", "60%", "60%", null, null);
+        };
+
+        //确认高级查询事件
+        __Utils.ConfirmHighSearch = function () {
+            IsHighSearch = true;
+            var serializeString = $("#winHighSearch").serialize();
+            //alert(serializeString);
+            __Utils.RefreshGrid(serializeString);
+            CloseCurrentDialog();
+
+            return false;
+        };
+        //关闭高级查询窗口
+        __Utils.CloseHighSearch = function () {
+            CloseCurrentDialog();
+            return false;
+        };
+
+        //普通简易查询
+        __Utils.ConfirmSimpleSearch = function () {
+            IsHighSearch = false;
+           __Utils.RefreshGrid();
+
+        };
+
+        //刷新列表
+        __Utils.RefreshGrid = function (strParams) {
+            @(ServiceJsModuleName).MainGrid.reload(strParams);
+
+        };
+
+        return __Utils;
+
+    })($, Config);
+
+    //业务数据操作服务
+    var DataServer = (function ($, Config) {
+        var __DataServer = {};
+
+        //双击行事件
+        __DataServer.DoubleRowClickAction = function (rowData) {
+            if (rowData) {
+                if (rowData.SUBMITSTATUS == 1) {
+					__DataServer.ViewDetail(rowData.ID);
+                }
+                else {
+                    __DataServer.Edit(rowData.ID);
+                }
+            }
+            return false;
+        };
+
+        //查看详情
+        __DataServer.ViewDetail = function (ID) {
+            var GV_URL_VIEWURL = Config.Url_Detail + "?ID=" + ID + "&InAudit=true";
+            var title = "查看详情";
+            ShowDialog(GV_URL_VIEWURL, title, '90%', '90%');
+            return false;
+        };
+		
+		//新增事件
+        __DataServer.Add = function () {
+			var showUrl = Config.Url_Form; 
+			var title='新增';
+			ShowDialog(showUrl, title, '90%', '90%', function () {
+                Utils.RefreshGrid();
+            });
+            return false;
+        };
+		
+        //编辑事件
+        __DataServer.Edit = function (ID) {
+            if (ID) {
+				var showUrl = Config.Url_Form + '?ID=' + ID;
+				var title='编辑';
+				ShowDialog(showUrl, title, '90%', '90%', function () {
+					Utils.RefreshGrid();
+				});
+            }
+            return false;
+        };
+		
+		//删除事件
+        __DataServer.Delete = function (ID) {
+            ShowConfirm('提示', '你确定要删除当前行数据吗？',
+            function (index) {//yes
+                 
+                if (ID) {
+                    $.ajax({
+                        type: "POST",
+                        url: Config.Url_Del,
+                        data: { ID: ID },
+                        cache: false,
+                        dataType: 'json',
+                        success: function (result) {
+                            if (result.Status == 1) {
+                                ShowAlert("提示", result.Message, result.Status);
+                                Utils.RefreshGrid();
+                            }
+                            else {
+                                ShowAlert("提示", result.Message, result.Status);
+                            }
+                        }
+                    });
+                }
+            },
+            function (index) {//no
+                //alert("no");
+            }
+            );
+            return false;
+        };
+		
+        //批量删除事件
+        __DataServer.DeleteBatch = function () {
+            ShowConfirm('提示', '你确定要批量删除选中行数据吗？',
+            function (index) {//yes
+
+                var rows = @(ServiceJsModuleName).MainGrid.getSelectedMany();
+                if (rows) {
+                    var removeArray = [];
+                    for (var i = 0; i < rows.length; i++) {
+                        removeArray.push(rows[i].ID);
+                    }
+					if(removeArray.length > 0)
+					{
+						$.ajax({
+							type: "POST",
+							url: Config.Url_BatchDel,
+							data: { IDS: removeArray.toString() },
+							cache: false,
+							dataType: 'json',
+							success: function (result) {
+								if (result.Status == 1) {
+									ShowAlert("提示", result.Message, result.Status);
+									Utils.RefreshGrid();
+								}
+								else {
+									ShowAlert("提示", result.Message, result.Status);
+								}
+							}
+						});
+					
+					}
+				
+                }
+            },
+            function (index) {//no
+                //alert("no");
+            }
+            );
+            return false;
+        };
+
+		//变更状态
+        __DataServer.ChangeStatus = function (ID) {
+            if (ID) {
+                $.ajax({
+                    type: "POST",
+                    url: Config.Url_ChangeStatus,
+                    data: { ID: ID },
+                    cache: false,
+                    dataType: 'json',
+                    success: function (result) {
+                        if (result.Status == 1) {
+                            ShowAlert("提示", result.Message, result.Status);
+                            Utils.RefreshGrid();
+                        }
+                        else {
+                            ShowAlert("提示", result.Message, result.Status);
+
+                        }
+                    }
+                });
+            }
+
+            return false;
+
+        };
+        //导出Excel
+        __DataServer.ExportGrid = function (exportType) {
+            @(ServiceJsModuleName).MainGrid.exportGrid("@(TableName)", "ID", "", "导出数据列表");
+            return false;
+        };
+
+        //打印表格
+        __DataServer.PrintGrid = function () {
+            @(ServiceJsModuleName).MainGrid.printGrid();
+            return false;
+
+        };
+
+
+        return __DataServer;
+
+    })($, Config);
+
+
+    return {
+        Config: Config,
+        DataServer: DataServer,
+        Utils: Utils,
+        CustomColumnModel: CustomColumnModel,
+        InitMainGrid: InitMainGrid,
+        MainGrid: __MainGrid
+    };
+
+}();
+
+

@@ -36,7 +36,11 @@ namespace Pure.Data.Gen
 
             return ParserConfig.TemplateRootDir;// AppDomain.CurrentDomain.BaseDirectory;
         }
+        public static string CombinePathWithAppDirectory(string path)
+        {
 
+            return PathHelper.CombineWithBaseDirectory( path);
+        }
         public static string GetDataDirectory()
         {
             string dataFilePath = System.IO.Path.Combine(GetAppDirectory(), RootBaseDirectoryName);
@@ -119,6 +123,8 @@ namespace Pure.Data.Gen
                 result = result.Replace("{%ProjectName%}", config.Name);
                 result = result.Replace("{%TemplateName%}", template.Name);
                 result = result.Replace("{%ObjectName%}", tableName);
+                //result = result.Replace("{%BoilerplatPath%}", tableName);
+                //result = result.Replace("{%ProjectOutputPath%}", tableName);
             }
             return result;
         }
