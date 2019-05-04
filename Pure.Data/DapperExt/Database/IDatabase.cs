@@ -44,23 +44,25 @@ namespace Pure.Data
         void RollbackTransaction();
         void RunInTransaction(Action action);
         T RunInTransaction<T>(Func<T> func);
-        T Get<T>(dynamic id, IDbTransaction transaction, int? commandTimeout = null) where T : class;
+        T Get<T>(dynamic id, IDbTransaction transaction = null, int? commandTimeout = null) where T : class;
         T Get<T>(dynamic id, int? commandTimeout = null) where T : class;
-        void InsertBulk<T>(IEnumerable<T> entities, IDbTransaction transaction, int? commandTimeout = null) where T : class;
-        void InsertBulk<T>(IEnumerable<T> entities, int? commandTimeout = null) where T : class;
-        int InsertBatch<T>(IEnumerable<T> entities, BatchOptions options = null, int? commandTimeout = null) where T : class;
-        int InsertBatch<T>(IEnumerable<T> entities, IDbTransaction transaction, BatchOptions options = null, int? commandTimeout = null) where T : class;
-        dynamic Insert<T>(T entity, IDbTransaction transaction, int? commandTimeout = null) where T : class;
+        void InsertBulk<T>(DataTable dt, IDbTransaction transaction = null, int? commandTimeout = null) where T : class;
+        void InsertBulk<T>(IEnumerable<T> entities, IDbTransaction transaction = null, int? commandTimeout = null) where T : class;
+        //void InsertBulk<T>(IEnumerable<T> entities, IDbTransaction transaction = null, int? commandTimeout = null) where T : class;
+        //void InsertBulk<T>(IEnumerable<T> entities, int? commandTimeout = null) where T : class;
+       int InsertBatch<T>(IEnumerable<T> entities, BatchOptions options = null, int? commandTimeout = null) where T : class;
+        int InsertBatch<T>(IEnumerable<T> entities, IDbTransaction transaction = null, BatchOptions options = null, int? commandTimeout = null) where T : class;
+        dynamic Insert<T>(T entity, IDbTransaction transaction = null, int? commandTimeout = null) where T : class;
         dynamic Insert<T>(T entity, int? commandTimeout = null) where T : class;
         int InsertByKV<T>(IDictionary<string, object> parameters) where T : class;
-        bool Update<T>(T entity, IDbTransaction transaction, int? commandTimeout = null) where T : class;
+        bool Update<T>(T entity, IDbTransaction transaction = null, int? commandTimeout = null) where T : class;
         bool Update<T>(T entity, int? commandTimeout = null) where T : class;
 
         int UpdateByKV<T>(IDictionary<string, object> parameters, IDictionary<string, object> conditions) where T : class;
         int UpdateBySQL(string sql, object parameters, IDbTransaction transaction = null, int? commandTimeout = null);
-        bool Delete<T>(T entity, IDbTransaction transaction, int? commandTimeout = null) where T : class;
+        bool Delete<T>(T entity, IDbTransaction transaction = null, int? commandTimeout = null) where T : class;
         bool Delete<T>(T entity, int? commandTimeout = null) where T : class;
-        bool Delete<T>(object predicate, IDbTransaction transaction, int? commandTimeout = null) where T : class;
+        bool Delete<T>(object predicate, IDbTransaction transaction = null, int? commandTimeout = null) where T : class;
         bool Delete<T>(object predicate, int? commandTimeout = null) where T : class;
         int DeleteByKV<T>(IDictionary<string, object> conditions) where T : class;
         bool DeleteById<T>(dynamic id, IDbTransaction transaction = null, int? commandTimeout = null) where T : class;
@@ -69,19 +71,19 @@ namespace Pure.Data
         int Truncate<T>(IDbTransaction transaction = null, int? commandTimeout = null) where T : class;
 
         IDataReader QueryByKV<T>(string[] columns, IDictionary<string, object> conditions, IList<ISort> sort) where T : class;
-        IEnumerable<T> Query<T>(object predicate, IList<ISort> sort, IDbTransaction transaction, int? commandTimeout = null, bool buffered = true) where T : class;
+        IEnumerable<T> Query<T>(object predicate, IList<ISort> sort, IDbTransaction transaction = null, int? commandTimeout = null, bool buffered = true) where T : class;
         IEnumerable<T> Query<T>(object predicate = null, IList<ISort> sort = null, int? commandTimeout = null, bool buffered = true) where T : class;
-        IEnumerable<T> GetPage<T>(int pageIndex, int pagesize, object predicate, IList<ISort> sort, out int totalCount, IDbTransaction transaction, int? commandTimeout = null, bool buffered = true) where T : class;
+        IEnumerable<T> GetPage<T>(int pageIndex, int pagesize, object predicate, IList<ISort> sort, out int totalCount, IDbTransaction transaction = null, int? commandTimeout = null, bool buffered = true) where T : class;
         IEnumerable<T> GetPage<T>(int pageIndex, int pagesize, object predicate, IList<ISort> sort, out int totalCount, int? commandTimeout = null, bool buffered = true) where T : class;
         IEnumerable<T> GetPage<T>(int pageIndex, int pagesize, out long allRowsCount, string sql, dynamic param = null, string allRowsCountSql = null, IDbTransaction transaction = null, int? commandTimeout = null, bool buffered = false) where T : class;
         IDataReader GetPageReader<T>(int pageIndex, int pagesize, object predicate, IList<ISort> sort, out int totalCount, IDbTransaction transaction = null, int? commandTimeout = null) where T : class;
 
-        PageDataResult<IEnumerable<T>> GetPage<T>(int pageIndex, int pagesize, object predicate, IList<ISort> sort, IDbTransaction transaction, int? commandTimeout, bool buffered) where T : class;
+        PageDataResult<IEnumerable<T>> GetPage<T>(int pageIndex, int pagesize, object predicate, IList<ISort> sort, IDbTransaction transaction = null, int? commandTimeout = null, bool buffered=true) where T : class;
         PageDataResult<IEnumerable<T>> GetPage<T>(int pageIndex, int pagesize, string sql, dynamic param = null, string allRowsCountSql = null, IDbTransaction transaction = null, int? commandTimeout = null, bool buffered = false) where T : class;
         PageDataResult<IDataReader> GetPageReader<T>(int pageIndex, int pagesize, object predicate, IList<ISort> sort, IDbTransaction transaction = null, int? commandTimeout = null) where T : class;
-        IEnumerable<T> GetSet<T>(int pageIndex, int pagesize, object predicate, IList<ISort> sort,  IDbTransaction transaction, int? commandTimeout, bool buffered) where T : class;
-        IEnumerable<T> GetSet<T>(int pageIndex, int pagesize, object predicate, IList<ISort> sort,  int? commandTimeout, bool buffered) where T : class;
-        int Count<T>(object predicate, IDbTransaction transaction, int? commandTimeout = null) where T : class;
+        IEnumerable<T> GetSet<T>(int pageIndex, int pagesize, object predicate, IList<ISort> sort,  IDbTransaction transaction = null, int? commandTimeout = null, bool buffered=true) where T : class;
+        IEnumerable<T> GetSet<T>(int pageIndex, int pagesize, object predicate, IList<ISort> sort,  int? commandTimeout = null, bool buffered = true) where T : class;
+        int Count<T>(object predicate, IDbTransaction transaction = null, int? commandTimeout = null) where T : class;
         int Count<T>(object predicate, int? commandTimeout = null) where T : class;
         int Count<T>() where T : class;
 
@@ -89,10 +91,10 @@ namespace Pure.Data
         long LongCountByKV<T>(IDictionary<string, object> conditions) where T : class;
 
         long LongCount<T>() where T : class;
-        long LongCount<T>(object predicate, IDbTransaction transaction, int? commandTimeout = null) where T : class;
+        long LongCount<T>(object predicate, IDbTransaction transaction = null, int? commandTimeout = null) where T : class;
         long LongCount<T>(object predicate, int? commandTimeout = null) where T : class;
         IMultipleResultReader GetMultiple(string sql, object param = null, IDbTransaction transaction = null, int? commandTimeout = null, CommandType? commandType = null);
-        IMultipleResultReader GetMultiple(GetMultiplePredicate predicate, IDbTransaction transaction, int? commandTimeout = null);
+        IMultipleResultReader GetMultiple(GetMultiplePredicate predicate, IDbTransaction transaction = null, int? commandTimeout = null);
         IMultipleResultReader GetMultiple(GetMultiplePredicate predicate, int? commandTimeout = null);
         bool Exists<T>(object predicate) where T : class;
         void ClearMap();

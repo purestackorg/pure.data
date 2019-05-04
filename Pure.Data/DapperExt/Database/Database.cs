@@ -873,7 +873,7 @@ namespace Pure.Data
 
             return DapperImplementor.GetList<TEntity>(Connection, null, null, _transaction, null, true);
         }
-        public T Get<T>(dynamic id, IDbTransaction transaction, int? commandTimeout = null) where T : class
+        public T Get<T>(dynamic id, IDbTransaction transaction = null, int? commandTimeout = null) where T : class
         {
             return (T)DapperImplementor.Get<T>(Connection, id, transaction, commandTimeout);
         }
@@ -884,12 +884,12 @@ namespace Pure.Data
         }
 
 
-        public IEnumerable<T> Query<T>(object predicate, IList<ISort> sort, IDbTransaction transaction, int? commandTimeout, bool buffered) where T : class
+        public IEnumerable<T> Query<T>(object predicate, IList<ISort> sort, IDbTransaction transaction = null, int? commandTimeout = null, bool buffered = true) where T : class
         {
             return DapperImplementor.GetList<T>(Connection, predicate, sort, transaction, commandTimeout, buffered);
         }
 
-        public IEnumerable<T> Query<T>(object predicate, IList<ISort> sort, int? commandTimeout, bool buffered) where T : class
+        public IEnumerable<T> Query<T>(object predicate, IList<ISort> sort, int? commandTimeout = null, bool buffered = true) where T : class
         {
             return DapperImplementor.GetList<T>(Connection, predicate, sort, _transaction, commandTimeout, buffered);
         }
@@ -927,23 +927,23 @@ namespace Pure.Data
         {
             return DapperImplementor.CountLong<T>(Connection, null, Transaction, Config.ExecuteTimeout);
         }
-        public int Count<T>(object predicate, IDbTransaction transaction, int? commandTimeout) where T : class
+        public int Count<T>(object predicate, IDbTransaction transaction = null, int? commandTimeout = null) where T : class
         {
             return DapperImplementor.Count<T>(Connection, predicate, transaction, commandTimeout);
         }
 
-        public int Count<T>(object predicate, int? commandTimeout) where T : class
+        public int Count<T>(object predicate, int? commandTimeout = null) where T : class
         {
             return DapperImplementor.Count<T>(Connection, predicate, _transaction, commandTimeout);
         }
 
 
-        public long LongCount<T>(object predicate, IDbTransaction transaction, int? commandTimeout) where T : class
+        public long LongCount<T>(object predicate, IDbTransaction transaction = null, int? commandTimeout = null) where T : class
         {
             return DapperImplementor.CountLong<T>(Connection, predicate, transaction, commandTimeout);
         }
 
-        public long LongCount<T>(object predicate, int? commandTimeout) where T : class
+        public long LongCount<T>(object predicate, int? commandTimeout = null) where T : class
         {
             return DapperImplementor.CountLong<T>(Connection, predicate, _transaction, commandTimeout);
         }
@@ -1046,44 +1046,44 @@ namespace Pure.Data
             return data;
 
         }
-        public IEnumerable<T> GetSet<T>(int pageIndex, int pagesize, object predicate, IList<ISort> sort, IDbTransaction transaction, int? commandTimeout, bool buffered) where T : class
+        public IEnumerable<T> GetSet<T>(int pageIndex, int pagesize, object predicate, IList<ISort> sort, IDbTransaction transaction = null, int? commandTimeout = null, bool buffered = true) where T : class
         {
             pagesize = pagesize == 0 ? Config.DefaultPageSize : pagesize;
             return DapperImplementor.GetSet<T>(Connection, predicate, sort, pageIndex, pagesize, transaction, commandTimeout, buffered);
         }
 
-        public IEnumerable<T> GetSet<T>(int pageIndex, int pagesize, object predicate, IList<ISort> sort, int? commandTimeout, bool buffered) where T : class
+        public IEnumerable<T> GetSet<T>(int pageIndex, int pagesize, object predicate, IList<ISort> sort, int? commandTimeout = null, bool buffered = true) where T : class
         {
             pagesize = pagesize == 0 ? Config.DefaultPageSize : pagesize;
             return DapperImplementor.GetSet<T>(Connection, predicate, sort, pageIndex, pagesize, _transaction, commandTimeout, buffered);
         }
-        public IEnumerable<T> GetPage<T>(int pageIndex, int pagesize, object predicate, IList<ISort> sort, out int totalCount, IDbTransaction transaction, int? commandTimeout, bool buffered) where T : class
+        public IEnumerable<T> GetPage<T>(int pageIndex, int pagesize, object predicate, IList<ISort> sort, out int totalCount, IDbTransaction transaction = null, int? commandTimeout = null, bool buffered = true) where T : class
         {
             pagesize = pagesize == 0 ? Config.DefaultPageSize : pagesize;
 
             return DapperImplementor.GetPage<T>(Connection, predicate, sort, pageIndex, pagesize, out totalCount, transaction, commandTimeout, buffered);
         }
-        public PageDataResult<IEnumerable<T>> GetPage<T>(int pageIndex, int pagesize, object predicate, IList<ISort> sort, IDbTransaction transaction, int? commandTimeout, bool buffered) where T : class
+        public PageDataResult<IEnumerable<T>> GetPage<T>(int pageIndex, int pagesize, object predicate, IList<ISort> sort, IDbTransaction transaction = null, int? commandTimeout = null, bool buffered = true) where T : class
         {
             pagesize = pagesize == 0 ? Config.DefaultPageSize : pagesize;
 
             return DapperImplementor.GetPage<T>(Connection, predicate, sort, pageIndex, pagesize,   transaction, commandTimeout, buffered);
         }
-        public IEnumerable<T> GetPage<T>(int pageIndex, int pagesize, object predicate, IList<ISort> sort, out int totalCount, int? commandTimeout, bool buffered) where T : class
+        public IEnumerable<T> GetPage<T>(int pageIndex, int pagesize, object predicate, IList<ISort> sort, out int totalCount, int? commandTimeout = null, bool buffered = true) where T : class
         {
             pagesize = pagesize == 0 ? Config.DefaultPageSize : pagesize;
 
             return DapperImplementor.GetPage<T>(Connection, predicate, sort, pageIndex, pagesize, out totalCount, _transaction, commandTimeout, buffered);
         }
 
-        public IEnumerable<T> GetPage<T>(int pageIndex, int pagesize, out long allRowsCount, string sql, dynamic param = null, string allRowsCountSql = null, IDbTransaction transaction = null, int? commandTimeout = null, bool buffered = false) where T : class
+        public IEnumerable<T> GetPage<T>(int pageIndex, int pagesize, out long allRowsCount, string sql, dynamic param = null, string allRowsCountSql = null, IDbTransaction transaction = null, int? commandTimeout = null, bool buffered = true) where T : class
         {
             pagesize = pagesize == 0 ? Config.DefaultPageSize : pagesize;
             transaction = transaction == null ? _transaction : transaction;
 
             return DapperImplementor.GetPage<T>(Connection, pageIndex,  pagesize, out allRowsCount,  sql,  param ,  allRowsCountSql ,  transaction ,  commandTimeout ,  buffered );
         }
-        public PageDataResult<IEnumerable<T>> GetPage<T>(int pageIndex, int pagesize,   string sql, dynamic param = null, string allRowsCountSql = null, IDbTransaction transaction = null, int? commandTimeout = null, bool buffered = false) where T : class
+        public PageDataResult<IEnumerable<T>> GetPage<T>(int pageIndex, int pagesize,   string sql, dynamic param = null, string allRowsCountSql = null, IDbTransaction transaction = null, int? commandTimeout = null, bool buffered = true) where T : class
         {
             pagesize = pagesize == 0 ? Config.DefaultPageSize : pagesize;
             transaction = transaction == null ? _transaction : transaction;
@@ -1122,39 +1122,38 @@ namespace Pure.Data
         #endregion
 
         #region Insert
-        public void InsertBulk<T>(IEnumerable<T> entities, IDbTransaction transaction, int? commandTimeout) where T : class
+        public void InsertBulk<T>(DataTable dt, IDbTransaction transaction = null, int? commandTimeout = null) where T : class
         {
-            if (!OnInsertingInternal(new InsertContext(entities)))
-                return;
-            if (SqlGenerator.Configuration.Dialect.databaseType == Data.DatabaseType.SqlServer)
-            {
-                SqlServerBatcher batch = new SqlServerBatcher();
-                batch.Insert(this, transaction, entities, GetMap<T>().TableName);
-            }
-            else
-            {
-                DapperImplementor.Insert<T>(Connection, entities, transaction, commandTimeout);
-
-            }
+            BulkOperateManage.Instance.Get(this.Config.BulkOperateClassName).Insert(this, dt); 
         }
-
-        public void InsertBulk<T>(IEnumerable<T> entities, int? commandTimeout) where T : class
+        public void InsertBulk<T>(IEnumerable<T> entities, IDbTransaction transaction = null, int? commandTimeout = null) where T : class
         {
-            if (!OnInsertingInternal(new InsertContext(entities)))
-                return;
-            if (SqlGenerator.Configuration.Dialect.databaseType == Data.DatabaseType.SqlServer)
-            {
-                SqlServerBatcher batch = new SqlServerBatcher();
-                batch.Insert(this, null, entities, GetMap<T>().TableName);
-            }
-            else
-            {
-                DapperImplementor.Insert<T>(Connection, entities, _transaction, commandTimeout);
-
-            }
-
+            BulkOperateManage.Instance.Get(this.Config.BulkOperateClassName).Insert(this, entities);
         }
-        public int InsertBatch<T>(IEnumerable<T> entities, IDbTransaction transaction, BatchOptions options = null, int? commandTimeout = null) where T : class
+        //public void InsertBulk<T>(IEnumerable<T> entities, IDbTransaction transaction = null, int? commandTimeout = null) where T : class
+        //{
+        //    if (!OnInsertingInternal(new InsertContext(entities)))
+        //        return;
+        //    if (SqlGenerator.Configuration.Dialect.databaseType == Data.DatabaseType.SqlServer)
+        //    {
+        //        SqlServerBatcher batch = new SqlServerBatcher();
+        //        batch.Insert(this, transaction, entities, GetMap<T>().TableName);
+        //    }
+        //    else
+        //    {
+        //        DapperImplementor.Insert<T>(Connection, entities, transaction, commandTimeout);
+
+        //    }
+             
+        //}
+
+        //public void InsertBulk<T>(IEnumerable<T> entities, int? commandTimeout = null) where T : class
+        //{
+
+        //    InsertBulk<T>(entities,  null, commandTimeout);
+            
+        //}
+        public int InsertBatch<T>(IEnumerable<T> entities, IDbTransaction transaction = null, BatchOptions options = null, int? commandTimeout = null) where T : class
         {
             if (!OnInsertingInternal(new InsertContext(entities)))
                 return 0;
@@ -1191,11 +1190,11 @@ namespace Pure.Data
 
         public int InsertBatch<T>(IEnumerable<T> entities, BatchOptions options = null, int? commandTimeout = null) where T : class
         {
-            if (!OnInsertingInternal(new InsertContext(entities)))
-                return 0;
+            //if (!OnInsertingInternal(new InsertContext(entities)))
+            //    return 0;
             return InsertBatch<T>(entities, null, options);
         }
-        public dynamic Insert<T>(T entity, IDbTransaction transaction, int? commandTimeout) where T : class
+        public dynamic Insert<T>(T entity, IDbTransaction transaction = null, int? commandTimeout = null) where T : class
         {
             if (!OnInsertingInternal(new InsertContext(entity)))
                 return 0;
@@ -1221,7 +1220,7 @@ namespace Pure.Data
         #endregion
 
         #region Update
-        public bool Update<T>(T entity, IDbTransaction transaction, int? commandTimeout) where T : class
+        public bool Update<T>(T entity, IDbTransaction transaction = null, int? commandTimeout = null) where T : class
         {
             if (!OnUpdatingInternal(new UpdateContext(entity)))
                 return false;
@@ -1254,7 +1253,7 @@ namespace Pure.Data
         #endregion
 
         #region Delete
-        public bool Delete<T>(T entity, IDbTransaction transaction, int? commandTimeout=null) where T : class
+        public bool Delete<T>(T entity, IDbTransaction transaction = null, int? commandTimeout=null) where T : class
         {
             if (!OnDeletingInternal(new DeleteContext(entity)))
                 return false;
@@ -1268,7 +1267,7 @@ namespace Pure.Data
             return DapperImplementor.Delete(Connection, entity, _transaction, commandTimeout);
         }
 
-        public bool Delete<T>(object predicate, IDbTransaction transaction, int? commandTimeout) where T : class
+        public bool Delete<T>(object predicate, IDbTransaction transaction = null, int? commandTimeout = null) where T : class
         {
             if (!OnDeletingInternal(new DeleteContext(predicate)))
                 return false;

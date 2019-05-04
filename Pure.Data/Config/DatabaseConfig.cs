@@ -757,6 +757,10 @@ namespace Pure.Data
         public List<CodeGenTemplate> CodeGenTemplates { get { return _CodeGenTemplates; }set { _CodeGenTemplates = value; } }
         #endregion
 
+        /// <summary>
+        /// 批量处理器
+        /// </summary>
+        public string BulkOperateClassName { get; set; }
 
         public override string ToString()
         {
@@ -771,6 +775,7 @@ namespace Pure.Data
                     LoadMapperMode=" + LoadMapperMode + @"
                     EnableLobConverter=" + EnableLobConverter + @"
                     LobConverterClassName=" + LobConverterClassName + @"
+                    BulkOperateClassName=" + BulkOperateClassName + @"
     
                     EnableDebug=" + EnableDebug + @"
                     EnableIntercept=" + EnableIntercept + @"

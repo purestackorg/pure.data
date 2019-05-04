@@ -615,7 +615,8 @@ namespace Pure.Data
 
                 foreach (PropertyDescriptor prop in properties)
                 {
-                    row[prop.Name] = prop.GetValue(item);
+                    object val = prop.GetValue(item);
+                    row[prop.Name] = val == null ? DBNull.Value : val;//  prop.GetValue(item);
                 }
 
                 table.Rows.Add(row);
@@ -696,13 +697,15 @@ namespace Pure.Data
 
                 foreach (PropertyInfo property in properties)
                 {
-                    dr[property.Name] = property.GetValue(item, null) == null ? DBNull.Value : property.GetValue(item, null); //property.GetValue(item, null);
+                    object val = property.GetValue(item, null);
+                    dr[property.Name] = val == null ? DBNull.Value : val; //property.GetValue(item, null);
 
                 }
 
                 foreach (FieldInfo field in fields)
                 {
-                    dr[field.Name] = field.GetValue(item);
+                    object val = field.GetValue(item);
+                    dr[field.Name] = val == null ? DBNull.Value : val;// field.GetValue(item);
                 }
 
                 dt.Rows.Add(dr);

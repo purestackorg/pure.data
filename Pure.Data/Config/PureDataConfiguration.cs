@@ -693,7 +693,17 @@ namespace Pure.Data
             set { _LobConverterClassName = value; }
         }
 
-
+        private string _BulkOperateClassName = "";
+        /// <summary>
+        ///  批量处理器接口实现类
+        /// </summary>
+        /// 
+        [XmlAttribute]
+        public string BulkOperateClassName
+        {
+            get { return _BulkOperateClassName; }
+            set { _BulkOperateClassName = value; }
+        }
         #region CodeGen Setting
         private bool _EnableCodeGen = false;
 

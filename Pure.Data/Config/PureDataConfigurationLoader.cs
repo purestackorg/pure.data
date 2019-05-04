@@ -365,10 +365,11 @@ namespace Pure.Data
                     databaseConfig.LobConverterClassName = settings.LobConverterClassName;
                     if (databaseConfig.EnableLobConverter == true)
                     {
-                        Type type = Type.GetType(databaseConfig.LobConverterClassName);
 
                         try
                         {
+                            Type type = Type.GetType(databaseConfig.LobConverterClassName);
+
                             if (type != null)
                             {
                                 object obj = Activator.CreateInstance(type, true);
@@ -386,6 +387,36 @@ namespace Pure.Data
                             Log("没有找到相关ILobParameterConverter实现类,LobConverterClassName: " + databaseConfig.LobConverterClassName, new ArgumentException("没有找到相关ILobParameterConverter实现类,LobConverterClassName: " + databaseConfig.LobConverterClassName), MessageType.Error);
 
                             throw new ArgumentException("没有找到相关ILobParameterConverter实现类,LobConverterClassName: " + databaseConfig.LobConverterClassName, ex);
+
+                        }
+
+                    }
+                    databaseConfig.BulkOperateClassName = settings.BulkOperateClassName;
+
+                    if (!string.IsNullOrEmpty(settings.BulkOperateClassName))
+                    {
+
+                        try
+                        {
+                            Type type = Type.GetType(settings.BulkOperateClassName);
+
+                            if (type != null)
+                            {
+                                IBulkOperate obj = (IBulkOperate)Activator.CreateInstance(type, true);
+                                BulkOperateManage.Instance.Register(settings.BulkOperateClassName, obj);
+                                 
+                            }
+                            else
+                            {
+                                Log("没有找到相关IBulkOperate实现类,BulkOperateClassName: " + settings.BulkOperateClassName, new ArgumentException("没有找到相关IBulkOperate实现类,BulkOperateClassName: " + settings.BulkOperateClassName), MessageType.Error);
+
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            Log("没有找到相关IBulkOperate实现类,BulkOperateClassName: " + settings.BulkOperateClassName, new ArgumentException("没有找到相关IBulkOperate实现类,BulkOperateClassName: " + settings.BulkOperateClassName), MessageType.Error);
+
+                            throw new ArgumentException("没有找到相关IBulkOperate实现类,BulkOperateClassName: " + settings.BulkOperateClassName, ex);
 
                         }
 

@@ -360,5 +360,10 @@ namespace Pure.Data
         /// </summary>
         List<CodeGenTemplate> CodeGenTemplates { get; set; }
         #endregion
+
+        /// <summary>
+        /// 批量处理器
+        /// </summary>
+        string BulkOperateClassName { get; set; }
     }
 }
