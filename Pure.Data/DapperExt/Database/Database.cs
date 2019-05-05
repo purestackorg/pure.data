@@ -873,7 +873,7 @@ namespace Pure.Data
 
             return DapperImplementor.GetList<TEntity>(Connection, null, null, _transaction, null, true);
         }
-        public T Get<T>(dynamic id, IDbTransaction transaction = null, int? commandTimeout = null) where T : class
+        public T Get<T>(dynamic id, IDbTransaction transaction, int? commandTimeout = null) where T : class
         {
             return (T)DapperImplementor.Get<T>(Connection, id, transaction, commandTimeout);
         }
@@ -1057,7 +1057,7 @@ namespace Pure.Data
             pagesize = pagesize == 0 ? Config.DefaultPageSize : pagesize;
             return DapperImplementor.GetSet<T>(Connection, predicate, sort, pageIndex, pagesize, _transaction, commandTimeout, buffered);
         }
-        public IEnumerable<T> GetPage<T>(int pageIndex, int pagesize, object predicate, IList<ISort> sort, out int totalCount, IDbTransaction transaction = null, int? commandTimeout = null, bool buffered = true) where T : class
+        public IEnumerable<T> GetPage<T>(int pageIndex, int pagesize, object predicate, IList<ISort> sort, out int totalCount, IDbTransaction transaction, int? commandTimeout = null, bool buffered = true) where T : class
         {
             pagesize = pagesize == 0 ? Config.DefaultPageSize : pagesize;
 
@@ -1122,7 +1122,7 @@ namespace Pure.Data
         #endregion
 
         #region Insert
-        public void InsertBulk<T>(DataTable dt, IDbTransaction transaction = null, int? commandTimeout = null) where T : class
+        public void InsertBulk(DataTable dt, IDbTransaction transaction = null, int? commandTimeout = null)
         {
             BulkOperateManage.Instance.Get(this.Config.BulkOperateClassName).Insert(this, dt); 
         }
@@ -1144,57 +1144,67 @@ namespace Pure.Data
         //        DapperImplementor.Insert<T>(Connection, entities, transaction, commandTimeout);
 
         //    }
-             
+
         //}
 
         //public void InsertBulk<T>(IEnumerable<T> entities, int? commandTimeout = null) where T : class
         //{
 
         //    InsertBulk<T>(entities,  null, commandTimeout);
-            
+
         //}
-        public int InsertBatch<T>(IEnumerable<T> entities, IDbTransaction transaction = null, BatchOptions options = null, int? commandTimeout = null) where T : class
+        public void InsertBatch(DataTable dt, int batchSize = 10000)  
+        {
+          //  options = options ?? new BatchOptions();
+
+            BulkOperateManage.Instance.Get(this.Config.BulkOperateClassName).InsertBatch(this, dt,batchSize);
+
+        }
+        public void InsertBatch<T>(IEnumerable<T> entities, IDbTransaction transaction = null,  int batchSize = 10000, int? commandTimeout = null) where T : class
         {
             if (!OnInsertingInternal(new InsertContext(entities)))
-                return 0;
+                return ;
 
-            options = options ?? new BatchOptions();
+            //options = options ?? new BatchOptions();
 
-            System.Text.StringBuilder sb = new System.Text.StringBuilder();
-            string sql = "";
-            int result = 0;
-            object p = null;
-            foreach (var chunks in entities.Chunkify(options.BatchSize))
-            {
-                sb.Clear();
-                //var preparedInserts = chunks.Select(x => new { sql = (_dapper.PrepareInsertStament(x, out p)), parameters = p }).ToArray();
-                var preparedInserts = chunks.Select(x => DapperImplementor.PrepareInsertStament(x, out p)).ToArray();
+            BulkOperateManage.Instance.Get(this.Config.BulkOperateClassName).InsertBatch<T>(this, entities, batchSize);
 
-                //var preparedInserts = chunks.Select(x => new { sql = ExpressionSqlBuilder.Insert<T>(() => new { x }).ToSqlString() }).ToArray();
 
-                foreach (var preparedInsertSql in preparedInserts)
-                {
-                    sb.Append(preparedInsertSql);
-                    sb.Append(options.StatementSeperator);
-                }
-                sql = sb.ToString();
-                if (!string.IsNullOrEmpty(sql))
-                {
-                    result += this.Execute(sql, null, transaction);
-                }
-                //  InsertBulk<T>(chunks.AsEnumerable(), transaction, null);
+            //System.Text.StringBuilder sb = new System.Text.StringBuilder();
+            //string sql = "";
+            //int result = 0;
+            //object p = null;
+            //foreach (var chunks in entities.Chunkify(options.BatchSize))
+            //{
+            //    sb.Clear();
+            //    //var preparedInserts = chunks.Select(x => new { sql = (_dapper.PrepareInsertStament(x, out p)), parameters = p }).ToArray();
+            //    var preparedInserts = chunks.Select(x => DapperImplementor.PrepareInsertStament(x, out p)).ToArray();
 
-            }
-            return result;
+            //    //var preparedInserts = chunks.Select(x => new { sql = ExpressionSqlBuilder.Insert<T>(() => new { x }).ToSqlString() }).ToArray();
+
+            //    foreach (var preparedInsertSql in preparedInserts)
+            //    {
+            //        sb.Append(preparedInsertSql);
+            //        sb.Append(options.StatementSeperator);
+            //    }
+            //    sql = sb.ToString();
+            //    if (!string.IsNullOrEmpty(sql))
+            //    {
+            //        result += this.Execute(sql, null, transaction);
+            //    }
+            //    //  InsertBulk<T>(chunks.AsEnumerable(), transaction, null);
+
+            //}
+            //return result;
         }
 
-        public int InsertBatch<T>(IEnumerable<T> entities, BatchOptions options = null, int? commandTimeout = null) where T : class
+        public void InsertBatch<T>(IEnumerable<T> entities, int batchSize = 10000, int? commandTimeout = null) where T : class
         {
             //if (!OnInsertingInternal(new InsertContext(entities)))
             //    return 0;
-            return InsertBatch<T>(entities, null, options);
+             InsertBatch<T>(entities, null, batchSize);
         }
-        public dynamic Insert<T>(T entity, IDbTransaction transaction = null, int? commandTimeout = null) where T : class
+        public dynamic Insert<T>(T entity, IDbTransaction transaction, int? commandTimeout = null) where T : class
         {
             if (!OnInsertingInternal(new InsertContext(entity)))
                 return 0;
@@ -1220,7 +1230,7 @@ namespace Pure.Data
         #endregion
 
         #region Update
-        public bool Update<T>(T entity, IDbTransaction transaction = null, int? commandTimeout = null) where T : class
+        public bool Update<T>(T entity, IDbTransaction transaction, int? commandTimeout = null) where T : class
         {
             if (!OnUpdatingInternal(new UpdateContext(entity)))
                 return false;
@@ -1584,6 +1594,7 @@ namespace Pure.Data
                 }
             }
         }
+      
         // Open a connection (can be nested)
         public IDatabase OpenSharedConnection()
         {

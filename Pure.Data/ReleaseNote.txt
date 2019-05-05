@@ -1,6 +1,21 @@
 ﻿ 
  ---------------需要将xsd文件都放到vs安装目录下的Xml\Schemas文件夹里
-       4.2.0.8 20190314
+ 4.2.0.9 20190505
+ 新增批量操作InsertBulk InsertBatch （SqlServer(Pure.Data.SqlServerBulkOperate,Pure.Data)、 Mysql(Pure.Data.MySqlBulkOperate,Pure.Data.MySql)、 Oracle(Pure.Data.OracleBulkOperate,Pure.Data.Oracle)、 Sqlite(Pure.Data.SQLiteBulkOperate,Pure.Data.Sqlite)、 PostgreSql）
+ InsertBatch 10万数据 耗时
+ SqlServer：3322 (毫秒)
+ Mysql：3020 (毫秒)
+ Sqlite：2469 (毫秒)
+ Oracle：3215 (毫秒)
+
+ InsertBulk 10万数据 耗时
+ SqlServer：958 (毫秒)
+ Mysql：876 (毫秒)  100万数据4954毫秒
+ Sqlite：2286 (毫秒)
+ Oracle：3215 (毫秒)
+
+
+4.2.0.8 20190314
  修复异步ExecuteReaderImplAsync会关闭连接导致reader失败的问题
  增强SqlBuilder功能
 

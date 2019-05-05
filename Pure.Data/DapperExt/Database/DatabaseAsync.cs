@@ -810,10 +810,33 @@ namespace Pure.Data
                 return new PageDataResult<IDataReader>(pageIndex, pagesize, totalCount, data);
         }
 
-      
-#endregion
 
-#endregion
+        #endregion
+
+        #endregion
+
+        #region 批量操作
+        public static async Task InsertBulkAsync(this IDatabase db, DataTable dt, IDbTransaction transaction = null, int? commandTimeout = null)
+        {
+            await BulkOperateManage.Instance.Get(db.Config.BulkOperateClassName).InsertAsync(db, dt);
+            
+        }
+        public static async Task InsertBulkAsync<T>(this IDatabase db, IEnumerable<T> dt, IDbTransaction transaction = null, int? commandTimeout = null) where T : class
+        {
+            await BulkOperateManage.Instance.Get(db.Config.BulkOperateClassName).InsertAsync(db, dt);
+        }
+        public static async Task InsertBatchAsync(this IDatabase db, DataTable dt, int batchSize = 10000)
+        {
+            await BulkOperateManage.Instance.Get(db.Config.BulkOperateClassName).InsertBatchAsync(db, dt,   batchSize);
+
+        }
+
+        public static async Task InsertBatchAsync<T>(this IDatabase db, IEnumerable<T> dt, int batchSize = 10000) where T : class
+        {
+            await BulkOperateManage.Instance.Get(db.Config.BulkOperateClassName).InsertBatchAsync(db, dt, batchSize);
+
+        }
+        #endregion
 
     }
 

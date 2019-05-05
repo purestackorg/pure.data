@@ -11,6 +11,7 @@
     LoadMapperMode="FluentMapper"
     EnableLobConverter="false"
     LobConverterClassName="Pure.Data.Test.MyLobParameterConverter,Pure.Data.Test"
+    BulkOperateClassName="Pure.Data.MySqlBulkOperate,Pure.Data.MySql"
     
     EnableDebug="true"
     EnableIntercept="true"
@@ -33,7 +34,7 @@
     NameSpacePrefix="Pure.Data.Test."
     WatchSqlMapInterval="3000"
     
-    AutoMigrate="true"
+    AutoMigrate="false"
     AutoRemoveUnuseColumnInTable="true"
     EnableAutoMigrateLog="true"
     EnableAutoMigrateDebug="true"

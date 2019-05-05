@@ -1,7 +1,9 @@
 ﻿
 using MySql.Data.MySqlClient;
+using Oracle.ManagedDataAccess.Client;
 using System;
 using System.Data.SqlClient;
+using System.Data.SQLite;
 
 namespace Pure.Data.Test
 {
@@ -11,8 +13,8 @@ namespace Pure.Data.Test
         {
             DbProviderFactories.AddDbProviderFactories("MYSQL",   MySqlClientFactory.Instance);
             DbProviderFactories.AddDbProviderFactories("SQLSERVER", SqlClientFactory.Instance);
-            DbProviderFactories.AddDbProviderFactories("SQLITE",  Microsoft.Data.Sqlite.SqliteFactory.Instance);
-            DbProviderFactories.AddDbProviderFactories("ORACLE",  Oracle.ManagedDataAccess.Client.OracleClientFactory.Instance);
+            DbProviderFactories.AddDbProviderFactories("SQLITE",  SQLiteFactory.Instance);
+            DbProviderFactories.AddDbProviderFactories("ORACLE",  OracleClientFactory.Instance);
 
 
             Console.WriteLine("Hello World!");
@@ -32,9 +34,9 @@ namespace Pure.Data.Test
             //DDDTest.Test();
             //DIContainerAndSqlQueryTest.Test();
             //SqlMapTest.Test();
-            DynamicExpressoTest.Test();
+            //DynamicExpressoTest.Test();
             //ConfigurationTest.Test();
-            ///BulkTest.Test();
+            BulkTest.Test();
             //MigratorTest.Test();
             // IdGenerateTest.Test();
             //  ValidationTest.Test();

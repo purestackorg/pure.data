@@ -12,6 +12,7 @@
     LoadMapperMode="FluentMapper"
     EnableLobConverter="false"
     LobConverterClassName=""
+    BulkOperateClassName=""
     
     EnableDebug="true"
     EnableIntercept="true"

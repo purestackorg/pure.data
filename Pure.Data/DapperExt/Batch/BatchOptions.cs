@@ -7,7 +7,7 @@ namespace Pure.Data
     {
         public BatchOptions()
         {
-            BatchSize = 20;
+            BatchSize = 10000;
             StatementSeperator = ";";
         }
 

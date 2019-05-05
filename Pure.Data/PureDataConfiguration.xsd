@@ -136,6 +136,7 @@
 
             <xs:attribute name="EnableLobConverter" type="xs:boolean"  default="false" />
             <xs:attribute name="LobConverterClassName" type="xs:string" />
+            <xs:attribute name="BulkOperateClassName" type="xs:string" />
 
             
             

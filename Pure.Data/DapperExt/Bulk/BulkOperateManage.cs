@@ -21,6 +21,10 @@ namespace Pure.Data
         }
 
         public IBulkOperate Get(string className) {
+            if (providers ==null || providers.Count == 0)
+            {
+                throw new PureDataException("Please config PureDataConfiguration in `BulkOperateClassName` or register IBulkOperate before use !", null);
+            }
             return providers[className];
 
         }

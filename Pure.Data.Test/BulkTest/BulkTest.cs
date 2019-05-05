@@ -6,7 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-
+using System.Data;
 
 namespace Pure.Data.Test
 {
@@ -21,7 +21,8 @@ namespace Pure.Data.Test
             Console.Title = title;
 
             CodeTimer.Time(title, 1, () => {
-              //  InsertBulk();
+                //  InsertBulk();
+                InsertBatch();
             });
 
 
@@ -29,6 +30,37 @@ namespace Pure.Data.Test
             
             
         }
+        public async static void InsertBatch()
+        {
+            //var table = new DataTable("Batcher");
+            //table.Columns.Add("Id", typeof(int));
+            //table.Columns.Add("Name1", typeof(string));
+            //table.Columns.Add("Name2", typeof(string));
+            //table.Columns.Add("Name3", typeof(string));
+            //table.Columns.Add("Name4", typeof(string));
+
+            ////构造100000条数据
+            //for (var i = 0; i < 100000; i++)
+            //{
+            //    table.Rows.Add(i, i.ToString(), i.ToString(), i.ToString(), i.ToString());
+            //}
+
+            var db = DbMocker.InstanceDataBase();
+            ////db.InsertBatch(table, new BatchOptions() { BatchSize=10000});
+            //db.InsertBulk(table);
+
+            var list = new List<UserInfo>();
+            for (var i = 0; i < 1000; i++)
+            {
+                list.Add(new UserInfo() { Id= i, Name = "Jesica-"+i, Age=88, DTCreate = DateTime.Now, Email = i.ToString(), Role= RoleType.普通用户, HasDelete= false, StatusCode=1} );
+            }
+
+            //await db.InsertBulkAsync(list);
+            await db.InsertBatchAsync(list);
+
+
+        }
+
 
         //public static void InsertBulk()
         //{
@@ -58,7 +90,7 @@ namespace Pure.Data.Test
 
         private static IEnumerable<MyDomainEntity> GetDomainEntities()
         {
-            for (int i = 0; i < 1000000; i++)
+            for (int i = 0; i < 100000; i++)
             {
                 yield return new MyDomainEntity();
             }

@@ -6,9 +6,9 @@ using System.Data.Common;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Pure.Data.Oracle
+namespace Pure.Data
 {
-    public abstract class OracleBulkOperate : AbstractBulkOperate
+    public class OracleBulkOperate : AbstractBulkOperate
     {
         //public Action<MySqlBulkLoader> ConfigAction { get; set; }
         //public OracleBulkOperate(Action<MySqlBulkLoader> configAction) : base()
@@ -19,6 +19,9 @@ namespace Pure.Data.Oracle
 
         public override void Insert(IDatabase database, DataTable Table)
         {
+            InsertBatch(database, Table, 10000);
+
+
             //https://blog.csdn.net/xwnxwn/article/details/51679113
 
             //OracleConnection conn = new OracleConnection(connOrcleString);
@@ -50,7 +53,7 @@ namespace Pure.Data.Oracle
 
         public override async Task InsertAsync(IDatabase database, DataTable Table)
         {
-          
+            InsertBatch(database, Table, 10000);
         }
 
         //private MySqlBulkLoader GetBulkLoader(MySqlConnection conn, DataTable Table)
@@ -79,7 +82,10 @@ namespace Pure.Data.Oracle
         //}
 
 
-
+        public override async Task InsertBatchAsync(IDatabase database, DataTable dataTable, int batchSize = 10000)
+        {
+            await Task.Run(() => InsertBatch(database, dataTable, batchSize));
+        }
 
         // https://www.jb51.net/article/96903.htm
         /// <summary>
@@ -120,41 +126,41 @@ namespace Pure.Data.Oracle
                 }
             }
         }
-        /// <summary>
-        /// 将DataTable转为二维数组
-        /// </summary>
-        /// <param name="dt"></param>
-        /// <returns></returns>
-        private object[,] DataTableToArray(DataTable dt)
-        {
-            int i = 0;
-            int rowsCount = dt.Rows.Count;
-            int colsCount = dt.Columns.Count;
-            object[,] arrReturn = new object[rowsCount, colsCount];
-            //foreach (System.Data.DataRow row in dt.Rows)
-            //{
-            //    int j = 0;
-            //    foreach (System.Data.DataColumn column in dt.Columns)
-            //    {
-            //        arrReturn[i, j] = row[column.ColumnName].ToString();
-            //        j = j + 1;
-            //    }
-            //    i = i + 1;
-            //}
+        ///// <summary>
+        ///// 将DataTable转为二维数组
+        ///// </summary>
+        ///// <param name="dt"></param>
+        ///// <returns></returns>
+        //private object[,] DataTableToArray(DataTable dt)
+        //{
+        //    int i = 0;
+        //    int rowsCount = dt.Rows.Count;
+        //    int colsCount = dt.Columns.Count;
+        //    object[,] arrReturn = new object[rowsCount, colsCount];
+        //    //foreach (System.Data.DataRow row in dt.Rows)
+        //    //{
+        //    //    int j = 0;
+        //    //    foreach (System.Data.DataColumn column in dt.Columns)
+        //    //    {
+        //    //        arrReturn[i, j] = row[column.ColumnName].ToString();
+        //    //        j = j + 1;
+        //    //    }
+        //    //    i = i + 1;
+        //    //}
 
-            Dictionary<string, object[]> dic = new Dictionary<string, object[]>();
-                foreach (System.Data.DataColumn column in dt.Columns)
-                {
-                    int j = 0;
-                    foreach (System.Data.DataRow row in dt.Rows)
-                    {
-                        arrReturn[i, j] = row[column.ColumnName].ToString();
-                        j = j + 1;
-                    }
-                i = i + 1;
-            }
-            return arrReturn;
-        }
+        //    Dictionary<string, object[]> dic = new Dictionary<string, object[]>();
+        //        foreach (System.Data.DataColumn column in dt.Columns)
+        //        {
+        //            int j = 0;
+        //            foreach (System.Data.DataRow row in dt.Rows)
+        //            {
+        //                arrReturn[i, j] = row[column.ColumnName].ToString();
+        //                j = j + 1;
+        //            }
+        //        i = i + 1;
+        //    }
+        //    return arrReturn;
+        //}
 
         private Dictionary<string, object[]> DataTableToDict(DataTable dt)
         { 

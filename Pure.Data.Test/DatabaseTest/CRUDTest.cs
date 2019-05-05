@@ -110,8 +110,8 @@ namespace Pure.Data.Test
                 //db.Insert(user1);
             }
 
-            //db.InsertBulk(list);
-            db.InsertBatch(list, new BatchOptions() { BatchSize = 30 });
+            db.InsertBulk(list);
+           // db.InsertBatch(list, 1000);
         }
 
         public static void Update()

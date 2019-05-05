@@ -1,4 +1,4 @@
-﻿using MySql.Data.MySqlClient;
+﻿ 
 using System;
 using System.Data;
 using System.Data.Common;
@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace Pure.Data
 {
-    public abstract class SQLiteBulkOperate : AbstractBulkOperate
+    public  class SQLiteBulkOperate : AbstractBulkOperate
     {
         //public Action<MySqlBulkLoader> ConfigAction { get; set; }
         //public MySqlBulkOperate(Action<MySqlBulkLoader> configAction) : base()
@@ -21,6 +21,11 @@ namespace Pure.Data
         public override void Insert(IDatabase database, DataTable Table)
         {
             InsertBatch(database, Table);
+        }
+
+        public override async Task InsertBatchAsync(IDatabase database, DataTable dataTable, int batchSize = 10000)
+        {
+            await Task.Run(() => InsertBatch(database, dataTable, batchSize));
         }
 
         public String SecureFilePriv { get; set; }

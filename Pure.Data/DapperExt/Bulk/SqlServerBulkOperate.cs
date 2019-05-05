@@ -7,13 +7,17 @@ using System.Threading.Tasks;
 using System.Linq;
 namespace Pure.Data
 {
-    public abstract class SqlServerBulkIOperate : AbstractBulkOperate
+    public  class SqlServerBulkOperate : AbstractBulkOperate
     {
         public SqlBulkCopyOptions Options { get; set; } = SqlBulkCopyOptions.Default;
         public Action<SqlBulkCopy> ConfigAction { get; set; } 
-        public SqlServerBulkIOperate( Action<SqlBulkCopy> configAction) : base()
+        public SqlServerBulkOperate( Action<SqlBulkCopy> configAction) : base()
         {
             ConfigAction = configAction;
+        }
+        public SqlServerBulkOperate( ) : base()
+        {
+
         }
         private SqlBulkCopy CreateSqlBulkCopy(IDatabase database)
         {
@@ -50,7 +54,10 @@ namespace Pure.Data
             }
         }
 
-
+        public override async Task InsertBatchAsync(IDatabase database, DataTable dataTable, int batchSize = 10000)
+        {
+            await Task.Run(() => InsertBatch(database, dataTable, batchSize));
+        }
 
         public override void InsertBatch(IDatabase database, DataTable dataTable, int batchSize = 10000)
         {

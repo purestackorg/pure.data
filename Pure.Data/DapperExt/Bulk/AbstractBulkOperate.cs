@@ -21,6 +21,10 @@ namespace Pure.Data
         /// <param name="dataTable">要批量插入的 <see cref="DataTable"/>。</param>
         /// <param name="batchSize">每批次写入的数据量。</param>
         void InsertBatch(IDatabase database, DataTable dataTable, int batchSize = 10000);
+        Task InsertBatchAsync(IDatabase database, DataTable dataTable, int batchSize = 10000);
+
+        void InsertBatch<TEntity>(IDatabase database, IEnumerable<TEntity> list, int batchSize = 10000) where TEntity : class;
+        Task InsertBatchAsync<TEntity>(IDatabase database, IEnumerable<TEntity> list, int batchSize = 10000) where TEntity : class;
     }
 
     public abstract class AbstractBulkOperate : IBulkOperate
@@ -73,7 +77,8 @@ namespace Pure.Data
         public abstract void Insert(IDatabase database, DataTable Table);
 
         public abstract Task InsertAsync(IDatabase database, DataTable Table);
-        public abstract void InsertBatch(IDatabase database, DataTable dataTable, int batchSize = 10000);
+        public abstract void InsertBatch(IDatabase database, DataTable dataTable, int batchSize = 10000); 
+        public abstract Task InsertBatchAsync(IDatabase database, DataTable dataTable, int batchSize = 10000);
 
         public  void Insert<TEntity>(IDatabase database, IEnumerable<TEntity> list) where TEntity : class
         {
@@ -86,6 +91,19 @@ namespace Pure.Data
             var dataTable = ConvertToBulkDataTable(database, list);// list.ToDataTable();
 
             await InsertAsync(database, dataTable);
+        }
+
+        public void InsertBatch<TEntity>(IDatabase database, IEnumerable<TEntity> list, int batchSize = 10000) where TEntity : class
+        {
+            var dataTable = ConvertToBulkDataTable(database, list);// list.ToDataTable();
+
+            InsertBatch(database, dataTable, batchSize);
+        }
+        public async Task InsertBatchAsync<TEntity>(IDatabase database, IEnumerable<TEntity> list, int batchSize = 10000) where TEntity : class
+        {
+            var dataTable = ConvertToBulkDataTable(database, list);// list.ToDataTable();
+
+            await InsertBatchAsync(database, dataTable, batchSize);
         }
 
         public string FormatByQuote(IDatabase database, string str) {
@@ -150,6 +168,35 @@ namespace Pure.Data
 
 
             return d;
+        }
+
+        public DataTable GetPagedTable(DataTable dt, int PageIndex, int PageSize)//PageIndex表示第几页，PageSize表示每页的记录数
+        {
+            if (PageIndex == 0)
+                return dt;//0页代表每页数据，直接返回
+
+            DataTable newdt = dt.Copy();
+            newdt.Clear();//copy dt的框架
+
+            int rowbegin = (PageIndex - 1) * PageSize;
+            int rowend = PageIndex * PageSize;
+
+            if (rowbegin >= dt.Rows.Count)
+                return newdt;//源数据记录数小于等于要显示的记录，直接返回dt
+
+            if (rowend > dt.Rows.Count)
+                rowend = dt.Rows.Count;
+            for (int i = rowbegin; i <= rowend - 1; i++)
+            {
+                DataRow newdr = newdt.NewRow();
+                DataRow dr = dt.Rows[i];
+                foreach (DataColumn column in dt.Columns)
+                {
+                    newdr[column.ColumnName] = dr[column.ColumnName];
+                }
+                newdt.Rows.Add(newdr);
+            }
+            return newdt;
         }
 
     }

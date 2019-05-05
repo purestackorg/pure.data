@@ -9,14 +9,17 @@ using System.Threading.Tasks;
 
 namespace Pure.Data
 {
-    public abstract class MySqlBulkOperate : AbstractBulkOperate
+    public  class MySqlBulkOperate : AbstractBulkOperate
     { 
         public Action<MySqlBulkLoader> ConfigAction { get; set; }
         public MySqlBulkOperate(Action<MySqlBulkLoader> configAction) : base()
         {
             ConfigAction = configAction;
         }
- 
+        public MySqlBulkOperate( ) : base()
+        { 
+        }
+
 
         public override void Insert(IDatabase database, DataTable Table)
         {
@@ -102,7 +105,10 @@ namespace Pure.Data
         }
 
 
-
+        public override async Task InsertBatchAsync(IDatabase database, DataTable dataTable, int batchSize = 10000)
+        {
+            await Task.Run(() => InsertBatch(database, dataTable, batchSize));
+        }
 
         /// <summary>
         /// 将 <see cref="DataTable"/> 的数据批量插入到数据库中。MySql的批量插入，是将值全部写在语句的values里，例如，insert batcher(id, name) values(1, '1', 2, '2', 3, '3', ........ 10, '10')。
@@ -115,26 +121,56 @@ namespace Pure.Data
             {
                 return;
             }
+
+
             using (var connection = database.Connection as MySqlConnection)
             {
                 try
                 {
                     database.EnsureOpenConnection();
-                    using (var command = database.DbFactory.CreateCommand())
-                    {
-                        if (command == null)
-                        {
-                            throw  (new ArgumentException("command"));
-                        }
-                        command.Connection = connection;
+                    if (dataTable.Rows.Count > batchSize) { 
 
-                        command.CommandText = GenerateInserSql(database, command, dataTable);
-                        if (command.CommandText == string.Empty)
+                        var pageCount = (int)Math.Ceiling((double)dataTable.Rows.Count/batchSize);
+                        for (int i = 1; i <= pageCount; i++)
                         {
-                            return;
+                            var table = GetPagedTable(dataTable, i, batchSize);
+                            using (var command = database.DbFactory.CreateCommand())
+                            {
+                                if (command == null)
+                                {
+                                    throw (new ArgumentException("command"));
+                                }
+                                command.Connection = connection;
+
+                                command.CommandText = GenerateInserSql(database, command, table);
+                                if (command.CommandText == string.Empty)
+                                {
+                                    return;
+                                }
+                                command.ExecuteNonQuery();
+                            }
                         }
-                        command.ExecuteNonQuery();
+                 
                     }
+                    else
+                    {
+                        using (var command = database.DbFactory.CreateCommand())
+                        {
+                            if (command == null)
+                            {
+                                throw (new ArgumentException("command"));
+                            }
+                            command.Connection = connection;
+
+                            command.CommandText = GenerateInserSql(database, command, dataTable);
+                            if (command.CommandText == string.Empty)
+                            {
+                                return;
+                            }
+                            command.ExecuteNonQuery();
+                        }
+                    }
+                 
                 }
                 catch (Exception exp)
                 {
