@@ -51,13 +51,14 @@ namespace Pure.Data
             {
                 return;
             }
-            using (var connection = database.Connection as SQLiteConnection)
+            using (var connection = CreateNewConnection(database) as SQLiteConnection)
             {
                 DbTransaction transcation = null;
                 try
                 {
                     //connection.TryOpen();
-                    database.EnsureOpenConnection();
+                    //database.EnsureOpenConnection();
+                    connection.Open();
                     transcation = connection.BeginTransaction();
                     using (var command = database.DbFactory.CreateCommand())
                     {
@@ -103,7 +104,7 @@ namespace Pure.Data
                 }
                 finally
                 {
-                    database.Close();
+                    connection.Close();
                 }
             }
 

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Data.Common;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -106,6 +107,10 @@ namespace Pure.Data
             await InsertBatchAsync(database, dataTable, batchSize);
         }
 
+        public DbConnection CreateNewConnection(IDatabase database)
+        {
+            return database.CreateNewDbConnection(false);
+        }
         public string FormatByQuote(IDatabase database, string str) {
             return database.SqlDialectProvider.OpenQuote + str + database.SqlDialectProvider.CloseQuote;
         }

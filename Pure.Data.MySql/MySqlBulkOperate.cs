@@ -20,12 +20,14 @@ namespace Pure.Data
         { 
         }
 
-
+       
         public override void Insert(IDatabase database, DataTable Table)
         {
             //DbSession.Open();
-            database.EnsureOpenConnection();
-            var conn = database.Connection as MySqlConnection;
+            var conn = CreateNewConnection(database) as MySqlConnection;
+            conn.Open();
+            //database.EnsureOpenConnection();
+            //var conn = database.Connection as MySqlConnection;
             MySqlBulkLoader bulkLoader = GetBulkLoader(conn, Table);
             bulkLoader.Load();
         }
@@ -37,10 +39,12 @@ namespace Pure.Data
         private string _lineTerminator = "\r\n";
         public override async Task InsertAsync(IDatabase database, DataTable Table)
         {
-            database.EnsureOpenConnection();
+            //database.EnsureOpenConnection();
+            //var conn = database.Connection as MySqlConnection;
+            var conn = CreateNewConnection(database) as MySqlConnection;
+            await conn.OpenAsync();
 
-            //await DbSession.OpenAsync();
-            var conn = database.Connection as MySqlConnection;
+
             MySqlBulkLoader bulkLoader = GetBulkLoader(conn, Table);
 
             await bulkLoader.LoadAsync();
@@ -123,11 +127,12 @@ namespace Pure.Data
             }
 
 
-            using (var connection = database.Connection as MySqlConnection)
+            using (var connection = CreateNewConnection(database) as MySqlConnection)
             {
                 try
                 {
-                    database.EnsureOpenConnection();
+                    connection.Open();
+                    //database.EnsureOpenConnection();
                     if (dataTable.Rows.Count > batchSize) { 
 
                         var pageCount = (int)Math.Ceiling((double)dataTable.Rows.Count/batchSize);
@@ -178,7 +183,7 @@ namespace Pure.Data
                 }
                 finally
                 {
-                    database.Close();
+                    connection.Close();
                 }
             }
         }

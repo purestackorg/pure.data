@@ -276,6 +276,32 @@ namespace Pure.Data
 
         }
 
+        public DbConnection CreateNewDbConnection(bool needInitAction = false) {
+            if (DbFactory == null)
+            {
+                DbFactory = DbConnectionFactory.CreateConnection(ConnectionString, ProviderName).DbFactory;
+                if (DbFactory == null)
+                {
+                    throw new ArgumentException("DbFactory can not be null!");
+                }
+            }
+            DbConnection conn = DbFactory.CreateConnection();
+            if (needInitAction == true && Config.DbConnectionInit != null)
+            {
+                conn = Config.DbConnectionInit((IDbConnection)conn) as DbConnection;
+            }
+          
+            if (conn == null) throw new Exception("DB Connection failed to configure.");
+            if (conn.State != ConnectionState.Open)
+            {
+                conn.ConnectionString = ConnectionString;
+
+            }
+            Connection = conn;
+
+            return conn;
+        }
+
         /// <summary>
         /// 初始化数据库连接信息
         /// </summary>

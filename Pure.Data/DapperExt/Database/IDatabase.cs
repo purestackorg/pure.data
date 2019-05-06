@@ -6,6 +6,7 @@ using Pure.Data.Validations.Results;
 using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Data.Common;
 using System.Diagnostics;
 using System.Linq.Expressions;
 using System.Reflection;
@@ -172,6 +173,7 @@ namespace Pure.Data
 
         IDatabase OpenNewConnection();
         IDatabase OpenSharedConnection();
+        DbConnection CreateNewDbConnection(bool needInitAction = false);
 
         void EnsureOpenConnection();
         void Close();

@@ -100,11 +100,12 @@ namespace Pure.Data
             {
                 return;
             }
-            using (var connection = database.Connection as OracleConnection)
+            using (var connection = CreateNewConnection(database) as OracleConnection)
             {
                 try
                 {
-                    database.EnsureOpenConnection();
+                    //database.EnsureOpenConnection();
+                    connection.Open();
                     using (var command = database.DbFactory.CreateCommand())
                     {
                         if (command == null)
@@ -122,7 +123,7 @@ namespace Pure.Data
                 }
                 finally
                 {
-                    database.Close();
+                    connection.Close();
                 }
             }
         }

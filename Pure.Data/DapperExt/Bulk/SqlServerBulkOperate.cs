@@ -5,6 +5,8 @@ using System.Data.SqlClient;
 using System.Text;
 using System.Threading.Tasks;
 using System.Linq;
+using System.Data.Common;
+
 namespace Pure.Data
 {
     public  class SqlServerBulkOperate : AbstractBulkOperate
@@ -19,39 +21,91 @@ namespace Pure.Data
         {
 
         }
-        private SqlBulkCopy CreateSqlBulkCopy(IDatabase database)
+        private SqlBulkCopy CreateSqlBulkCopy(SqlConnection conn, DbTransaction transaction)
         {
-            var conn = database.Connection as SqlConnection;
-            return new SqlBulkCopy(conn, Options, database.Transaction as SqlTransaction);
+            //var conn = database.Connection as SqlConnection;
+            return new SqlBulkCopy(conn, Options, transaction as SqlTransaction );
         }
         public override void Insert(IDatabase database, DataTable Table)
         {
-            database.EnsureOpenConnection();
-            using (var sqlBulkCopy = CreateSqlBulkCopy(database))
+            //database.EnsureOpenConnection();
+            using (var conn = CreateNewConnection(database) as SqlConnection)
             {
-                sqlBulkCopy.DestinationTableName = Table.TableName;
-                if (ConfigAction != null)
+                DbTransaction transcation = null;
+                try
                 {
-                    ConfigAction(sqlBulkCopy);
+                    conn.Open();
+
+                    transcation = conn.BeginTransaction();
+                    using (var sqlBulkCopy = CreateSqlBulkCopy(conn, transcation))
+                    {
+                        sqlBulkCopy.DestinationTableName = Table.TableName;
+                        if (ConfigAction != null)
+                        {
+                            ConfigAction(sqlBulkCopy);
+                        }
+                        sqlBulkCopy.WriteToServer(Table);
+                    }
                 }
-                sqlBulkCopy.WriteToServer(Table);
+                catch (Exception)
+                {
+                    if (transcation != null)
+                    {
+                        transcation.Rollback();
+                    }
+                    throw;
+                }
+                finally
+                {
+                    conn.Close();
+                }
+               
             }
+          
         }
 
         public override async Task InsertAsync(IDatabase database, DataTable Table)
         {
-            database.EnsureOpenConnection();
+            //database.EnsureOpenConnection();
+
             //await DbSession.OpenAsync();
-            using (var sqlBulkCopy = CreateSqlBulkCopy(database))
+
+
+            using (var conn = CreateNewConnection(database) as SqlConnection)
             {
-                
-                sqlBulkCopy.DestinationTableName = Table.TableName;
-                if (ConfigAction != null)
-                {
-                    ConfigAction(sqlBulkCopy);
+                DbTransaction transcation = null;
+                try
+                { 
+                    await conn.OpenAsync();
+                 
+                    transcation = conn.BeginTransaction();
+                    using (var sqlBulkCopy = CreateSqlBulkCopy(conn, transcation))
+                    {
+                        sqlBulkCopy.DestinationTableName = Table.TableName;
+                        if (ConfigAction != null)
+                        {
+                            ConfigAction(sqlBulkCopy);
+                        }
+                        await sqlBulkCopy.WriteToServerAsync(Table);
+                    }
                 }
-                await sqlBulkCopy.WriteToServerAsync(Table);
+                catch (Exception)
+                {
+                    if (transcation != null)
+                    {
+                        transcation.Rollback();
+                    }
+                    throw;
+                }
+                finally
+                {
+                    conn.Close();
+                }
+
             }
+
+
+           
         }
 
         public override async Task InsertBatchAsync(IDatabase database, DataTable dataTable, int batchSize = 10000)
@@ -65,11 +119,12 @@ namespace Pure.Data
             {
                 return;
             }
-            using (var connection = (SqlConnection)database.Connection)
+            using (var connection = CreateNewConnection(database) as SqlConnection)
             {
                 try
                 {
-                    database.EnsureOpenConnection();
+                    //database.EnsureOpenConnection();
+                    connection.Open();
                     //给表名加上前后导符
                     string tableName = dataTable.TableName ;// DbUtility.FormatByQuote(ServiceContext.Database.Provider.GetService<ISyntaxProvider>(), dataTable.TableName);
                     using (var bulk = new SqlBulkCopy(connection, SqlBulkCopyOptions.KeepIdentity, null)
@@ -97,7 +152,7 @@ namespace Pure.Data
                 }
                 finally
                 {
-                    database.Close();
+                    connection.Close();
                 }
             }
         }

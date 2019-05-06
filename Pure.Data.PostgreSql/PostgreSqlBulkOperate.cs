@@ -22,14 +22,17 @@ namespace Pure.Data.PostgreSql
         public const string DATA_TYPE_NAME = "DataTypeName";
         public override void Insert(IDatabase database, DataTable Table)
         {
-            database.EnsureOpenConnection();
+            //database.EnsureOpenConnection();
             //DbSession.Open();
             InsertImpl(database, Table);
         }
 
         private void InsertImpl(IDatabase database, DataTable Table)
         {
-            var conn = database.Connection as NpgsqlConnection;
+            var conn = CreateNewConnection(database) as NpgsqlConnection;
+
+            conn.Open();
+
             var dataColumns = Table.Columns.Cast<DataColumn>();
             var colNamesStr = String.Join(",", dataColumns.Select(col => col.ColumnName));
 
@@ -66,7 +69,7 @@ namespace Pure.Data.PostgreSql
 
         public override async Task InsertAsync(IDatabase database, DataTable Table)
         {
-            database.EnsureOpenConnection();
+            //database.EnsureOpenConnection();
 
             //await DbSession.OpenAsync();
             InsertImpl(database, Table);
@@ -86,11 +89,12 @@ namespace Pure.Data.PostgreSql
             {
                 return;
             }
-            using (var connection = database.Connection as NpgsqlConnection)
+            using (var connection = CreateNewConnection(database) as NpgsqlConnection)
             {
                 try
                 {
-                    database.EnsureOpenConnection();
+                    //database.EnsureOpenConnection();
+                    connection.Open();
                     using (var command = database.DbFactory.CreateCommand())
                     {
                         if (command == null)
@@ -113,7 +117,7 @@ namespace Pure.Data.PostgreSql
                 }
                 finally
                 {
-                    database.Close();
+                    connection.Close();
                 }
             }
         }
