@@ -1,12 +1,13 @@
 ﻿
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 
 namespace FluentExpressionSQL.Mapper
 {
     public class TableMapperCache
     {
-        private static readonly Dictionary<string, Dictionary<Type, ITableMap>> _classMaps = new Dictionary<string, Dictionary<Type, ITableMap>>();
+        private static readonly ConcurrentDictionary<string, Dictionary<Type, ITableMap>> _classMaps = new ConcurrentDictionary<string, Dictionary<Type, ITableMap>>();
 
         public static Dictionary<Type, ITableMap> Get(string key)
         {
