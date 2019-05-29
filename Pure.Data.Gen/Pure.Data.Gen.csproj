@@ -34,6 +34,11 @@
 
 
   <ItemGroup>
+    <PackageReference Include="ICSharpCode.SharpZipLib.dll" Version="0.85.4.369" />
+  </ItemGroup>
+
+
+  <ItemGroup>
     <ProjectReference Include="..\Pure.Data\Pure.Data.csproj" />
   </ItemGroup>
 

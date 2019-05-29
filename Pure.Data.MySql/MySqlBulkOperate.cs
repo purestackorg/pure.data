@@ -152,7 +152,11 @@ namespace Pure.Data
                                 {
                                     return;
                                 }
+                                database.LogToDebug(command);
+
                                 command.ExecuteNonQuery();
+
+
                             }
                         }
                  
@@ -172,7 +176,11 @@ namespace Pure.Data
                             {
                                 return;
                             }
+
+                            database.LogToDebug(command);
+
                             command.ExecuteNonQuery();
+                             
                         }
                     }
                  
@@ -183,6 +191,7 @@ namespace Pure.Data
                 }
                 finally
                 {
+                    
                     connection.Close();
                 }
             }

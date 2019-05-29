@@ -1038,5 +1038,37 @@ namespace Pure.Data.Gen
             return sb.ToString();
         }
         #endregion
+
+        static System.Text.Encoding encoding = System.Text.Encoding.UTF8;
+        public static string ReadFile(string path)
+        {
+            try
+            {
+                StreamReader sr = new StreamReader(path, encoding);
+                string data = sr.ReadToEnd();
+                sr.Close();
+                return data;
+            }
+            catch (System.Exception e)
+            {
+                return "";
+            }
+        }
+
+        public static bool WriteFile(string path, string data)
+        {
+            try
+            {
+                StreamWriter sw = new StreamWriter(path, false, encoding);
+                sw.Write(data);
+                sw.Flush();
+                sw.Close();
+                return true;
+            }
+            catch
+            {
+                return false;
+            }
+        }
     }
 }

@@ -111,6 +111,10 @@ namespace Pure.Data
         {
             return database.CreateNewDbConnection(false);
         }
+      
+
+
+
         public string FormatByQuote(IDatabase database, string str) {
             return database.SqlDialectProvider.OpenQuote + str + database.SqlDialectProvider.CloseQuote;
         }
