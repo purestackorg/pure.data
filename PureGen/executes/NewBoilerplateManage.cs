@@ -154,10 +154,8 @@ namespace PureGen
 
         public static void DoGen(string config, string projectName = "", string nameSpace = "", string tablePrefixFilter = "", string onlyTable = "") {
 
-            if (config ==null || config =="")
-            {
-                config = "PureDataConfiguration.xml";
-            }
+             
+            config = ConfigHelpers.GetDefaultConfig(config);// "PureDataConfiguration.xml";
             //string config = "";
             //config = "PureDataConfiguration.xml";
             //if (args.Length > 0)
@@ -179,12 +177,9 @@ namespace PureGen
                 string outputPath = database.GenerateCode();
                 LogStatic("Generate output: " + outputPath);
 
-                if (System.IO.Directory.Exists(outputPath))
-                {
-                    string v_OpenFolderPath = outputPath;
-                    System.Diagnostics.Process.Start("explorer.exe", v_OpenFolderPath);
-                }
 
+                ConfigHelpers.OpenDir(outputPath);
+                 
             }
             catch (Exception ex)
             {
@@ -198,7 +193,7 @@ namespace PureGen
 
         public static void LogStatic(string msg, Exception ex = null, Pure.Data.MessageType type = Pure.Data.MessageType.Debug)
         {
-            ConsoleHelper.Instance.OutputMessage(msg, ex, type);
+            LogHelpers.LogStatic(msg, ex, type);
 
         }
     }

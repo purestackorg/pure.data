@@ -6,10 +6,10 @@ namespace Pure.Data.Gen
     public class Table 
     {
         public List<Column> Columns { get; set; }
-        //public string ObjectID { get; set; }
+        public string ObjectID { get; set; }
         public string Name { get; set; }
         public string Schema { get; set; }
-        //public bool IsView { get; set; }
+        public bool IsView { get; set; }
     //    public string CleanName { get; set; }
         public string ClassName { get; set; }
      //   public string FilteredName { get; set; }
@@ -20,11 +20,13 @@ namespace Pure.Data.Gen
         //public string CreateSQL { get; set; }
 
       //  public IClassMapper ClassMapper { get; set; }
-        
+        public List<Column> PrimaryKeys { get; set; }
+
         public Table()
         {
             _Properties = new Dictionary<string, object>();
             Columns = new List<Column>();
+            PrimaryKeys = new List<Column>();
 
         }
         #region 拓展

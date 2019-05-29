@@ -22,34 +22,38 @@ namespace Pure.Data.Gen
             {
                 var config = database.Config;
 
-                ProjectConfig projectConfig = new ProjectConfig();
-                projectConfig.Enable = config.EnableCodeGen;
-                projectConfig.ClassNameMode = config.CodeGenClassNameMode;
-                projectConfig.PropertyNameMode = config.CodeGenPropertyNameMode;
-                projectConfig.Name = config.CodeGenProjectName;
-                projectConfig.NameSpace = config.CodeGenNameSpace;
-                projectConfig.TableFilter = config.CodeGenTableFilter;
+                //ProjectConfig projectConfig = new ProjectConfig();
+                //projectConfig.Enable = config.EnableCodeGen;
+                //projectConfig.ClassNameMode = config.CodeGenClassNameMode;
+                //projectConfig.PropertyNameMode = config.CodeGenPropertyNameMode;
+                //projectConfig.Name = config.CodeGenProjectName;
+                //projectConfig.NameSpace = config.CodeGenNameSpace;
+                //projectConfig.TableFilter = config.CodeGenTableFilter;
 
-                foreach (var temp in config.CodeGenTemplates)
-                {
-                    GeneraterConfig genConfig = new GeneraterConfig();
-                    genConfig.Name = temp.Name;
-                    genConfig.OutputFileExtension = temp.OutputFileExtension;
-                    genConfig.FilePrefix = temp.FilePrefix;
-                    genConfig.FileSuffix = temp.FileSuffix;
-                    genConfig.FileNameFormat = temp.FileNameFormat;
-                    genConfig.Enabled = temp.Enabled;
-                    genConfig.TemplateFileName = temp.TemplateFileName;
-                    //genConfig.Template = temp.Template;
-                    genConfig.OutputDirectory = temp.OutputDirectory;
-                    genConfig.Append = temp.Append;
-                    genConfig.Encoding = temp.Encoding;
-                    genConfig.OutputType = temp.OutputType;
+                //foreach (var temp in config.CodeGenTemplates)
+                //{
+                //    GeneraterConfig genConfig = new GeneraterConfig();
+                //    genConfig.Name = temp.Name;
+                //    genConfig.OutputFileExtension = temp.OutputFileExtension;
+                //    genConfig.FilePrefix = temp.FilePrefix;
+                //    genConfig.FileSuffix = temp.FileSuffix;
+                //    genConfig.FileNameFormat = temp.FileNameFormat;
+                //    genConfig.Enabled = temp.Enabled;
+                //    genConfig.TemplateFileName = temp.TemplateFileName;
+                //    //genConfig.Template = temp.Template;
+                //    genConfig.OutputDirectory = temp.OutputDirectory;
+                //    genConfig.Append = temp.Append;
+                //    genConfig.Encoding = temp.Encoding;
+                //    genConfig.OutputType = temp.OutputType;
 
-                    projectConfig.GeneraterConfigs.Add(genConfig);
+                //    projectConfig.GeneraterConfigs.Add(genConfig);
 
 
-                }
+                //}
+
+
+                var projectConfig = DbLoader.ConvertDatabaseConfigToProjectConfig(database);
+
                 var generater = GeneratorHelper.NewGenerator(database);
 
                 generater.ClearCache(projectConfig);
@@ -58,7 +62,15 @@ namespace Pure.Data.Gen
                 {
                     filterTables = config.AutoMigrateOnContainTable.ToUpper().Split(new char[] { ';' }, StringSplitOptions.RemoveEmptyEntries).ToList();
                 }
-                generater.Run(database, projectConfig, filterTables);
+
+
+                List<string> withoutTables = new List<string>();
+                if (database.Config.AutoMigrateWithoutTable != null && database.Config.AutoMigrateWithoutTable != "")
+                {
+                    withoutTables = database.Config.AutoMigrateWithoutTable.ToUpper().Split(new char[] { ';' }, StringSplitOptions.RemoveEmptyEntries).ToList();
+                }
+
+                generater.Run(database, projectConfig, filterTables, withoutTables);
 
                 
 

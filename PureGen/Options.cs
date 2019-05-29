@@ -72,6 +72,21 @@ namespace PureGen
 
     }
 
+
+
+    //创建code 程序
+    [Verb("doc", HelpText = "生成数据库字典文档")]
+    public class DocOptions
+    { //normal options here
+        [Option('c', "config", Default = "PureDataConfiguration.xml", Required = false, HelpText = "配置文件")]
+        public string Config { get; set; }
+  
+        [Option('t', "type", Default = "doc", Required = false, HelpText = "可以输出html,doc,docx,pdf,text,epub,odt,png,tiff")]
+        public string Type { get; set; }
+        [Option('z', "zip", Default = false, Required = false, HelpText = "是否压缩zip")]
+        public bool Zip { get; set; }
+    }
+
     [Verb("restore", HelpText = "还原项目包")]
     public class RestoreOptions
     { //normal options here
@@ -97,7 +112,7 @@ namespace PureGen
         [Option('p', "Path", Default = "", Required = false, HelpText = "编译目录路径")]
         public string Path { get; set; }
     }
-    [Verb("gen", HelpText = "生成代码")]
+    [Verb("gen", HelpText = "生成代码:doc -t docx -c PureDataConfiguration.xml -z")]
     public class GenOptions
     { //normal options here
         [Option('c', "config", MetaValue = "PureDataConfiguration.xml", Required = false, HelpText = "生成配置文件，默认：PureDataConfiguration.xml")]

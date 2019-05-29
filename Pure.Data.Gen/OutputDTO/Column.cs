@@ -5,7 +5,7 @@ namespace Pure.Data.Gen
 {
     public class Column
     {
-        //public string ObjectID { get; set; }
+        public string ObjectID { get; set; }
         public string Name { get; set; }
         //public string Schema { get; set; }
 

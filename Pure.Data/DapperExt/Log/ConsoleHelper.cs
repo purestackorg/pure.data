@@ -47,6 +47,14 @@ namespace Pure.Data
             Console.WriteLine(data);
             Console.Write("=>");
             System.Diagnostics.Debug.WriteLine(data);
+            if (ex != null)
+            {
+                Console.WriteLine("Exception => ");
+                Console.WriteLine(ex);
+
+                System.Diagnostics.Debug.WriteLine(ex);
+
+            }
         }
 
         public static void Print(string data, Exception ex, MessageType type)
@@ -55,7 +63,16 @@ namespace Pure.Data
             Console.ForegroundColor = ConsoleHelper.Instance.GetColor(type);
             Console.WriteLine(data);
             Console.Write("=>");
+
             System.Diagnostics.Debug.WriteLine(data);
+            if (ex != null)
+            {
+                Console.WriteLine("Exception => ");
+                Console.WriteLine(ex);
+
+                System.Diagnostics.Debug.WriteLine(ex);
+
+            }
         }
     }
 }

@@ -10,16 +10,17 @@ using System.Threading.Tasks;
 namespace PureGen
 {
 
-    
+
 
     class Program
-    { 
+    {
 
-        private static readonly HeadingInfo HeadingInfo = new HeadingInfo("PureGen", "v1.2.1.1");
+        private static readonly HeadingInfo HeadingInfo = new HeadingInfo("PureGen", "v1.0.1.1");
 
-        private static void WriteMsg(string str) {
+        private static void WriteMsg(string str)
+        {
             //HeadingInfo.WriteMessage(str);
-           Console.WriteLine(str);
+            Console.WriteLine(str);
         }
         private static void WriteError(string str)
         {
@@ -32,26 +33,31 @@ namespace PureGen
 
 
             string testCmd = "new -b csharp_mvc -t article;comments -p AGRYGL -n AGRYGL.Core";
+            testCmd = @"doc --help";
+            //testCmd = @"doc -t docx -c PureDataConfiguration.xml -z";
             //testCmd = @"build -l csharp -p D:\Life\Source\github\pure.data\PureGen\bin\Debug\generate\csharp_mvc";
             //testCmd = @"run -l csharp -p C:\Users\benson\source\repos\PureGen.Web\PureGen.Web\bin\Debug\netcoreapp2.1\PureGen.Web.dll";
             //testCmd = "gen";
-            args = testCmd.Split(new char[] { ' '}, StringSplitOptions.RemoveEmptyEntries);
+            args = testCmd.Split(new char[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
             ParseAndExecute(args);
 
             Console.ReadLine();
 
         }
 
-        private static void ParseAndExecute(string[] args) {
+        private static void ParseAndExecute(string[] args)
+        {
 
 
-            Parser.Default.ParseArguments<GenOptions, NewOptions, BuildOptions, RunOptions, RestoreOptions>(args)
-   .WithParsed<GenOptions>(opts => {
+            Parser.Default.ParseArguments<GenOptions, NewOptions, DocOptions, BuildOptions, RunOptions, RestoreOptions>(args)
+   .WithParsed<GenOptions>(opts =>
+   { //生成代码
        DoWhenNoArgs(opts.ConfigFile);
    })
-   .WithParsed<NewOptions>(opts => {
+   .WithParsed<NewOptions>(opts =>
+   { //创建新模板项目
 
-       if (opts.Boilerplate == ""|| opts.Boilerplate == null)
+       if (opts.Boilerplate == "" || opts.Boilerplate == null)
        {
            WriteMsg("` --b %` Boilerplate list: ");
            var listTemplateType = NewBoilerplateManage.Providers;
@@ -68,7 +74,13 @@ namespace PureGen
        }
 
    })
-   .WithParsed<BuildOptions>(opts => {
+     .WithParsed<DocOptions>(opts =>
+     { //生成数据库字典文档
+         DocGenerator.Process(opts);
+
+     })
+   .WithParsed<BuildOptions>(opts =>
+   { //编译项目
        if (opts.LangType == LangType.none)
        {
            WriteMsg("` --l %` LangType list: ");
@@ -80,12 +92,13 @@ namespace PureGen
            }
        }
        else
-       { 
+       {
            CmdHelper.RunCmd(CmdHelper.GetBuildCmd(opts));
        }
-        
+
    })
-   .WithParsed<RunOptions>(opts => {
+   .WithParsed<RunOptions>(opts =>
+   { //运行项目
 
        if (opts.LangType == LangType.none)
        {
@@ -103,8 +116,12 @@ namespace PureGen
        }
 
    })
-   .WithParsed<RestoreOptions>(opts => { })
-   .WithNotParsed(errs => {
+   .WithParsed<RestoreOptions>(opts =>
+   {//还原项目包文件
+
+   })
+   .WithNotParsed(errs =>
+   {
        foreach (var err in errs)
        {
            WriteError(err.ToString());
@@ -114,12 +131,12 @@ namespace PureGen
 
         }
 
-        private static void DoWhenNoArgs(params string[] args) {
+        private static void DoWhenNoArgs(params string[] args)
+        {
 
 
 
             string config = "";
-            config = "PureDataConfiguration.xml";
             if (args.Length > 0)
             {
                 config = args[0];
@@ -153,7 +170,7 @@ namespace PureGen
         }
 
 
-     
+
 
     }
 }
