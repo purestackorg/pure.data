@@ -36,10 +36,10 @@ namespace Pure.Data.Test
             //SqlMapTest.Test();
             //DynamicExpressoTest.Test();
             //ConfigurationTest.Test();
-            BulkTest.Test();
+            //BulkTest.Test();
             //MigratorTest.Test();
             // IdGenerateTest.Test();
-            //  ValidationTest.Test();
+            ValidationTest.Test();
             //  BackupAndGenTest.Test();
 
             //PoolingTest.Test();

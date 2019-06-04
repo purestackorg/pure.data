@@ -761,6 +761,10 @@ namespace Pure.Data
         /// 批量处理器
         /// </summary>
         public string BulkOperateClassName { get; set; }
+        public bool EnableDefaultPropertySecurityValidate { get; set; }
+        public string PropertySecurityValidateClassName { get; set; }
+
+
 
         public override string ToString()
         {
@@ -776,6 +780,8 @@ namespace Pure.Data
                     EnableLobConverter=" + EnableLobConverter + @"
                     LobConverterClassName=" + LobConverterClassName + @"
                     BulkOperateClassName=" + BulkOperateClassName + @"
+                    EnableDefaultPropertySecurityValidate=" + EnableDefaultPropertySecurityValidate + @"
+                    PropertySecurityValidateClassName=" + PropertySecurityValidateClassName + @"
     
                     EnableDebug=" + EnableDebug + @"
                     EnableIntercept=" + EnableIntercept + @"

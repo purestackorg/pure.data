@@ -365,5 +365,14 @@ namespace Pure.Data
         /// 批量处理器
         /// </summary>
         string BulkOperateClassName { get; set; }
-    }
+        /// <summary>
+        /// 是否启用默认属性安全校验器
+        /// </summary>
+        bool EnableDefaultPropertySecurityValidate { get; set; }
+        
+        /// <summary>
+        /// 属性安全校验管理器
+        /// </summary>
+        string PropertySecurityValidateClassName { get; set; }
+}
 }

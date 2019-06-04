@@ -756,9 +756,9 @@ namespace Pure.Data {
 		/// <param name="instance"></param>
 		/// <param name="propertyExpressions"></param>
 		/// <returns></returns>
-		public static ValidationResult Validate<T>(this IValidator<T> validator, T instance, params Expression<Func<T, object>>[] propertyExpressions) {
+		public static ValidationResult Validate<T>(this IValidator<T> validator, IDatabase database, T instance, params Expression<Func<T, object>>[] propertyExpressions) {
 			var selector = ValidatorOptions.ValidatorSelectors.MemberNameValidatorSelectorFactory(MemberNameValidatorSelector.MemberNamesFromExpressions(propertyExpressions));
-			var context = new ValidationContext<T>(instance, new PropertyChain(), selector);
+			var context = new ValidationContext<T>(database, instance, new PropertyChain(), selector);
 			return validator.Validate(context);
 		}
 
@@ -768,8 +768,8 @@ namespace Pure.Data {
 		/// <param name="instance">The object to validate</param>
 		/// <param name="properties">The names of the properties to validate.</param>
 		/// <returns>A ValidationResult object containing any validation failures.</returns>
-		public static ValidationResult Validate<T>(this IValidator<T> validator, T instance, params string[] properties) {
-			var context = new ValidationContext<T>(instance, new PropertyChain(), ValidatorOptions.ValidatorSelectors.MemberNameValidatorSelectorFactory(properties));
+		public static ValidationResult Validate<T>(this IValidator<T> validator, IDatabase database, T instance, params string[] properties) {
+			var context = new ValidationContext<T>(database, instance, new PropertyChain(), ValidatorOptions.ValidatorSelectors.MemberNameValidatorSelectorFactory(properties));
 			return validator.Validate(context);
 		}
         /// <summary>
@@ -781,7 +781,7 @@ namespace Pure.Data {
         /// <param name="selector"></param>
         /// <param name="ruleSet"></param>
         /// <returns></returns>
-		public static ValidationResult Validate<T>(this IValidator<T> validator, T instance, IValidatorSelector selector = null, string ruleSet = null) {
+		public static ValidationResult Validate<T>(this IValidator<T> validator, IDatabase database, T instance, IValidatorSelector selector = null, string ruleSet = null) {
 			if(selector != null && ruleSet != null) {
 				throw new InvalidOperationException("Cannot specify both an IValidatorSelector and a RuleSet.");
 			}
@@ -795,7 +795,7 @@ namespace Pure.Data {
 				selector = ValidatorOptions.ValidatorSelectors.RulesetValidatorSelectorFactory(ruleSetNames);
 			} 
 
-			var context = new ValidationContext<T>(instance, new PropertyChain(), selector);
+			var context = new ValidationContext<T>(database, instance, new PropertyChain(), selector);
 			return validator.Validate(context);
 		}
 
@@ -806,9 +806,9 @@ namespace Pure.Data {
 		/// <param name="instance">The object to validate</param>
 		/// <param name="propertyExpressions">Expressions to specify the properties to validate</param>
 		/// <returns>A ValidationResult object containing any validation failures</returns>
-		public static Task<ValidationResult> ValidateAsync<T>(this IValidator<T> validator, T instance, params Expression<Func<T, object>>[] propertyExpressions) {
+		public static Task<ValidationResult> ValidateAsync<T>(this IValidator<T> validator, IDatabase database, T instance, params Expression<Func<T, object>>[] propertyExpressions) {
 			var selector = ValidatorOptions.ValidatorSelectors.MemberNameValidatorSelectorFactory(MemberNameValidatorSelector.MemberNamesFromExpressions(propertyExpressions));
-			var context = new ValidationContext<T>(instance, new PropertyChain(), selector);
+			var context = new ValidationContext<T>(database, instance, new PropertyChain(), selector);
 			return validator.ValidateAsync(context);
 		}
 
@@ -818,8 +818,8 @@ namespace Pure.Data {
 		/// <param name="instance">The object to validate</param>
 		/// <param name="properties">The names of the properties to validate.</param>
 		/// <returns>A ValidationResult object containing any validation failures.</returns>
-		public static Task<ValidationResult> ValidateAsync<T>(this IValidator<T> validator, T instance, params string[] properties) {
-			var context = new ValidationContext<T>(instance, new PropertyChain(), ValidatorOptions.ValidatorSelectors.MemberNameValidatorSelectorFactory(properties));
+		public static Task<ValidationResult> ValidateAsync<T>(this IValidator<T> validator, IDatabase database, T instance, params string[] properties) {
+			var context = new ValidationContext<T>(database, instance, new PropertyChain(), ValidatorOptions.ValidatorSelectors.MemberNameValidatorSelectorFactory(properties));
 			return validator.ValidateAsync(context);
 		}
         /// <summary>
@@ -831,7 +831,7 @@ namespace Pure.Data {
         /// <param name="selector"></param>
         /// <param name="ruleSet"></param>
         /// <returns></returns>
-		public static Task<ValidationResult> ValidateAsync<T>(this IValidator<T> validator, T instance, IValidatorSelector selector = null, string ruleSet = null) {
+		public static Task<ValidationResult> ValidateAsync<T>(this IValidator<T> validator,IDatabase database, T instance, IValidatorSelector selector = null, string ruleSet = null) {
 			if (selector != null && ruleSet != null) {
 				throw new InvalidOperationException("Cannot specify both an IValidatorSelector and a RuleSet.");
 			}
@@ -845,7 +845,7 @@ namespace Pure.Data {
 				selector = ValidatorOptions.ValidatorSelectors.RulesetValidatorSelectorFactory(ruleSetNames);
 			}
 
-			var context = new ValidationContext<T>(instance, new PropertyChain(), selector);
+			var context = new ValidationContext<T>( database, instance, new PropertyChain(), selector);
 			return validator.ValidateAsync(context);
 		}
 
@@ -855,8 +855,8 @@ namespace Pure.Data {
 		/// <param name="validator">The validator this method is extending.</param>
 		/// <param name="instance">The instance of the type we are validating.</param>
 		/// <param name="ruleSet">Optional: a ruleset when need to validate against.</param>
-		public static void ValidateAndThrow<T>(this IValidator<T> validator, T instance, string ruleSet = null) {
-			var result = validator.Validate(instance, ruleSet: ruleSet);
+		public static void ValidateAndThrow<T>(this IValidator<T> validator, IDatabase database, T instance, string ruleSet = null) {
+			var result = validator.Validate(database, instance, ruleSet: ruleSet);
 
 			if (!result.IsValid) {
 				throw new ValidationException(result.Errors);
@@ -869,9 +869,9 @@ namespace Pure.Data {
 		/// <param name="validator">The validator this method is extending.</param>
 		/// <param name="instance">The instance of the type we are validating.</param>
 		/// <param name="ruleSet">Optional: a ruleset when need to validate against.</param>
-		public static Task ValidateAndThrowAsync<T>(this IValidator<T> validator, T instance, string ruleSet = null) {
+		public static Task ValidateAndThrowAsync<T>(this IValidator<T> validator, IDatabase database, T instance, string ruleSet = null) {
 			return validator
-				.ValidateAsync(instance, ruleSet: ruleSet)
+				.ValidateAsync(database, instance, ruleSet: ruleSet)
 				.Then(r => r.IsValid
 					? TaskHelpers.Completed()
 					: TaskHelpers.FromError(new ValidationException(r.Errors)));

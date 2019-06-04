@@ -12,11 +12,11 @@ namespace Pure.Data
     public  class MySqlBulkOperate : AbstractBulkOperate
     { 
         public Action<MySqlBulkLoader> ConfigAction { get; set; }
-        public MySqlBulkOperate(Action<MySqlBulkLoader> configAction) : base()
+        public MySqlBulkOperate(Action<MySqlBulkLoader> configAction) 
         {
             ConfigAction = configAction;
         }
-        public MySqlBulkOperate( ) : base()
+        public MySqlBulkOperate( ) 
         { 
         }
 
