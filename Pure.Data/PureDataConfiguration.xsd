@@ -137,9 +137,12 @@
             <xs:attribute name="EnableLobConverter" type="xs:boolean"  default="false" />
             <xs:attribute name="LobConverterClassName" type="xs:string" />
             <xs:attribute name="BulkOperateClassName" type="xs:string" />
+            
+            <xs:attribute name="EnableDefaultPropertySecurityValidate" type="xs:boolean"  default="false"  />
+            <xs:attribute name="PropertySecurityValidateClassName" type="xs:string" />
 
             
-            
+
 
           </xs:complexType>
         </xs:element>

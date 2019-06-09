@@ -7,6 +7,8 @@ using System.Linq;
 using System.Reflection;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using Pure.Data.Validations;
+
 namespace Pure.Data
 {
     /// <summary>
@@ -392,6 +394,9 @@ namespace Pure.Data
 
                     }
                     databaseConfig.BulkOperateClassName = settings.BulkOperateClassName;
+                    databaseConfig.EnableDefaultPropertySecurityValidate = settings.EnableDefaultPropertySecurityValidate;
+
+                    databaseConfig.PropertySecurityValidateClassName = settings.PropertySecurityValidateClassName;
 
                     if (!string.IsNullOrEmpty(settings.BulkOperateClassName))
                     {
@@ -417,6 +422,36 @@ namespace Pure.Data
                             Log("没有找到相关IBulkOperate实现类,BulkOperateClassName: " + settings.BulkOperateClassName, new ArgumentException("没有找到相关IBulkOperate实现类,BulkOperateClassName: " + settings.BulkOperateClassName), MessageType.Error);
 
                             throw new ArgumentException("没有找到相关IBulkOperate实现类,BulkOperateClassName: " + settings.BulkOperateClassName, ex);
+
+                        }
+
+                    }
+
+
+                    if (!string.IsNullOrEmpty(settings.PropertySecurityValidateClassName))
+                    {
+
+                        try
+                        {
+                            Type type = Type.GetType(settings.PropertySecurityValidateClassName);
+
+                            if (type != null)
+                            {
+                                IPropertySecurityValidate obj = (IPropertySecurityValidate)Activator.CreateInstance(type, true);
+                                PropertySecurityValidateManage.Instance.Register(settings.PropertySecurityValidateClassName, obj);
+
+                            }
+                            else
+                            {
+                                Log("IPropertySecurityValidate 无法找到实现类, 将启用默认的安全校验器！" );
+
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            Log("IPropertySecurityValidate 无法找到实现类, 将启用默认的安全校验器！");
+
+                            // throw new ArgumentException("没有找到相关IBulkOperate实现类,PropertySecurityValidateClassName: " + settings.PropertySecurityValidateClassName, ex);
 
                         }
 

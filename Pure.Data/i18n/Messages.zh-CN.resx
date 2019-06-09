@@ -231,4 +231,7 @@
   <data name="valid_success" xml:space="preserve">
     <value>验证通过</value>
   </data>
+  <data name="stringsafety_error" xml:space="preserve">
+    <value>'{PropertyName}' 存在危险的特殊字符。</value>
+  </data>
 </root>

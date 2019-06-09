@@ -23,11 +23,11 @@ namespace Pure.Data
         IList<IPropertyMap> Properties { get; }
         Type EntityType { get; }
 
-        ValidationResult Validate<TEntity>(TEntity instance);
+        ValidationResult Validate<TEntity>(IDatabase database, TEntity instance);
 
-        ValidationResult Validate<TEntity>(TEntity instance, params string[] properties);
-        ValidationResult Validate<TEntity>(TEntity instance, params Expression<Func<TEntity, object>>[] propertyExpressions);
-        void ValidateAndThrow<TEntity>(TEntity instance);
+        ValidationResult Validate<TEntity>(IDatabase database, TEntity instance, params string[] properties);
+        ValidationResult Validate<TEntity>(IDatabase database, TEntity instance, params Expression<Func<TEntity, object>>[] propertyExpressions);
+        void ValidateAndThrow<TEntity>(IDatabase database, TEntity instance);
         
 
     }
@@ -210,7 +210,10 @@ namespace Pure.Data
                                     ruleBuilder.LengthMaximum(map.ColumnSize);
                                 }
                             }
-                           
+
+                            //启用Web 字符串安全验证
+                            ruleBuilder.SetValidator(PropertySecurityValidate.Instance);
+
                         }
                         if (!map.IsNullabled )
                         {
@@ -353,11 +356,11 @@ namespace Pure.Data
         /// </summary>
         /// <param name="instance"></param>
         /// <returns></returns>
-        public ValidationResult Validate<TEntity>(TEntity instance)
+        public ValidationResult Validate<TEntity>(IDatabase database, TEntity instance)
         {
             ValidInstance(instance, false);
 
-            return ValidateInternal(new ValidationContext<TEntity>(instance, new PropertyChain(), ValidatorOptions.ValidatorSelectors.DefaultValidatorSelectorFactory()));
+            return ValidateInternal(new ValidationContext<TEntity>(database, instance, new PropertyChain(), ValidatorOptions.ValidatorSelectors.DefaultValidatorSelectorFactory()));
         }
 
         /// <summary>
@@ -368,12 +371,12 @@ namespace Pure.Data
         /// <param name="instance"></param>
         /// <param name="propertyExpressions"></param>
         /// <returns></returns>
-        public ValidationResult Validate<TEntity>(TEntity instance, params Expression<Func<TEntity, object>>[] propertyExpressions)
+        public ValidationResult Validate<TEntity>(IDatabase database, TEntity instance, params Expression<Func<TEntity, object>>[] propertyExpressions)
         {
             ValidInstance(instance, false);
              
             var selector = ValidatorOptions.ValidatorSelectors.MemberNameValidatorSelectorFactory(MemberNameValidatorSelector.MemberNamesFromExpressions(propertyExpressions));
-            var context = new ValidationContext<TEntity>(instance, new PropertyChain(), selector);
+            var context = new ValidationContext<TEntity>(database, instance, new PropertyChain(), selector);
             return ValidateInternal(context);
         }
 
@@ -383,11 +386,11 @@ namespace Pure.Data
         /// <param name="instance">The object to validate</param>
         /// <param name="properties">The names of the properties to validate.</param>
         /// <returns>A ValidationResult object containing any validation failures.</returns>
-        public ValidationResult Validate<TEntity>(TEntity instance, params string[] properties)
+        public ValidationResult Validate<TEntity>(IDatabase database, TEntity instance, params string[] properties)
         {
             ValidInstance(instance, false);
 
-            var context = new ValidationContext<TEntity>(instance, new PropertyChain(), ValidatorOptions.ValidatorSelectors.MemberNameValidatorSelectorFactory(properties));
+            var context = new ValidationContext<TEntity>(database, instance, new PropertyChain(), ValidatorOptions.ValidatorSelectors.MemberNameValidatorSelectorFactory(properties));
             return ValidateInternal(context);
         }
 
@@ -395,9 +398,9 @@ namespace Pure.Data
         /// 验证如果不通过抛出异常
         /// </summary>
         /// <param name="instance"></param>
-        public void ValidateAndThrow<TEntity>(TEntity instance)
+        public void ValidateAndThrow<TEntity>(IDatabase database, TEntity instance)
         {
-            var result = Validate(instance);
+            var result = Validate(database, instance);
 
             if (!result.IsValid)
             {
@@ -477,9 +480,7 @@ namespace Pure.Data
                 AddRuleBuilder(propertyInfo, ruleBuilder);//添加RuleBuilder
                 return ruleBuilder;
             }
-            return ruleBuilder;
-
-
+            return ruleBuilder; 
         }
         /// <summary>
         /// 加载验证的显示名称
@@ -732,11 +733,11 @@ namespace Pure.Data
         /// </summary>
         /// <param name="instance"></param>
         /// <returns></returns>
-        public ValidationResult Validate<TEntity>(TEntity instance)
+        public ValidationResult Validate<TEntity>(IDatabase database, TEntity instance)
         {
             ValidInstance(instance, false);
 
-            return ValidateInternal(new ValidationContext<TEntity>(instance, new PropertyChain(), ValidatorOptions.ValidatorSelectors.DefaultValidatorSelectorFactory()));
+            return ValidateInternal(new ValidationContext<TEntity>(database, instance, new PropertyChain(), ValidatorOptions.ValidatorSelectors.DefaultValidatorSelectorFactory()));
         }
 
         /// <summary>
@@ -747,12 +748,12 @@ namespace Pure.Data
         /// <param name="instance"></param>
         /// <param name="propertyExpressions"></param>
         /// <returns></returns>
-        public ValidationResult Validate<TEntity>(TEntity instance, params Expression<Func<TEntity, object>>[] propertyExpressions)
+        public ValidationResult Validate<TEntity>(IDatabase database, TEntity instance, params Expression<Func<TEntity, object>>[] propertyExpressions)
         {
             ValidInstance(instance, false);
 
             var selector = ValidatorOptions.ValidatorSelectors.MemberNameValidatorSelectorFactory(MemberNameValidatorSelector.MemberNamesFromExpressions(propertyExpressions));
-            var context = new ValidationContext<TEntity>(instance, new PropertyChain(), selector);
+            var context = new ValidationContext<TEntity>(database, instance, new PropertyChain(), selector);
             return ValidateInternal(context);
         }
 
@@ -762,11 +763,11 @@ namespace Pure.Data
         /// <param name="instance">The object to validate</param>
         /// <param name="properties">The names of the properties to validate.</param>
         /// <returns>A ValidationResult object containing any validation failures.</returns>
-        public ValidationResult Validate<TEntity>(TEntity instance, params string[] properties)
+        public ValidationResult Validate<TEntity>(IDatabase database, TEntity instance, params string[] properties)
         {
             ValidInstance(instance, false);
 
-            var context = new ValidationContext<TEntity>(instance, new PropertyChain(), ValidatorOptions.ValidatorSelectors.MemberNameValidatorSelectorFactory(properties));
+            var context = new ValidationContext<TEntity>(database, instance, new PropertyChain(), ValidatorOptions.ValidatorSelectors.MemberNameValidatorSelectorFactory(properties));
             return ValidateInternal(context);
         }
 
@@ -774,9 +775,9 @@ namespace Pure.Data
         /// 验证如果不通过抛出异常
         /// </summary>
         /// <param name="instance"></param>
-        public void ValidateAndThrow<TEntity>(TEntity instance)
+        public void ValidateAndThrow<TEntity>(IDatabase database, TEntity instance)
         {
-            var result = Validate(instance);
+            var result = Validate(database, instance);
 
             if (!result.IsValid)
             {
@@ -794,6 +795,7 @@ namespace Pure.Data
             {
                 throw new ValidationException("ValidationContext Cannot be null to Validate.");
             }
+             
 
 
             var failures = nestedValidators.SelectMany(x => x.Validate(context)).ToList();

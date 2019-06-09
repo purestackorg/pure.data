@@ -13,6 +13,8 @@
     EnableLobConverter="false"
     LobConverterClassName=""
     BulkOperateClassName=""
+    EnableDefaultPropertySecurityValidate="false"
+    PropertySecurityValidateClassName=""
     
     EnableDebug="true"
     EnableIntercept="true"

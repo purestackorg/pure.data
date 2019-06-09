@@ -19,7 +19,7 @@ namespace Pure.Data.Test
             string title = "ValidationTest";
             Console.Title = title;
 
-            CodeTimer.Time(title, 10, () => {
+            CodeTimer.Time(title, 1, () => {
                  
                 Convert();
                 
@@ -40,12 +40,13 @@ namespace Pure.Data.Test
             v.Name = "http://www.sdfd.com";
             v.Age = 1;
             v.Email = "324234234234@qq.com";
-         
-            var result = mapper.Validate(v, "Age");
+            v.Name = "<script>alert(3242)</script>";
+
+            var result = mapper.Validate(db, v, "Age");
 
 
             var result2 = db.Validate(v, m => m.Name, m => m.Age);
-            var result3 = mapper.Validate(v );
+            var result3 = mapper.Validate(db, v );
 
             Console.WriteLine(result.ToString());
             Console.WriteLine(result2.ToString());

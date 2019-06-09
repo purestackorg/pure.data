@@ -704,6 +704,23 @@ namespace Pure.Data
             get { return _BulkOperateClassName; }
             set { _BulkOperateClassName = value; }
         }
+
+        private bool _EnableDefaultPropertySecurityValidate = false; 
+        [XmlAttribute]
+        public bool EnableDefaultPropertySecurityValidate
+        {
+            get { return _EnableDefaultPropertySecurityValidate; }
+            set { _EnableDefaultPropertySecurityValidate = value; }
+        }
+        
+        private string _PropertySecurityValidateClassName = "";
+         
+        [XmlAttribute]
+        public string PropertySecurityValidateClassName
+        {
+            get { return _PropertySecurityValidateClassName; }
+            set { _PropertySecurityValidateClassName = value; }
+        }
         #region CodeGen Setting
         private bool _EnableCodeGen = false;
 

@@ -1734,7 +1734,7 @@ namespace Pure.Data
             {
                 throw new ArgumentException("Cannot find IClassMapper of "+typeof(T).Name );
             }
-            return mapper.Validate(instance); 
+            return mapper.Validate(this, instance); 
         }
         public ValidationResult Validate<T>(T instance,  params Expression<Func<T, object>>[] propertyExpressions) where T : class
         {
@@ -1743,7 +1743,7 @@ namespace Pure.Data
             {
                 throw new ArgumentException("Cannot find IClassMapper of " + typeof(T).Name);
             }
-            return mapper.Validate(instance, propertyExpressions);
+            return mapper.Validate(this, instance, propertyExpressions);
         }
         public ValidationResult Validate<T>(T instance, params string[] properties) where T : class
         {
@@ -1752,7 +1752,7 @@ namespace Pure.Data
             {
                 throw new ArgumentException("Cannot find IClassMapper of " + typeof(T).Name);
             }
-            return mapper.Validate(instance, properties);
+            return mapper.Validate(this, instance, properties);
         }
         public void ValidateAndThrow<T>(T instance) where T : class
         {
@@ -1761,7 +1761,7 @@ namespace Pure.Data
             {
                 throw new ArgumentException("Cannot find IClassMapper of " + typeof(T).Name);
             }
-             mapper.ValidateAndThrow(instance);
+             mapper.ValidateAndThrow(this, instance);
         }
         public void LoadAllMap(List<Assembly> MappingAssemblies = null, LoadMapperMode LoadMode = LoadMapperMode.FluentMapper)
         {

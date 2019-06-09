@@ -222,7 +222,16 @@ namespace Pure.Data.i18n
                 return ResourceManager.GetString("idcard_error", resourceCulture);
             }
         }
-
+        /// <summary>
+        ///   查找类似 &apos;{PropertyName}&apos; is not a valid china ID Card number. 的本地化字符串。
+        /// </summary>
+        public static string stringsafety_error
+        {
+            get
+            {
+                return ResourceManager.GetString("stringsafety_error", resourceCulture);
+            }
+        }
         /// <summary>
         ///   查找类似 &apos;{PropertyName}&apos; must be between {From} and {To}. You entered {Value}. 的本地化字符串。
         /// </summary>
@@ -365,7 +374,13 @@ namespace Pure.Data.i18n
                 return ResourceManager.GetString("orgcode_error", resourceCulture);
             }
         }
-
+        //public static string xss_error
+        //{
+        //    get
+        //    {
+        //        return ResourceManager.GetString("xss_error", resourceCulture);
+        //    }
+        //}
         /// <summary>
         ///   查找类似 &apos;{PropertyName}&apos; must start with a letter, the length of 6 to 18, can only contain letters, numbers and underscores. 的本地化字符串。
         /// </summary>

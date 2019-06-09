@@ -12,6 +12,8 @@
     EnableLobConverter="false"
     LobConverterClassName="Pure.Data.Test.MyLobParameterConverter,Pure.Data.Test"
     BulkOperateClassName="Pure.Data.MySqlBulkOperate,Pure.Data.MySql"
+        EnableDefaultPropertySecurityValidate="true"
+    PropertySecurityValidateClassName=""
     
     EnableDebug="true"
     EnableIntercept="true"

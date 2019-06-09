@@ -26,12 +26,12 @@ namespace Pure.Data.Validations.Internal {
 		public RuleBuilder(PropertyRule rule) {
 			this.rule = rule;
 		}
-
-		/// <summary>
-		/// Sets the validator associated with the rule.
-		/// </summary>
-		/// <param name="validator">The validator to set</param>
-		/// <returns></returns>
+        
+        /// <summary>
+        /// Sets the validator associated with the rule.
+        /// </summary>
+        /// <param name="validator">The validator to set</param>
+        /// <returns></returns>
         public RuleBuilder<T, TProperty> SetValidator(IPropertyValidator validator)
         {
 			validator.Guard("Cannot pass a null validator to SetValidator.");
