@@ -177,6 +177,7 @@ namespace FluentExpressionSQL
             CurrentWhereExpression = null;
             CurrentColAlias = null;
             CaseWhenStatement.Clear();
+            
         }
 
         private string GetDbParameterName()

@@ -15,6 +15,7 @@ namespace FluentExpressionSQL
 
         Dictionary<string, Dictionary<Type, ITableMap>> tableMaps = new Dictionary<string, Dictionary<Type, ITableMap>>();
         ConcurrentDictionary<string, FluentExpressionSqlBuilder> SqlBuilders = new ConcurrentDictionary<string, FluentExpressionSqlBuilder>();
+        private static object oCreateFluentExpressSqlBuilderlock = new object();
         public FluentExpressionSqlBuilder Load(IDatabase db)
         {
             DatabaseType dbType = db.DatabaseType;
@@ -27,81 +28,74 @@ namespace FluentExpressionSQL
             }
             if (expressionSqlBuilder == null)
             {
-                //if (HasLoad == false)
-                //{
-                switch (dbType)
+                lock (oCreateFluentExpressSqlBuilderlock)
                 {
-                    case DatabaseType.None:
-                        break;
-                    case DatabaseType.SqlServer:
-                        expressionSqlBuilder = new FluentExpressionSqlBuilder(ExpDbType.SQLServer);
-                        break;
-                    case DatabaseType.SqlCe:
-                        expressionSqlBuilder = new FluentExpressionSqlBuilder(ExpDbType.SqlCe);
-                        break;
-                    case DatabaseType.PostgreSQL:
-                        expressionSqlBuilder = new FluentExpressionSqlBuilder(ExpDbType.PostgreSQL);
-                        break;
-                    case DatabaseType.MySql:
-                        expressionSqlBuilder = new FluentExpressionSqlBuilder(ExpDbType.MySQL);
-                        break;
-                    case DatabaseType.Oracle:
-                        expressionSqlBuilder = new FluentExpressionSqlBuilder(ExpDbType.Oracle);
-                        break;
-                    case DatabaseType.SQLite:
-                        expressionSqlBuilder = new FluentExpressionSqlBuilder(ExpDbType.SQLite);
-                        break;
-                    case DatabaseType.Access:
-                        break;
-                    case DatabaseType.OleDb:
-                        break;
-                    case DatabaseType.Firebird:
-                        expressionSqlBuilder = new FluentExpressionSqlBuilder(ExpDbType.Firebird);
-                        break;
-                    case DatabaseType.DB2:
-                        expressionSqlBuilder = new FluentExpressionSqlBuilder(ExpDbType.DB2);
-                        break;
-                    case DatabaseType.DB2iSeries:
-                        break;
-                    case DatabaseType.SybaseASA:
-                        break;
-                    case DatabaseType.SybaseASE:
-                        break;
-                    case DatabaseType.SybaseUltraLite:
-                        break;
-                    case DatabaseType.DM:
-                        break;
-                    default:
-                        break;
+                    //if (HasLoad == false)
+                    //{
+                    switch (dbType)
+                    {
+                        case DatabaseType.None:
+                            break;
+                        case DatabaseType.SqlServer:
+                            expressionSqlBuilder = new FluentExpressionSqlBuilder(ExpDbType.SQLServer);
+                            break;
+                        case DatabaseType.SqlCe:
+                            expressionSqlBuilder = new FluentExpressionSqlBuilder(ExpDbType.SqlCe);
+                            break;
+                        case DatabaseType.PostgreSQL:
+                            expressionSqlBuilder = new FluentExpressionSqlBuilder(ExpDbType.PostgreSQL);
+                            break;
+                        case DatabaseType.MySql:
+                            expressionSqlBuilder = new FluentExpressionSqlBuilder(ExpDbType.MySQL);
+                            break;
+                        case DatabaseType.Oracle:
+                            expressionSqlBuilder = new FluentExpressionSqlBuilder(ExpDbType.Oracle);
+                            break;
+                        case DatabaseType.SQLite:
+                            expressionSqlBuilder = new FluentExpressionSqlBuilder(ExpDbType.SQLite);
+                            break;
+                        case DatabaseType.Access:
+                            break;
+                        case DatabaseType.OleDb:
+                            break;
+                        case DatabaseType.Firebird:
+                            expressionSqlBuilder = new FluentExpressionSqlBuilder(ExpDbType.Firebird);
+                            break;
+                        case DatabaseType.DB2:
+                            expressionSqlBuilder = new FluentExpressionSqlBuilder(ExpDbType.DB2);
+                            break;
+                        case DatabaseType.DB2iSeries:
+                            break;
+                        case DatabaseType.SybaseASA:
+                            break;
+                        case DatabaseType.SybaseASE:
+                            break;
+                        case DatabaseType.SybaseUltraLite:
+                            break;
+                        case DatabaseType.DM:
+                            break;
+                        default:
+                            break;
+                    }
+
+                    if (expressionSqlBuilder == null)
+                    {
+                        throw new Exception("FluentExpressionSqlBuilder 不支持数据库 " + dbType);
+                    }
+
+                    //    HasLoad = true;
+                    //}
+
+
+                    //初始化 FluentExpressionSqlBuilder 别名映射
+                    expressionSqlBuilder.TableMapperContainer = new TableMapperContainer(db.DatabaseName);
+                    var maps = LoadTableMaps(db);
+                    expressionSqlBuilder.TableMapperContainer.SetTableMapper(maps);
+                    
+
+                    SqlBuilders[key] = expressionSqlBuilder;
                 }
-
-                if (expressionSqlBuilder == null)
-                {
-                    throw new Exception("FluentExpressionSqlBuilder 不支持数据库 " + dbType);
-                }
-
-                //    HasLoad = true;
-                //}
-
-
-                //初始化 FluentExpressionSqlBuilder 别名映射
-                expressionSqlBuilder.TableMapperContainer = new TableMapperContainer(db.DatabaseName);
-                var maps = LoadTableMaps(db);
-                expressionSqlBuilder.TableMapperContainer.SetTableMapper(maps);
-                //expressionSqlBuilder.TableMapperContainer.InitTableMapper(() =>
-                //{
-                //    Dictionary<Type, ITableMap> maps = new Dictionary<Type, ITableMap>();
-                //    foreach (var item in db.GetAllMap())
-                //    {
-                //        if (!maps.ContainsKey(item.Key))
-                //        {
-                //            maps.Add(item.Key, new TableMap(item.Key, item.Value.TableName));
-                //        }
-                //    }
-                //    return maps;
-                //});
-
-                SqlBuilders[key]=expressionSqlBuilder;
+                
             }
 
 

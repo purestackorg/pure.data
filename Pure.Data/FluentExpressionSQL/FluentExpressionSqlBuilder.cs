@@ -16,8 +16,10 @@ namespace FluentExpressionSQL
         /// <summary>
         /// 临时表名
         /// </summary>
-        public  List<string> S_listEnglishWords = new List<string> { "a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z" };
-
+        private static List<string> S_listEnglishWords;
+        static FluentExpressionSqlBuilder() {
+            S_listEnglishWords = new List<string> { "a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z" };
+        }
         #region 执行代理方法
         public ExecuteScalarDelegate ExecuteScalarAction { get; set; }
         public ExecuteDelegate ExecuteDelegateAction { get; set; }
@@ -39,6 +41,8 @@ namespace FluentExpressionSQL
                 S_listEnglishWords = _TableAliasContainer;
             }
             SubQueryStatement = new StatementSubQuery();
+
+            _ExpressionContainers = new Dictionary<Type, dynamic>();
         }
 
         #region 子查询
@@ -76,18 +80,39 @@ namespace FluentExpressionSQL
             SubQueryStatement.Clear();
         }
         #endregion
-       
+
+        private Dictionary<Type, dynamic> _ExpressionContainers = null;
+
         private FluentExpressionSQLCore<T> NewExpressionContainer<T>()
         {
-            var e = new FluentExpressionSQLCore<T>(DatabaseType, TableMapperContainer);
-            e.ExecuteScalarAction = ExecuteScalarAction;
-            e.ExecuteDelegateAction = ExecuteDelegateAction;
-            e.ExecuteReaderAction = ExecuteReaderAction;
-            e.ExecuteScalarAsyncAction = ExecuteScalarAsyncAction;
-            e.ExecuteDelegateAsyncAction = ExecuteDelegateAsyncAction;
-            e.ExecuteReaderAsyncAction = ExecuteReaderAsyncAction;
-            e.Database = Database;
-            return e;
+            dynamic cached = null;
+            FluentExpressionSQLCore<T> result = null;
+            Type type = typeof(T);
+            if (_ExpressionContainers.TryGetValue(type, out cached))
+            {
+                result = cached as FluentExpressionSQLCore<T>;
+            }
+
+            if (result == null)
+            {
+                var e = new FluentExpressionSQLCore<T>(DatabaseType, TableMapperContainer);
+                e.ExecuteScalarAction = ExecuteScalarAction;
+                e.ExecuteDelegateAction = ExecuteDelegateAction;
+                e.ExecuteReaderAction = ExecuteReaderAction;
+                e.ExecuteScalarAsyncAction = ExecuteScalarAsyncAction;
+                e.ExecuteDelegateAsyncAction = ExecuteDelegateAsyncAction;
+                e.ExecuteReaderAsyncAction = ExecuteReaderAsyncAction;
+                e.Database = Database;
+
+                result = e;
+                _ExpressionContainers[type] = e;
+            }
+            else
+            {
+                result.Clear();
+            }
+             
+            return result;
         }
 
 		public FluentExpressionSQLCore<T> Delete<T>()

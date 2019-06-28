@@ -157,7 +157,7 @@ namespace FluentExpressionSQL
             {
                 result = result.Replace(item.Key.ToString(), FormatParamString(item.Value));
             }
-            ///清空子查询列表临时数据
+            //清空子查询列表临时数据
             if (ExpressionSqlBuilder.ExistSubQuery())
             {
                 foreach (KeyValuePair<string, object> item in ExpressionSqlBuilder.GetExistDbParameters())

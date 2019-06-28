@@ -130,7 +130,11 @@ Server=myServerAddress;Port=1234;Database=myDataBase;Uid=myUsername;Pwd=myPasswo
             }
         }
 
-
+        public static readonly object _DatabaseDapperImplementorLock = new object();
+        public static readonly object _DatabaseSqlDialectProviderLock = new object();
+        public static readonly object _DatabaseSqlBuilderLock = new object();
+        public static readonly object _DatabaseFluentSqlBuilderLock = new object();
+        
         public static readonly object _logHelperLock = new object();
         public static readonly object _DatabaseConfigLock = new object();
         public static readonly object _DatabaseConnectionLock = new object();

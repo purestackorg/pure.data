@@ -368,7 +368,10 @@ namespace Pure.Data
         {
             return await db.DapperImplementor.CountAsync<T>(GetDbConnection(db), predicate, GetDbTransaction(db, transaction), GetCommandTimeout(db, commandTimeout));
         }
-
+        public static async Task<bool> ExistsAsync<TEntity>(this IDatabase db, object predicate = null) where TEntity : class
+        {
+            return await db.CountAsync<TEntity>(predicate) > 0;
+        }
         /// <summary>
         /// Executes a query for the specified id, returning the data typed as per T.
         /// </summary>

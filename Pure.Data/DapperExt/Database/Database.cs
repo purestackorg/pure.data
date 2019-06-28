@@ -28,17 +28,44 @@ namespace Pure.Data
     {
 
         #region Property And Field
- 
 
+        private FluentExpressionSqlBuilder _FluentSqlBuilder = null; 
         public FluentExpressionSqlBuilder FluentSqlBuilder
         {
             get
             {
+                if (_FluentSqlBuilder == null)
+                {
+                    lock (DatabaseConfigPool._DatabaseFluentSqlBuilderLock)
+                    {
+                        if (_FluentSqlBuilder == null)
+                        {
+                            _FluentSqlBuilder = FluentExpressionSqlBuilderBoostraper.Instance.Load(this);
+                            return _FluentSqlBuilder;
+                        }
+                    }
+                }
+                return _FluentSqlBuilder;
+
                 //return expressionSqlBuilder; 
-                return FluentExpressionSqlBuilderBoostraper.Instance.Load(this);
             }
         }
-        public SqlBuilder SqlBuilder { get { return new SqlBuilder(this); } }
+        private SqlBuilder _SqlBuilder = null;
+
+        public SqlBuilder SqlBuilder { get {
+                if (_SqlBuilder == null)
+                {
+                    lock (DatabaseConfigPool._DatabaseSqlBuilderLock)
+                    {
+                        if (_SqlBuilder == null)
+                        {
+                            _SqlBuilder = new SqlBuilder(this);
+                            return _SqlBuilder;
+                        }
+                    }
+                }
+                return _SqlBuilder;
+            } }
 
         public string DatabaseName { get; private set; }
         public string ProviderName { get; private set; }
@@ -56,28 +83,65 @@ namespace Pure.Data
             }
         }
 
+        private ISqlDialectProvider _SqlDialectProvider = null;
         public ISqlDialectProvider SqlDialectProvider
         {
             get
             {
-                return  SqlDialectProviderLoader.GetSqlProviderByDatabaseType(this.DatabaseType); 
+                if (_SqlDialectProvider == null)
+                {
+                    lock (DatabaseConfigPool._DatabaseSqlDialectProviderLock)
+                    {
+                        if (_SqlDialectProvider == null)
+                        {
+                            _SqlDialectProvider = SqlDialectProviderLoader.GetSqlProviderByDatabaseType(this.DatabaseType);
+                            return _SqlDialectProvider;
+                        }
+                    }
+                }
+                return _SqlDialectProvider;
             }
         }
 
+        
 #if ASYNC
-         public IDapperAsyncImplementor DapperImplementor
+        private IDapperAsyncImplementor _DapperImplementor = null;
+        public IDapperAsyncImplementor DapperImplementor
         {
             get
             {
-                return DapperImplementorBoostraper.Instance.LoadAsync(DatabaseType, this);//_dapper;
+                if (_DapperImplementor == null)
+                {
+                    lock (DatabaseConfigPool._DatabaseDapperImplementorLock)
+                    {
+                        if (_DapperImplementor == null)
+                        {
+                            _DapperImplementor = DapperImplementorBoostraper.Instance.LoadAsync(DatabaseType, this);//_dapper;
+                            return _DapperImplementor;
+                        }
+                    }
+                }
+                return _DapperImplementor;
             }
         }
 #else
+        private IDapperImplementor _DapperImplementor = null;
         public IDapperImplementor DapperImplementor
         {
             get
             {
-                return DapperImplementorBoostraper.Instance.Load(DatabaseType, this);//_dapper;
+                if (_DapperImplementor == null)
+                {
+                    lock (DatabaseConfigPool._DatabaseDapperImplementorLock)
+                    {
+                        if (_DapperImplementor == null)
+                        {
+                            _DapperImplementor = DapperImplementorBoostraper.Instance.Load(DatabaseType, this);//_dapper;
+                            return _DapperImplementor;
+                        }
+                    }
+                }
+                return _DapperImplementor;
             }
         }
 #endif
