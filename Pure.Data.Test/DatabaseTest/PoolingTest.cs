@@ -22,7 +22,7 @@ namespace Pure.Data.Test
             string title = "PoolingTest";
             Console.Title = title;
 
-            CodeTimer.Time(title, 1, () =>
+            CodeTimer.Time(title, 2, () =>
             {
                 //TestGetAndReturn();
                 //TestRun();
@@ -156,7 +156,7 @@ namespace Pure.Data.Test
             using (var pdb = pooldb.GetPooledDatabase())
             {
                 var oo = pdb.InternalResource.FirstOrDefault<UserInfo>(p=>p.Id == 9);
-                 
+                pdb.InternalResource.Close();
             }
             //var db = pooldb.GetPooledDatabase().InternalResource;
             //Log("GetCurrentDatabase:" + db.GetHashCode().ToString(), null);
@@ -171,7 +171,7 @@ namespace Pure.Data.Test
         {
             // ExeTExt();
             //Thread.Sleep(1000);
-            Parallel.Invoke(new ParallelOptions() { MaxDegreeOfParallelism = 50 },
+            Parallel.Invoke(new ParallelOptions() { MaxDegreeOfParallelism = 5 },
                   () =>
                   {
                       ExeTExt();
