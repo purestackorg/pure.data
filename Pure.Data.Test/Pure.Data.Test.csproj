@@ -34,7 +34,7 @@
     <!--<PackageReference Include="Microsoft.Data.Sqlite" Version="3.0.0-preview4.19216.3" />
     <PackageReference Include="MySql.Data" Version="8.0.16" />
     <PackageReference Include="Oracle.ManagedDataAccess.Core" Version="2.18.6" />-->
-    <PackageReference Include="System.Security.Permissions" Version="4.6.0-preview4.19212.13" />
+    <!--<PackageReference Include="System.Security.Permissions" Version="4.6.0-preview4.19212.13" />-->
   </ItemGroup>
 
   <ItemGroup>

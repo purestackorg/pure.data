@@ -1,5 +1,8 @@
 ﻿ 
  ---------------需要将xsd文件都放到vs安装目录下的Xml\Schemas文件夹里
+ 4.3.0.0 20190630
+ 引入数据库连接池PooledDatabase
+
  4.2.1.3 20190604
  新增数据库属性安全验证IPropertySecurityValidate ，可以自行实现过滤Xss攻击等
 

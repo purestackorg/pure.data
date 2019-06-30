@@ -52,10 +52,10 @@ namespace Pure.Data.Test
         public static void Insert()
         {
             var db = DbMocker.NewDataBase();
-            db.Config.EnableOrmLog = false;
-            db.Config.EnableDebug = true;
-            db.Config.KeepConnectionAlive = true;
-            db.Config.Interceptors.Add(new ConnectionTestIntercept());
+            //db.Config.EnableOrmLog = false;
+            //db.Config.EnableDebug = true;
+            //db.Config.KeepConnectionAlive = true;
+            //db.Config.Interceptors.Add(new ConnectionTestIntercept());
 
             var data1 = db.FluentSqlBuilder.Select<UserInfo>().ExecuteList();
             data1 = db.FluentSqlBuilder.Select<UserInfo>().ExecuteList();

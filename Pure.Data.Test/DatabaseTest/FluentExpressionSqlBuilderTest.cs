@@ -20,17 +20,17 @@ namespace Pure.Data.Test
             string title = "FluentExpressionSqlBuilderTest";
             Console.Title = title;
             var db = DbMocker.InstanceDataBase();
-            db.Config.EnableOrmLog = false;
-            db.Config.EnableDebug = true;
-            db.Config.Interceptors.Add(new ConnectionTestIntercept());
+            //db.Config.EnableOrmLog = false;
+            //db.Config.EnableDebug = true;
+            //db.Config.Interceptors.Add(new ConnectionTestIntercept());
             
-            db.LogHelper.Write("Add ConnectionTestIntercept");
+            //db.LogHelper.Write("Add ConnectionTestIntercept");
             CodeTimer.Time(title, 1, () => {
 
                 //CreateSql(db);
                 //Update(db);
                 //FetchWhereExpression(db);
-                Query();
+                Query(db);
             });
 
 
@@ -77,7 +77,7 @@ namespace Pure.Data.Test
             
         }
 
-        public static void Query()
+        public static void Query(IDatabase db)
         {
             bool hasDel = false;
             DateTime now = DateTime.Now;
@@ -88,24 +88,30 @@ namespace Pure.Data.Test
             int intValue = -32;
             double decimalValue = 20.8251;
 
-            using (IDatabase db = DbMocker.NewDataBase())
-            {
+            //using (IDatabase db = DbMocker.NewDataBase())
+            //{
 
 
 
 
-                db.Config.EnableOrmLog = true;
-                db.Config.EnableDebug = true;
-                db.Config.Interceptors.Add(new ConnectionTestIntercept());
+                //db.Config.EnableOrmLog = true;
+                //db.Config.EnableDebug = true;
+                //db.Config.Interceptors.Add(new ConnectionTestIntercept());
                 var ExpressionSqlBuilder = db.FluentSqlBuilder;
+
+
+
                 string keyword = "123";
 
-                var lamb1 = ExpressionSqlBuilder.NewBuilder<UserInfo>()
-                       .AndIf(!string.IsNullOrEmpty(keyword), p => p.Email.Contains(keyword) || p.Name.Contains(keyword));
+            string sqltest = ExpressionSqlBuilder.Select<UserInfo>().AndIf(!string.IsNullOrEmpty(keyword), p => p.Email.Contains(keyword) || p.Name.Contains(keyword)).OrderBy(p => p.Id).TakePage(1, 10).ToSqlString();
+            //Console.WriteLine(sqltest);
 
-                var total = Convert.ToInt32(ExpressionSqlBuilder.Count<UserInfo>().Append(lamb1).ExecuteScalar());
+               // var lamb1 = ExpressionSqlBuilder.NewBuilder<UserInfo>()
+               //        .AndIf(!string.IsNullOrEmpty(keyword), p => p.Email.Contains(keyword) || p.Name.Contains(keyword));
 
-               var data = ExpressionSqlBuilder.Select<UserInfo>().Append(lamb1).OrderBy(p => p.Id).TakePage(1, 10).ExecuteList();
+               // var total = Convert.ToInt32(ExpressionSqlBuilder.Count<UserInfo>().Append(lamb1).ExecuteScalar());
+
+               //var data = ExpressionSqlBuilder.Select<UserInfo>().Append(lamb1).OrderBy(p => p.Id).TakePage(1, 10).ExecuteList();
 
 
                 //string sql = db.FluentExpressionSqlBuilder.Select<UserInfo>(p => new { p.Id, p.Name }).Where(p => p.Age > 50 && p.Id > 1).ToSqlString();
@@ -192,32 +198,32 @@ namespace Pure.Data.Test
 
 
                 //  "长度Length函数"
-                       string sql =ExpressionSqlBuilder.Select<UserInfo>(p => new
-                       {
-                           长度 = p.Name.Length,
-                           大写 = p.Email.ToUpper(),
-                           小写 = p.Email.ToLower(),
-                           TrimStart = " 李佳佳 ".TrimStart(),
-                           TrimEnd = testTrimStr.TrimEnd(),
-                           Trim = testTrimStr.Trim(),
-                           ToString = testTrimStr.ToString(),
-                           Substring = testTrimStr.Substring(1, 2),
-                           SubstringWithAutoLength = p.Email.Substring(1),
-                           IsNullOrEmpty = string.IsNullOrEmpty(p.Email) ? "空" : "非空"
-                       }).Where(p =>
-                           //p.Email.Substring(1,2) == "A"
-                           // p.Email.ToUpper() == "AAA"// &&
-                           // p.Name.StartsWith("ss")
-                           string.IsNullOrWhiteSpace(p.Email)
+                //       string sql =ExpressionSqlBuilder.Select<UserInfo>(p => new
+                //       {
+                //           长度 = p.Name.Length,
+                //           大写 = p.Email.ToUpper(),
+                //           小写 = p.Email.ToLower(),
+                //           TrimStart = " 李佳佳 ".TrimStart(),
+                //           TrimEnd = testTrimStr.TrimEnd(),
+                //           Trim = testTrimStr.Trim(),
+                //           ToString = testTrimStr.ToString(),
+                //           Substring = testTrimStr.Substring(1, 2),
+                //           SubstringWithAutoLength = p.Email.Substring(1),
+                //           IsNullOrEmpty = string.IsNullOrEmpty(p.Email) ? "空" : "非空"
+                //       }).Where(p =>
+                //           //p.Email.Substring(1,2) == "A"
+                //           // p.Email.ToUpper() == "AAA"// &&
+                //           // p.Name.StartsWith("ss")
+                //           string.IsNullOrWhiteSpace(p.Email)
 
 
-                       ).ToSqlString();
+                //       ).ToSqlString();
                      
 
-                var list = db.QueryBySQL<UserInfo>(sql);
+                //var list = db.QueryBySQL<UserInfo>(sql);
 
-                db.LogHelper.Debug(list.Count().ToString());
+                //db.LogHelper.Debug(list.Count().ToString());
             }
-        }
+        //}
     }
 }

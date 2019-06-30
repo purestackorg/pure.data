@@ -39,10 +39,10 @@ namespace Pure.Data.Test
             //BulkTest.Test();
             //MigratorTest.Test();
             // IdGenerateTest.Test();
-            ValidationTest.Test();
+            //ValidationTest.Test();
             //  BackupAndGenTest.Test();
 
-            //PoolingTest.Test();
+            PoolingTest.Test();
         }
     }
 }
