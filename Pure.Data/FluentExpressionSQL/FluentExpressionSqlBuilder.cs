@@ -85,34 +85,46 @@ namespace FluentExpressionSQL
 
         private FluentExpressionSQLCore<T> NewExpressionContainer<T>()
         {
-            dynamic cached = null;
-            FluentExpressionSQLCore<T> result = null;
-            Type type = typeof(T);
-            if (_ExpressionContainers.TryGetValue(type, out cached))
-            {
-                result = cached as FluentExpressionSQLCore<T>;
-            }
 
-            if (result == null)
-            {
-                var e = new FluentExpressionSQLCore<T>(DatabaseType, TableMapperContainer);
-                e.ExecuteScalarAction = ExecuteScalarAction;
-                e.ExecuteDelegateAction = ExecuteDelegateAction;
-                e.ExecuteReaderAction = ExecuteReaderAction;
-                e.ExecuteScalarAsyncAction = ExecuteScalarAsyncAction;
-                e.ExecuteDelegateAsyncAction = ExecuteDelegateAsyncAction;
-                e.ExecuteReaderAsyncAction = ExecuteReaderAsyncAction;
-                e.Database = Database;
+            var e = new FluentExpressionSQLCore<T>(DatabaseType, TableMapperContainer);
+            e.ExecuteScalarAction = ExecuteScalarAction;
+            e.ExecuteDelegateAction = ExecuteDelegateAction;
+            e.ExecuteReaderAction = ExecuteReaderAction;
+            e.ExecuteScalarAsyncAction = ExecuteScalarAsyncAction;
+            e.ExecuteDelegateAsyncAction = ExecuteDelegateAsyncAction;
+            e.ExecuteReaderAsyncAction = ExecuteReaderAsyncAction;
+            e.Database = Database;
+            return e;
 
-                result = e;
-                _ExpressionContainers[type] = e;
-            }
-            else
-            {
-                result.Clear();
-            }
+
+            //dynamic cached = null;
+            //FluentExpressionSQLCore<T> result = null;
+            //Type type = typeof(T);
+            //if (_ExpressionContainers.TryGetValue(type, out cached))
+            //{
+            //    result = cached as FluentExpressionSQLCore<T>;
+            //}
+
+            //if (result == null)
+            //{
+            //    var e = new FluentExpressionSQLCore<T>(DatabaseType, TableMapperContainer);
+            //    e.ExecuteScalarAction = ExecuteScalarAction;
+            //    e.ExecuteDelegateAction = ExecuteDelegateAction;
+            //    e.ExecuteReaderAction = ExecuteReaderAction;
+            //    e.ExecuteScalarAsyncAction = ExecuteScalarAsyncAction;
+            //    e.ExecuteDelegateAsyncAction = ExecuteDelegateAsyncAction;
+            //    e.ExecuteReaderAsyncAction = ExecuteReaderAsyncAction;
+            //    e.Database = Database;
+
+            //    result = e;
+            //    _ExpressionContainers[type] = e;
+            //}
+            //else
+            //{
+            //    result.Clear();
+            //}
              
-            return result;
+            //return result;
         }
 
 		public FluentExpressionSQLCore<T> Delete<T>()

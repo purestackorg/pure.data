@@ -134,6 +134,9 @@ namespace Pure.Data.SqlMap
                 
                 #endregion
             }
+
+            db.Debug("Watch sqlmap files finished .");
+
             #endregion
         }
 
