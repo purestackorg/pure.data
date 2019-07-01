@@ -20,7 +20,7 @@ namespace Pure.Data
         /// <summary>
         /// The asynchronous counterpart to <see cref="IDapperImplementor.Get{T}"/>.
         /// </summary>
-        Task<T> GetAsync<T>(IDbConnection connection, dynamic id, IDbTransaction transaction = null, int? commandTimeout = null) where T : class;
+        Task<T> GetAsync<T>(IDbConnection connection, object id, IDbTransaction transaction = null, int? commandTimeout = null) where T : class;
         /// <summary>
         /// The asynchronous counterpart to <see cref="IDapperImplementor.GetList{T}"/>.
         /// </summary>
@@ -71,7 +71,7 @@ namespace Pure.Data
         Task<IMultipleResultReader> GetMultipleAsync(IDbConnection connection, GetMultiplePredicate predicate, IDbTransaction transaction, int? commandTimeout);
 
         Task<PageDataResult<IEnumerable<T>>> GetPageAsync<T>(IDbConnection connection, object predicate, IList<ISort> sort, int page, int resultsPerPage, IDbTransaction transaction, int? commandTimeout, bool buffered = false) where T : class;
-        Task<PageDataResult<IEnumerable<T>>> GetPageAsync<T>(IDbConnection connection, int page, int resultsPerPage, string sql, dynamic param = null, string allRowsCountSql = null, IDbTransaction transaction = null, int? commandTimeout = null, bool buffered = false) where T : class;
+        Task<PageDataResult<IEnumerable<T>>> GetPageAsync<T>(IDbConnection connection, int page, int resultsPerPage, string sql, object param = null, string allRowsCountSql = null, IDbTransaction transaction = null, int? commandTimeout = null, bool buffered = false) where T : class;
 
 
     }
@@ -550,7 +550,7 @@ namespace Pure.Data
         /// <summary>
         /// The asynchronous counterpart to <see cref="IDapperImplementor.Get{T}"/>.
         /// </summary>
-        public async Task<T> GetAsync<T>(IDbConnection connection, dynamic id, IDbTransaction transaction = null,
+        public async Task<T> GetAsync<T>(IDbConnection connection, object id, IDbTransaction transaction = null,
             int? commandTimeout = null) where T : class
         {
             
@@ -851,7 +851,7 @@ namespace Pure.Data
                 }
             }
         }
-        public async Task<PageDataResult<IEnumerable<T>>> GetPageAsync<T>(IDbConnection connection, int page, int resultsPerPage,   string sql, dynamic param = null, string allRowsCountSql = null, IDbTransaction transaction = null, int? commandTimeout = null, bool buffered = false) where T : class
+        public async Task<PageDataResult<IEnumerable<T>>> GetPageAsync<T>(IDbConnection connection, int page, int resultsPerPage,   string sql, object param = null, string allRowsCountSql = null, IDbTransaction transaction = null, int? commandTimeout = null, bool buffered = false) where T : class
         {
             try
             {

@@ -22,16 +22,24 @@ namespace Pure.Data.Test
             string title = "PoolingTest";
             Console.Title = title;
 
-            CodeTimer.Time(title, 2, () =>
+            CodeTimer.Time(title, 1, () =>
             {
                 //TestGetAndReturn();
                 //TestRun();
                 //TestDbContext();
-
-                TestDbContext();
+                TestGetAndReturnPoolDatabase();
+                //TestDbContext();
             });
 
-            string info = pooldb.Pool.ShowStatisticsInfo();
+
+            string info = "--------------- databaseWrapperPool --------------- \r\n" +databaseWrapperPool.Pool.ShowStatisticsInfo();
+            info += "\r\n";
+            info += "\r\n";
+            Log(info, null, MessageType.Debug);
+
+             info = "--------------- databasePool --------------- \r\n" +databasePool.Pool.ShowStatisticsInfo();
+            info += "\r\n";
+            info += "\r\n";
 
             Log(info, null, MessageType.Debug);
             Console.Read();
@@ -71,7 +79,69 @@ namespace Pure.Data.Test
             ConsoleHelper.Instance.OutputMessage(msg, ex, type);
             FastLogger.WriteLog(msg);
         }
-        public static PooledDatabase pooldb = new PooledDatabase(() => new Pooling.PooledObjectWrapper<IDatabase>(new Database("PureDataConfiguration.xml", Log,
+
+        public static DatabasePool databasePool = new DatabasePool(() => new PooledDatabase("PureDataConfiguration.xml", Log,
+        config => {
+
+
+        })
+        {
+            
+            LogAction = Log,
+            OnValidateObject = (ctx) =>
+            {
+                if (ctx.Direction == Pooling.PooledObjectDirection.Inbound)
+                {
+                    return true;
+                }
+                else
+                {
+                    return true;
+                }
+            },
+            OnReleaseResources = (o) =>
+            {
+                var resource = o as PooledDatabase;
+                Log("Release -> " + resource.GetHashCode() + " , connection: " + resource.Connection.GetHashCode() + ", status : " + resource.Connection.State, null, MessageType.Error);
+                //resource?.Close();
+            },
+            OnResetState = (o) =>
+            {
+                var resource = o as PooledDatabase;
+
+                Log("Reset -> " + resource.GetHashCode() + " , connection: " + resource.Connection.GetHashCode() + ", status : " + resource.Connection.State, null, MessageType.Info);
+                //resource?.Close();
+            },
+            OnCreateResource = (o) =>
+            {
+                var resource = o as PooledDatabase;
+
+                Log("Create -> " + resource.GetHashCode() + " , connection: " + resource.Connection.GetHashCode() + ", status : " + resource.Connection.State, null, MessageType.Warning);
+            },
+            OnEvictResource = (o) =>
+            {
+                var resource = o as PooledDatabase;
+
+                Log("Evict -> " + resource.GetHashCode() + " , connection: " + resource.Connection.GetHashCode() + ", status : " + resource.Connection.State, null, MessageType.Error);
+                //resource?.Close();
+            },
+            OnGetResource = (o) =>
+            {
+                var resource = o as PooledDatabase;
+                Log("Get -> " + resource.GetHashCode() + " , connection: " + resource.Connection.GetHashCode() + ", status : " + resource.Connection.State, null, MessageType.Info);
+            },
+            OnReturnResource = (o) =>
+            {
+                var resource = o as PooledDatabase;
+                Log("Return -> " + resource.GetHashCode() + " , connection: " + resource.Connection.GetHashCode() + ", status : " + resource.Connection.State, null, MessageType.Warning);
+            },
+
+
+        }, Environment.ProcessorCount * 2
+           , new Pooling.EvictionSettings() { Enabled = true, Period = TimeSpan.FromMilliseconds(1000) }
+           );
+
+        public static DatabaseWrapperPool databaseWrapperPool = new DatabaseWrapperPool(() => new Pooling.PooledObjectWrapper<IDatabase>(new Database("PureDataConfiguration.xml", Log,
          config => {
 
          })) {
@@ -104,16 +174,82 @@ namespace Pure.Data.Test
         }, Environment.ProcessorCount * 2
             , new Pooling.EvictionSettings() { Enabled = true, Period =TimeSpan.FromMilliseconds(1000)}
             );
+
+
+        public static void TestGetAndReturnPoolDatabase()
+        {
+            //var db11 = DbMocker.NewDataBase();
+
+            //var userinfo = db11.Get<UserInfo>(9);
+            //userinfo.Role = RoleType.管理员;
+            //userinfo.DTCreate = DateTime.Now;
+
+            //db11.Update(userinfo);
+            //var olist = db11.GetAll<UserInfo>();
+
+
+            using (var pdb = databasePool.GetPooledDatabase())
+            {
+                //pdb.BeginTransaction();
+                //var oo = pdb.FirstOrDefault<UserInfo>(p => p.Id == 9);
+                var userinfo9 = pdb.Get<UserInfo>(9);
+                var userinfo = new UserInfo() { Id = 9, Name = "zss", Age = 20, HasDelete = false, StatusCode = 1 };
+                pdb.Insert<UserInfo>(userinfo);
+                userinfo.Role = RoleType.管理员;
+                userinfo.DTCreate = DateTime.Now;
+
+                //pdb.Update(userinfo);
+
+                var oo2 = pdb.FirstOrDefault<UserInfo>(p => p.Name == "zss");
+                //var oo4 = pdb.Query<UserInfo>(p => p.Name == "zss");
+
+                //pdb.Delete<UserInfo>(p => p.Name == "zss");
+
+                //oo2 = pdb.FirstOrDefault<UserInfo>(p => p.Name == "zss");
+
+                //pdb.CommitTransaction();
+
+                pdb.ReturnPooledDatabase();
+                //pdb.Close();
+            }
+
+
+            //using (var pdb = databasePool.GetPooledDatabase())
+            //{
+            //    //var oo = pdb.FirstOrDefault<UserInfo>(p => p.Id == 9);
+            //    var userinfo9 = pdb.Get<UserInfo>(9);
+            //    var userinfo = new UserInfo() { Id = 9, Name = "zss", Age = 20, HasDelete = false, StatusCode = 1 };
+            //    pdb.Insert<UserInfo>(userinfo);
+            //    userinfo.Role = RoleType.管理员;
+            //    userinfo.DTCreate = DateTime.Now;
+
+            //    pdb.Update(userinfo);
+
+            //    var oo2 = pdb.FirstOrDefault<UserInfo>(p => p.Name == "zss");
+            //    var oo4 = pdb.Query<UserInfo>(p => p.Name == "zss");
+
+            //    pdb.Delete<UserInfo>(p => p.Name == "zss");
+
+            //    oo2 = pdb.FirstOrDefault<UserInfo>(p => p.Name == "zss");
+
+            //    //pdb.ReturnPooledDatabase();
+
+            //    //pdb.Close();
+            //}
+
+        }
+
+
         public static void TestGetAndReturn() {
 
-            var db = pooldb.GetPooledDatabase().InternalResource;
+            var db = databaseWrapperPool.GetPooledDatabaseWrapper().InternalResource;
             Log("GetCurrentDatabase:" + db.GetHashCode().ToString(), null);
-            pooldb.ReturnPooledDatabase(db);
+            databaseWrapperPool.ReturnPooledDatabase(db);
             Log("ReturnDatabase:" + db.GetHashCode().ToString(), null);
 
-            db = pooldb.GetPooledDatabase().InternalResource;
+            db = databaseWrapperPool.GetPooledDatabaseWrapper().InternalResource;
             Log("GetCurrentDatabase:" + db.GetHashCode().ToString(), null);
-            pooldb.ReturnPooledDatabase(db);
+            databaseWrapperPool.ReturnPooledDatabase(db);
             Log("ReturnDatabase:" + db.GetHashCode().ToString(), null);
 
             //for (var a = 0; a < 10; a++)
@@ -141,8 +277,7 @@ namespace Pure.Data.Test
 
         private static void ExeTExt()
         {
-            //var db = DbMocker.NewDataBase();
-            //var o = db.Get<UserInfo>(1);
+
             //o.DTCreate = DateTime.Now;
             //db.Update<UserInfo>(o);
 
@@ -153,17 +288,48 @@ namespace Pure.Data.Test
             //}
 
 
-            using (var pdb = pooldb.GetPooledDatabase())
-            {
-                var oo = pdb.InternalResource.FirstOrDefault<UserInfo>(p=>p.Id == 9);
-                pdb.InternalResource.Close();
+
+
+            //using (var pdb = databaseWrapperPool.GetPooledDatabaseWrapper())
+            //{
+            //    //var oo = pdb.InternalResource.FirstOrDefault<UserInfo>(p => p.Id == 9);
+            //    var oo = pdb.InternalResource.Get<UserInfo>(9);
+
+            //    pdb.InternalResource.Close();
+            //}
+
+            using (var pdb = databasePool.GetPooledDatabase())
+            { 
+                //var oo = pdb.FirstOrDefault<UserInfo>(p => p.Id == 9);
+                var userinfo9 = pdb.Get<UserInfo>(9);
+                var userinfo = new UserInfo() { Id = 9, Name = "zss", Age = 20, HasDelete = false, StatusCode = 1 };
+                pdb.Insert<UserInfo>(userinfo);
+                userinfo.Role = RoleType.管理员;
+                userinfo.DTCreate = DateTime.Now;
+
+                pdb.Update(userinfo);
+
+                var oo2 = pdb.FirstOrDefault<UserInfo>(p => p.Name == "zss");
+                var oo4 = pdb.Query<UserInfo>(p => p.Name == "zss");
+
+                pdb.Delete<UserInfo>(p => p.Name == "zss");
+
+                oo2 = pdb.FirstOrDefault<UserInfo>(p => p.Name == "zss");
+
+                pdb.ReturnPooledDatabase();
+
             }
-            //var db = pooldb.GetPooledDatabase().InternalResource;
-            //Log("GetCurrentDatabase:" + db.GetHashCode().ToString(), null);
-            ////Thread.Sleep(100);
-            //pooldb.ReturnPooledDatabase(db);
-            ////pooldb.Close();
-            //Log("ReturnDatabase:" + db.GetHashCode().ToString(), null);
+           
+
+
+
+                //pdb.Close();
+                //var db = pooldb.GetPooledDatabase().InternalResource;
+                //Log("GetCurrentDatabase:" + db.GetHashCode().ToString(), null);
+                ////Thread.Sleep(100);
+                //pooldb.ReturnPooledDatabase(db);
+                ////pooldb.Close();
+                //Log("ReturnDatabase:" + db.GetHashCode().ToString(), null);
 
 
         }

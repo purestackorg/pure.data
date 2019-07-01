@@ -15,7 +15,7 @@ namespace Expression2SqlTest
             Sequence("S_TB_USER");
             Description("用户信息表");
            
-            Map(m => m.Id).Key(KeyType.TriggerIdentity).Description("主键");
+            Map(m => m.Id).Key(KeyType.Identity).Description("主键");
 
             Map(m => m.Age).Nullable(false).Description("年龄");
             Map(m => m.DTCreate).Nullable(false).Description("创建日期");

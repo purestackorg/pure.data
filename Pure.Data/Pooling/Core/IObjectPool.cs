@@ -379,7 +379,7 @@ namespace Pure.Data.Pooling
                 // available as soon as the object will return to the pool.
                 pooledObject.PooledObjectInfo.State = PooledObjectState.Reserved;
 
-                pooledObject.OnGetResource();
+                pooledObject.OnGetResource(pooledObject);
                  
                 return pooledObject;
             }
@@ -424,7 +424,7 @@ namespace Pure.Data.Pooling
                 // available as soon as the object will return to the pool.
                 pooledObject.PooledObjectInfo.State = PooledObjectState.Reserved;
 
-                pooledObject.OnGetResource();
+                pooledObject.OnGetResource(pooledObject);
 
                 return pooledObject;
             }
@@ -476,7 +476,7 @@ namespace Pure.Data.Pooling
                 // While adding the object back to the pool, we mark it as available.
                 returnedObject.PooledObjectInfo.State = PooledObjectState.Available;
 
-                returnedObject.OnReturnResource();
+                returnedObject.OnReturnResource(returnedObject);
                  
             }
             else
@@ -603,7 +603,7 @@ namespace Pure.Data.Pooling
 
                             if (!pooledObject.ValidateObject(PooledObjectValidationContext.Outbound(pooledObject)) && PooledObjects.TryRemove(pooledObject))
                             {
-                                pooledObject.OnEvictResource();
+                                pooledObject.OnEvictResource(pooledObject);
 
                                 DestroyPooledObject(pooledObject);
                             }
@@ -624,7 +624,7 @@ namespace Pure.Data.Pooling
             newObject.PooledObjectInfo.State = PooledObjectState.Available;
             newObject.PooledObjectInfo.Handle = this;
 
-            newObject.OnCreateResource();
+            newObject.OnCreateResource(newObject);
             return newObject;
         }
 

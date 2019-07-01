@@ -34,13 +34,13 @@ namespace Pure.Data.Pooling
         {
             InternalResource = resource ?? throw new ArgumentNullException(nameof(resource), ErrorMessages.NullResource);
 
-            base.OnReleaseResources += () => OnReleaseResources?.Invoke(InternalResource);
-            base.OnResetState += () => OnResetState?.Invoke(InternalResource);
+            base.OnReleaseResources += (o) => OnReleaseResources?.Invoke(InternalResource);
+            base.OnResetState += (o) => OnResetState?.Invoke(InternalResource);
 
-            base.OnEvictResource += () => OnEvictResource?.Invoke(InternalResource);
-            base.OnGetResource += () => OnGetResource?.Invoke(InternalResource);
-            base.OnCreateResource += () => OnCreateResource?.Invoke(InternalResource);
-            base.OnReturnResource += () => OnReturnResource?.Invoke(InternalResource);
+            base.OnEvictResource += (o) => OnEvictResource?.Invoke(InternalResource);
+            base.OnGetResource += (o) => OnGetResource?.Invoke(InternalResource);
+            base.OnCreateResource += (o) => OnCreateResource?.Invoke(InternalResource);
+            base.OnReturnResource += (o) => OnReturnResource?.Invoke(InternalResource);
         }
         //private static object olock = new object();
         //private T innernalResource = null;

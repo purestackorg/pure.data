@@ -118,7 +118,7 @@ namespace Pure.Data.Pooling
             var pooledObject = base.CreatePooledObject();
 
             // Register an handler which records the time at which the object returned to the pool.
-            pooledObject.OnResetState += () =>
+            pooledObject.OnResetState += (o) =>
             {
                 pooledObject.PooledObjectInfo.Payload = DateTime.UtcNow;
             };
@@ -150,7 +150,7 @@ namespace Pure.Data.Pooling
                 .ConfigureAwait(continueOnCapturedContext);
 
             // Register an handler which records the time at which the object returned to the pool.
-            pooledObject.OnResetState += () =>
+            pooledObject.OnResetState += (o) =>
             {
                 pooledObject.PooledObjectInfo.Payload = DateTime.UtcNow;
             };

@@ -62,7 +62,7 @@ namespace Pure.Data.Pooling
         ///   Clears the <see cref="StringBuilder"/> property, using specific methods depending on
         ///   the framework for which ObjectPool has been compiled.
         /// </summary>
-        protected void ClearStringBuilder()
+        protected void ClearStringBuilder(PooledObject o)
         {
             StringBuilder.Clear();
         }

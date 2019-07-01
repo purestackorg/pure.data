@@ -34,7 +34,7 @@ namespace Pure.Data.Pooling
             {
                 try
                 {
-                    OnReleaseResources();
+                    OnReleaseResources(this);
                 }
                 catch (Exception ex)
                 {
@@ -59,7 +59,7 @@ namespace Pure.Data.Pooling
             {
                 try
                 {
-                    OnResetState();
+                    OnResetState(this);
                 }
                 catch (Exception ex)
                 {
@@ -99,20 +99,20 @@ namespace Pure.Data.Pooling
 
         #region Events - extending resource and state management
 
-        public Action OnEvictResource { get; set; }
-        public Action OnGetResource { get; set; }
-        public Action OnCreateResource { get; set; }
-        public Action OnReturnResource { get; set; }
+        public Action<PooledObject> OnEvictResource { get; set; }
+        public Action<PooledObject> OnGetResource { get; set; }
+        public Action<PooledObject> OnCreateResource { get; set; }
+        public Action<PooledObject> OnReturnResource { get; set; }
 
         /// <summary>
         ///   Releases the object's resources.
         /// </summary>
-        public Action OnReleaseResources { get; set; }
+        public Action<PooledObject> OnReleaseResources { get; set; }
 
         /// <summary>
         ///   Reset the object state to allow this object to be re-used by other parts of the application.
         /// </summary>
-        public Action OnResetState { get; set; }
+        public Action<PooledObject> OnResetState { get; set; }
 
         /// <summary>
         ///   Validates pooled object state. An invalid object will not get into the pool and it will

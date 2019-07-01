@@ -13,7 +13,7 @@ namespace Pure.Data
     {
         #region Private Members
 
-        private Database db;
+        private IDatabase db;
         private int batchSize;
         private BatchOptions Option;
         private IDbTransaction tran;
@@ -238,7 +238,7 @@ namespace Pure.Data
         /// <param name="db">The db.</param>
         /// <param name="batchSize">Size of the batch.</param>
         /// <param name="tran">The tran.</param>
-        public BatchCommander(Database db, BatchOptions option, IDbTransaction tran)
+        public BatchCommander(IDatabase db, BatchOptions option, IDbTransaction tran)
         {
             if (option.BatchSize < 1)
             {

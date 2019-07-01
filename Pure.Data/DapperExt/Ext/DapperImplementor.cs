@@ -17,7 +17,7 @@ namespace Pure.Data
 
         //bool EnableDebug { get; set; }
         //LogHelper LogHelper { get; set; }
-        T Get<T>(IDbConnection connection, dynamic id, IDbTransaction transaction, int? commandTimeout) where T : class;
+        T Get<T>(IDbConnection connection, object id, IDbTransaction transaction, int? commandTimeout) where T : class; 
         void Insert<T>(IDbConnection connection, IEnumerable<T> entities, IDbTransaction transaction, int? commandTimeout) where T : class;
         dynamic Insert<T>(IDbConnection connection, T entity, IDbTransaction transaction, int? commandTimeout) where T : class;
         bool Update<T>(IDbConnection connection, T entity, IDbTransaction transaction, int? commandTimeout, bool ignoreAllKeyProperties = false) where T : class;
@@ -37,7 +37,7 @@ namespace Pure.Data
         long CountLong<T>(IDbConnection connection, object predicate, IDbTransaction transaction, int? commandTimeout) where T : class;
         IMultipleResultReader GetMultiple(IDbConnection connection, GetMultiplePredicate predicate, IDbTransaction transaction, int? commandTimeout);
 
-        IEnumerable<T> GetPage<T>(IDbConnection connection, int page, int resultsPerPage, out long allRowsCount, string sql, dynamic param = null, string allRowsCountSql = null, IDbTransaction transaction = null, int? commandTimeout = null, bool buffered = false) where T : class;
+        IEnumerable<T> GetPage<T>(IDbConnection connection, int page, int resultsPerPage, out long allRowsCount, string sql, object param = null, string allRowsCountSql = null, IDbTransaction transaction = null, int? commandTimeout = null, bool buffered = false) where T : class;
 
         IDataReader GetPageReader<T>(IDbConnection connection, object predicate, IList<ISort> sort, int page, int resultsPerPage, out int totalCount, IDbTransaction transaction, int? commandTimeout ) where T : class;
         string PrepareInsertStament<T>(T entity, out object parameters) where T : class;
@@ -45,7 +45,7 @@ namespace Pure.Data
 
         PageDataResult<IDataReader> GetPageReader<T>(IDbConnection connection, object predicate, IList<ISort> sort, int page, int resultsPerPage, IDbTransaction transaction, int? commandTimeout) where T : class;
         PageDataResult<IEnumerable<T>> GetPage<T>(IDbConnection connection, object predicate, IList<ISort> sort, int page, int resultsPerPage, IDbTransaction transaction, int? commandTimeout, bool buffered = false) where T : class;
-        PageDataResult<IEnumerable<T>> GetPage<T>(IDbConnection connection, int page, int resultsPerPage, string sql, dynamic param = null, string allRowsCountSql = null, IDbTransaction transaction = null, int? commandTimeout = null, bool buffered = false) where T : class;
+        PageDataResult<IEnumerable<T>> GetPage<T>(IDbConnection connection, int page, int resultsPerPage, string sql, object param = null, string allRowsCountSql = null, IDbTransaction transaction = null, int? commandTimeout = null, bool buffered = false) where T : class;
     }
 
 
@@ -60,7 +60,7 @@ namespace Pure.Data
         public ISqlGenerator SqlGenerator { get; private set; }
         public IDatabase Database { get; private set; }
 
-        public T Get<T>(IDbConnection connection, dynamic id, IDbTransaction transaction, int? commandTimeout) where T : class
+        public T Get<T>(IDbConnection connection, object id, IDbTransaction transaction, int? commandTimeout) where T : class
         {
             IClassMapper classMap = SqlGenerator.Configuration.GetMap<T>();
             IPredicate predicate = GetIdPredicate(classMap, id);
@@ -720,14 +720,14 @@ namespace Pure.Data
 
 
 
-        public IEnumerable<T> GetPage<T>(IDbConnection connection, int page, int resultsPerPage, out long allRowsCount, string sql, dynamic param = null, string allRowsCountSql = null, IDbTransaction transaction = null, int? commandTimeout = null, bool buffered = false) where T : class
+        public IEnumerable<T> GetPage<T>(IDbConnection connection, int page, int resultsPerPage, out long allRowsCount, string sql, object param = null, string allRowsCountSql = null, IDbTransaction transaction = null, int? commandTimeout = null, bool buffered = false) where T : class
         {
             PageDataResult<IEnumerable<T>> pd = GetPage<T>( connection,  page,  resultsPerPage,  sql,  param ,  allRowsCountSql,  transaction ,  commandTimeout ,  buffered );
             allRowsCount = pd.Total;
             return pd.Data; 
         }
 
-        public PageDataResult<IEnumerable<T>> GetPage<T>(IDbConnection connection, int page, int resultsPerPage, string sql, dynamic param = null, string allRowsCountSql = null, IDbTransaction transaction = null, int? commandTimeout = null, bool buffered = false) where T : class
+        public PageDataResult<IEnumerable<T>> GetPage<T>(IDbConnection connection, int page, int resultsPerPage, string sql, object param = null, string allRowsCountSql = null, IDbTransaction transaction = null, int? commandTimeout = null, bool buffered = false) where T : class
         {
             try
             {

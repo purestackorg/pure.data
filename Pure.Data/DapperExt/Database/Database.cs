@@ -963,14 +963,14 @@ namespace Pure.Data
 
             return DapperImplementor.GetList<TEntity>(Connection, null, null, _transaction, null, true);
         }
-        public T Get<T>(dynamic id, IDbTransaction transaction, int? commandTimeout = null) where T : class
+        public T Get<T>(object id, IDbTransaction transaction, int? commandTimeout = null) where T : class
         {
-            return (T)DapperImplementor.Get<T>(Connection, id, transaction, commandTimeout);
+            return (DapperImplementor.Get<T>(Connection, id, transaction, commandTimeout));
         }
 
-        public T Get<T>(dynamic id, int? commandTimeout=null) where T : class
+        public T Get<T>(object id, int? commandTimeout=null) where T : class
         {
-            return (T)DapperImplementor.Get<T>(Connection, id, _transaction, commandTimeout);
+            return (DapperImplementor.Get<T>(Connection, id, _transaction, commandTimeout));
         }
 
 
@@ -1166,14 +1166,14 @@ namespace Pure.Data
             return DapperImplementor.GetPage<T>(Connection, predicate, sort, pageIndex, pagesize, out totalCount, _transaction, commandTimeout, buffered);
         }
 
-        public IEnumerable<T> GetPage<T>(int pageIndex, int pagesize, out long allRowsCount, string sql, dynamic param = null, string allRowsCountSql = null, IDbTransaction transaction = null, int? commandTimeout = null, bool buffered = true) where T : class
+        public IEnumerable<T> GetPage<T>(int pageIndex, int pagesize, out long allRowsCount, string sql, object param = null, string allRowsCountSql = null, IDbTransaction transaction = null, int? commandTimeout = null, bool buffered = true) where T : class
         {
             pagesize = pagesize == 0 ? Config.DefaultPageSize : pagesize;
             transaction = transaction == null ? _transaction : transaction;
 
             return DapperImplementor.GetPage<T>(Connection, pageIndex,  pagesize, out allRowsCount,  sql,  param ,  allRowsCountSql ,  transaction ,  commandTimeout ,  buffered );
         }
-        public PageDataResult<IEnumerable<T>> GetPage<T>(int pageIndex, int pagesize,   string sql, dynamic param = null, string allRowsCountSql = null, IDbTransaction transaction = null, int? commandTimeout = null, bool buffered = true) where T : class
+        public PageDataResult<IEnumerable<T>> GetPage<T>(int pageIndex, int pagesize,   string sql, object param = null, string allRowsCountSql = null, IDbTransaction transaction = null, int? commandTimeout = null, bool buffered = true) where T : class
         {
             pagesize = pagesize == 0 ? Config.DefaultPageSize : pagesize;
             transaction = transaction == null ? _transaction : transaction;
@@ -1389,7 +1389,7 @@ namespace Pure.Data
             return DapperImplementor.DeleteByIds<T>(Connection, cName, ids, transaction, commandTimeout);
         }
 
-        public bool DeleteById<T>(dynamic id, IDbTransaction transaction = null, int? commandTimeout = null) where T : class
+        public bool DeleteById<T>(object id, IDbTransaction transaction = null, int? commandTimeout = null) where T : class
         {
             if (!OnDeletingInternal(new DeleteContext(id)))
                 return false;
@@ -2120,118 +2120,7 @@ namespace Pure.Data
         #endregion
 
 
-        #region 异步操作
-#if ASYNC
-
-        //public Task<int> ExecuteAsync(string sql, object param = null, IDbTransaction transaction = null, int? commandTimeout = null, CommandType? commandType = null)
-        //{
-        //    if (transaction == null)
-        //    {
-        //        transaction = Transaction;
-        //    }
-        //    if (commandTimeout == null || !commandTimeout.HasValue)
-        //    {
-        //        commandTimeout = Config.ExecuteTimeout;
-        //    }
-        //    return Connection.ExecuteAsync(sql, param, transaction, commandTimeout, commandType, this);
-        //}
-        //public Task<object> ExecuteScalarAsync(string sql, object param = null, IDbTransaction transaction = null, int? commandTimeout = null, CommandType? commandType = null)
-        //{
-        //    if (transaction == null)
-        //    {
-        //        transaction = Transaction;
-        //    }
-        //    if (commandTimeout == null || !commandTimeout.HasValue)
-        //    {
-        //        commandTimeout = Config.ExecuteTimeout;
-        //    }
-        //    return Connection.ExecuteScalarAsync(sql, param, transaction, commandTimeout, commandType, this);
-        //}
-        //public Task<T> ExecuteScalarAsync<T>(string sql, object param = null, IDbTransaction transaction = null, int? commandTimeout = null, CommandType? commandType = null)
-        //{
-        //    if (transaction == null)
-        //    {
-        //        transaction = Transaction;
-        //    }
-        //    if (commandTimeout == null || !commandTimeout.HasValue)
-        //    {
-        //        commandTimeout = Config.ExecuteTimeout;
-        //    }
-        //    return Connection.ExecuteScalarAsync<T>(sql, param, transaction, commandTimeout, commandType, this);
-        //}
-        //public Task<IDataReader> ExecuteReaderAsync(string sql, object param = null, IDbTransaction transaction = null, int? commandTimeout = null, CommandType? commandType = null)
-        //{
-        //    if (transaction == null)
-        //    {
-        //        transaction = Transaction;
-        //    }
-        //    if (commandTimeout == null || !commandTimeout.HasValue)
-        //    {
-        //        commandTimeout = Config.ExecuteTimeout;
-        //    }
-        //    return Connection.ExecuteReaderAsync(sql, param, transaction, commandTimeout, commandType, this);
-        //}
-
-        
-        // /// <summary>
-        ///// Executes a query using the specified predicate, returning an integer that represents the number of rows that match the query.
-        ///// </summary>
-        //public Task<int> CountAsync<T>(object predicate = null, IDbTransaction transaction = null, int? commandTimeout = null) where T : class
-        //{
-        //    return DapperImplementor.CountAsync<T>(Connection, predicate, transaction, commandTimeout);
-        //}
-
-        ///// <summary>
-        ///// Executes a query for the specified id, returning the data typed as per T.
-        ///// </summary>
-        //public Task<T> GetAsync<T>(dynamic id, IDbTransaction transaction = null, int? commandTimeout = null) where T : class
-        //{
-        //    return DapperImplementor.GetAsync<T>(Connection, id, transaction, commandTimeout);
-        //}
-
-        ///// <summary>
-        ///// Executes a select query using the specified predicate, returning an IEnumerable data typed as per T.
-        ///// </summary>
-        //public Task<IEnumerable<T>> GetListAsync<T>(  object predicate = null, IList<ISort> sort = null, IDbTransaction transaction = null, int? commandTimeout = null) where T : class
-        //{
-        //    return DapperImplementor.GetListAsync<T>(Connection, predicate, sort, transaction, commandTimeout);
-        //}
-
-        ///// <summary>
-        ///// Executes a select query using the specified predicate, returning an IEnumerable data typed as per T.
-        ///// Data returned is dependent upon the specified page and resultsPerPage.
-        ///// </summary>
-        //public Task<IEnumerable<T>> GetPageDataAsync<T>(  object predicate = null, IList<ISort> sort = null, int page = 1, int resultsPerPage = 10, IDbTransaction transaction = null, int? commandTimeout = null) where T : class
-        //{
-        //    return DapperImplementor.GetPageDataAsync<T>(Connection, predicate, sort, page, resultsPerPage, transaction, commandTimeout);
-        //}
-
-
-        ///// <summary>
-        ///// Executes a select query using the specified predicate, returning an IEnumerable data typed as per T.
-        ///// Data returned is dependent upon the specified firstResult and maxResults.
-        ///// </summary>
-        //public Task<IEnumerable<T>> GetSetAsync<T>( object predicate = null, IList<ISort> sort = null, int firstResult = 1, int maxResults = 10, IDbTransaction transaction = null, int? commandTimeout = null) where T : class
-        //{
-        //    return DapperImplementor.GetSetAsync<T>(Connection, predicate, sort, firstResult, maxResults, transaction, commandTimeout);
-        //}
-
-
-        //public Task<IEnumerable<T>> SqlQueryAsync<T>(string sql, object param = null, IDbTransaction transaction = null, bool buffer = true, int? commandTimeout = null, CommandType? commandType = null)
-        //{
-        //    if (transaction == null)
-        //    {
-        //        transaction = Transaction;
-        //    }
-        //    return Connection.QueryAsync<T>( sql, param, transaction, commandTimeout, commandType, this);
-
-        //}
-
-
-
-#endif
-        #endregion
-
+       
         #region Batch Command
         /// <summary>
         /// 创建批处理命令

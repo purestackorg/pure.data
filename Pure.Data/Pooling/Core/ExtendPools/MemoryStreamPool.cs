@@ -62,13 +62,13 @@ namespace Pure.Data.Pooling
                 return true; // Object is valid.
             };
 
-            OnResetState += () =>
+            OnResetState += (o) =>
             {
                 _trackedMemoryStream.Position = 0L;
                 _trackedMemoryStream.SetLength(0L);
             };
 
-            OnReleaseResources += () =>
+            OnReleaseResources += (o) =>
             {
                 _trackedMemoryStream.Parent = null;
                 _trackedMemoryStream.Dispose();

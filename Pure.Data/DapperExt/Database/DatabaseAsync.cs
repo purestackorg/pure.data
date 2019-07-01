@@ -375,7 +375,7 @@ namespace Pure.Data
         /// <summary>
         /// Executes a query for the specified id, returning the data typed as per T.
         /// </summary>
-        public static async Task<T> GetAsync<T>(this IDatabase db, dynamic id, IDbTransaction transaction = null, int? commandTimeout = null) where T : class
+        public static async Task<T> GetAsync<T>(this IDatabase db, object id, IDbTransaction transaction = null, int? commandTimeout = null) where T : class
         {
             return await db.DapperImplementor.GetAsync<T>(GetDbConnection(db), id, GetDbTransaction(db, transaction), GetCommandTimeout(db, commandTimeout));
         }
@@ -502,7 +502,7 @@ namespace Pure.Data
             return await db.DapperImplementor.GetPageAsync<T>(GetDbConnection(db), predicate, sort, page, resultsPerPage, GetDbTransaction(db, transaction), GetCommandTimeout(db, commandTimeout));
         }
 
-        public static async Task<PageDataResult<IEnumerable<T>>> GetPageAsync<T>(this IDatabase db, int page, int resultsPerPage, string sql, dynamic param = null, string allRowsCountSql = null, IDbTransaction transaction = null, int? commandTimeout = null, bool buffered = false) where T : class
+        public static async Task<PageDataResult<IEnumerable<T>>> GetPageAsync<T>(this IDatabase db, int page, int resultsPerPage, string sql, object param = null, string allRowsCountSql = null, IDbTransaction transaction = null, int? commandTimeout = null, bool buffered = false) where T : class
         {
             return await db.DapperImplementor.GetPageAsync<T>(GetDbConnection(db),  page,  resultsPerPage,  sql,  param ,  allRowsCountSql , GetDbTransaction(db, transaction), GetCommandTimeout(db, commandTimeout),  buffered );
         }

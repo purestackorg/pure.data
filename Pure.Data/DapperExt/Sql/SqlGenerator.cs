@@ -233,7 +233,7 @@ namespace Pure.Data.Sql
                 throw new ArgumentNullException("Parameters");
             }
 
-            var columns = classMap.Properties.Where(p => !(p.Ignored || p.IsReadOnly || p.KeyType == KeyType.Identity || p.KeyType == KeyType.Assigned));
+            var columns = classMap.Properties.Where(p => !(p.Ignored || p.IsReadOnly || p.KeyType == KeyType.Identity || p.KeyType == KeyType.Assigned || p.KeyType == KeyType.TriggerIdentity));
             if (!columns.Any())
             {
                 throw new ArgumentException("No columns were mapped.");
