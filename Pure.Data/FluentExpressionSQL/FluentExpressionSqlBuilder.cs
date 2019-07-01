@@ -42,7 +42,7 @@ namespace FluentExpressionSQL
             }
             SubQueryStatement = new StatementSubQuery();
 
-            _ExpressionContainers = new Dictionary<Type, dynamic>();
+            //_ExpressionContainers = new Dictionary<Type, dynamic>();
         }
 
         #region 子查询
@@ -81,12 +81,11 @@ namespace FluentExpressionSQL
         }
         #endregion
 
-        private Dictionary<Type, dynamic> _ExpressionContainers = null;
+        //private Dictionary<Type, dynamic> _ExpressionContainers = null;
 
         private FluentExpressionSQLCore<T> NewExpressionContainer<T>()
         {
-
-            var e = new FluentExpressionSQLCore<T>(DatabaseType, TableMapperContainer);
+            FluentExpressionSQLCore<T> e = new FluentExpressionSQLCore<T>(DatabaseType, TableMapperContainer);
             e.ExecuteScalarAction = ExecuteScalarAction;
             e.ExecuteDelegateAction = ExecuteDelegateAction;
             e.ExecuteReaderAction = ExecuteReaderAction;
@@ -94,8 +93,8 @@ namespace FluentExpressionSQL
             e.ExecuteDelegateAsyncAction = ExecuteDelegateAsyncAction;
             e.ExecuteReaderAsyncAction = ExecuteReaderAsyncAction;
             e.Database = Database;
-            return e;
 
+            return e;
 
             //dynamic cached = null;
             //FluentExpressionSQLCore<T> result = null;

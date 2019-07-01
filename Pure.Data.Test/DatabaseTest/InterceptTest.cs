@@ -59,9 +59,9 @@ namespace Pure.Data.Test
             string title = "CRUDTest";
             Console.Title = title;
             var db = DbMocker.InstanceDataBase();
-            db.Config.EnableOrmLog = false;
-            db.Config.EnableDebug = true;
-            db.Config.Interceptors.Add(new ConnectionTestIntercept());
+            //db.Config.EnableOrmLog = false;
+            //db.Config.EnableDebug = true;
+            //db.Config.Interceptors.Add(new ConnectionTestIntercept());
             PrintHelper.WriteLine("Add ConnectionTestIntercept");
             db.LogHelper.Write("Add ConnectionTestIntercept");
             CodeTimer.Time(title, 100, () => {
