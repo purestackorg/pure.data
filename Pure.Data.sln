@@ -11,13 +11,15 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Pure.Data.Gen", "Pure.Data.
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PureGen", "PureGen\PureGen.csproj", "{A6316D64-EAB9-4805-B0F5-68C3967C2B74}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Pure.Data.MySql", "Pure.Data.MySql\Pure.Data.MySql.csproj", "{182FB069-CC6F-4027-AEC1-4B0DE2B4D6A8}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Pure.Data.MySql", "Pure.Data.MySql\Pure.Data.MySql.csproj", "{182FB069-CC6F-4027-AEC1-4B0DE2B4D6A8}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Pure.Data.PostgreSql", "Pure.Data.PostgreSql\Pure.Data.PostgreSql.csproj", "{1B916005-32A5-4BAB-8C5D-91B905984364}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Pure.Data.Oracle", "Pure.Data.Oracle\Pure.Data.Oracle.csproj", "{3D3F74BA-F2D0-4546-B266-FB9DCB0DF826}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Pure.Data.Oracle", "Pure.Data.Oracle\Pure.Data.Oracle.csproj", "{3D3F74BA-F2D0-4546-B266-FB9DCB0DF826}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Pure.Data.Sqlite", "Pure.Data.Sqlite\Pure.Data.Sqlite.csproj", "{EB01A0AE-EE62-4853-A8E2-E2D79B78F846}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Pure.Data.Sqlite", "Pure.Data.Sqlite\Pure.Data.Sqlite.csproj", "{EB01A0AE-EE62-4853-A8E2-E2D79B78F846}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Choping.Pooling", "Choping.Pooling\Choping.Pooling.csproj", "{7824FC0E-B7F4-4506-8444-41589DE9EA71}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -57,6 +59,10 @@ Global
 		{EB01A0AE-EE62-4853-A8E2-E2D79B78F846}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{EB01A0AE-EE62-4853-A8E2-E2D79B78F846}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{EB01A0AE-EE62-4853-A8E2-E2D79B78F846}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7824FC0E-B7F4-4506-8444-41589DE9EA71}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7824FC0E-B7F4-4506-8444-41589DE9EA71}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7824FC0E-B7F4-4506-8444-41589DE9EA71}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7824FC0E-B7F4-4506-8444-41589DE9EA71}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

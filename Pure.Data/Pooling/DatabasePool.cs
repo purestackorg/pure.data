@@ -29,7 +29,7 @@ namespace Pure.Data
                 maximumRetained = Environment.ProcessorCount * 2;
             }
 
-            //currentDatabaseLocal = new AsyncLocal<PooledDatabase>();
+            currentDatabaseLocal = new AsyncLocal<PooledDatabase>();
 
             
             Pool = new ObjectPool<PooledDatabase>(maximumRetained, () =>
@@ -40,24 +40,27 @@ namespace Pure.Data
             }
             , evictSetting, null);
         }
-        //private AsyncLocal<PooledDatabase> currentDatabaseLocal = null;
-
+        private AsyncLocal<PooledDatabase> currentDatabaseLocal = null;
+ 
         public PooledDatabase GetPooledDatabase()
         {
-            PooledDatabase obj = Pool.GetObject();
-            obj.SetConnectionAlive(true);
-            return obj;
+            //PooledDatabase obj = Pool.GetObject();
+            ////obj.SetConnectionAlive(true);
+            //return obj;
 
-            //if (currentDatabaseLocal.Value == null)
-            //{
-            //    currentDatabaseLocal.Value = Pool.GetObject();
+            if (currentDatabaseLocal.Value == null)
+            {
+               
+                    PooledDatabase obj = Pool.GetObject();
+                    currentDatabaseLocal.Value = obj;
+
+                    if (currentDatabaseLocal.Value == null)
+                    {
+                        throw new PureDataException("DatabasePool GetPooledDatabase has been null!", null);
+                    }
                 
-            //    if (currentDatabaseLocal.Value == null)
-            //    {
-            //        throw new PureDataException("DatabasePool GetPooledDatabase has been null!", null);
-            //    }
-            //}
-            //return currentDatabaseLocal.Value;
+            }
+            return currentDatabaseLocal.Value;
         }
         
        
@@ -70,7 +73,7 @@ namespace Pure.Data
             //    pool.ReturnObject(currentDatabaseLocal.Value);
 
             //}
-            database.SetConnectionAlive(false); 
+            //database.SetConnectionAlive(false); 
             Pool.ReturnObject(database);
 
         }
@@ -80,6 +83,23 @@ namespace Pure.Data
             Pool.Clear();
         }
 
+
+        public void RunInAction(Action<PooledDatabase> action) {
+            using (var pdb = this.GetPooledDatabase())
+            {
+                action(pdb);
+            }
+        }
+
+        public T RunInAction<T>(Func<PooledDatabase, T> func)
+        {
+            T r = default(T);
+            using (var pdb = this.GetPooledDatabase())
+            {
+                r = func(pdb);
+            }
+            return r;
+        }
         #endregion
 
 

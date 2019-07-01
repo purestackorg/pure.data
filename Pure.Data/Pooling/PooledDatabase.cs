@@ -40,6 +40,41 @@ namespace Pure.Data
             Pool = pool;
         }
 
+
+        public void RunInAction(Action action)
+        {
+            try
+            {
+                action();
+            }
+            catch (Exception ex)
+            {
+                throw new PureDataException("RunInAction", ex);
+            }
+            finally
+            {
+                ReturnPooledDatabase();
+
+            }
+        }
+
+        public T RunInAction<T>(Func<T> func)
+        {
+            try
+            {
+                T result = func(); 
+                return result;
+            }
+            catch (Exception ex)
+            {
+                throw new PureDataException("RunInAction", ex);
+            }
+            finally
+            {
+                ReturnPooledDatabase();
+            }
+        }
+
         public void ReturnPooledDatabase()
         {
             Pool.ReturnPooledDatabase(this); //返还当前的数据库
@@ -66,7 +101,7 @@ namespace Pure.Data
                     Connection.Close();
                 }
 
-                if (IsPooled == false)
+                if (IsPooled == false) //这个很关键，避免导致connection为null的错误
                 {
                     if (Config.AutoDisposeConnection == true)
                     {
@@ -1663,8 +1698,11 @@ namespace Pure.Data
                     RollbackTransaction();
                 }
                 throw new PureDataException("RunInTransaction", ex);
-
             }
+            //finally
+            //{
+            //    Close();
+            //}
         }
 
         public T RunInTransaction<T>(Func<T> func)
@@ -1682,9 +1720,12 @@ namespace Pure.Data
                 {
                     RollbackTransaction();
                 }
-                throw new PureDataException("RunInTransaction", ex);
-
+                throw new PureDataException("RunInTransaction", ex); 
             }
+            //finally
+            //{
+            //    Close();
+            //}
         }
 
         #endregion

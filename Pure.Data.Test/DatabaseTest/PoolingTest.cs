@@ -22,13 +22,13 @@ namespace Pure.Data.Test
             string title = "PoolingTest";
             Console.Title = title;
 
-            CodeTimer.Time(title, 1, () =>
+            CodeTimer.Time(title, 10, () =>
             {
                 //TestGetAndReturn();
                 //TestRun();
                 //TestDbContext();
-                TestGetAndReturnPoolDatabase();
-                //TestDbContext();
+                //TestGetAndReturnPoolDatabase();
+                TestDbContext();
             });
 
 
@@ -77,7 +77,7 @@ namespace Pure.Data.Test
         public static void Log(string msg, Exception ex, MessageType type = MessageType.Debug)
         {
             ConsoleHelper.Instance.OutputMessage(msg, ex, type);
-            FastLogger.WriteLog(msg);
+            //FastLogger.WriteLog(msg);
         }
 
         public static DatabasePool databasePool = new DatabasePool(() => new PooledDatabase("PureDataConfiguration.xml", Log,
@@ -138,7 +138,7 @@ namespace Pure.Data.Test
 
 
         }, Environment.ProcessorCount * 2
-           , new Pooling.EvictionSettings() { Enabled = true, Period = TimeSpan.FromMilliseconds(1000) }
+           //, new Pooling.EvictionSettings() { Enabled = true, Period = TimeSpan.FromMilliseconds(1000) }
            );
 
         public static DatabaseWrapperPool databaseWrapperPool = new DatabaseWrapperPool(() => new Pooling.PooledObjectWrapper<IDatabase>(new Database("PureDataConfiguration.xml", Log,
@@ -158,14 +158,14 @@ namespace Pure.Data.Test
                 }
             },
             OnReleaseResources = (resource) => { Log("Release -> " + resource.GetHashCode() +" , connection: "+ resource.Connection.GetHashCode() +", status : "+resource.Connection.State, null, MessageType.Error);
-                resource?.Close();
+             
             },
             OnResetState = (resource) => { Log("Reset -> " + resource.GetHashCode() + " , connection: " + resource.Connection.GetHashCode() + ", status : " + resource.Connection.State, null, MessageType.Info);
-                resource?.Close();
+                
             },
             OnCreateResource = (resource) => { Log("Create -> "+ resource.GetHashCode() + " , connection: " + resource.Connection.GetHashCode() + ", status : " + resource.Connection.State, null, MessageType.Warning); },
             OnEvictResource = (resource) => { Log("Evict -> " + resource.GetHashCode() + " , connection: " + resource.Connection.GetHashCode() + ", status : " + resource.Connection.State, null, MessageType.Error);
-                resource?.Close();
+                 
             },
             OnGetResource = (resource) => { Log("Get -> " + resource.GetHashCode() + " , connection: " + resource.Connection.GetHashCode() + ", status : " + resource.Connection.State, null, MessageType.Info); },
             OnReturnResource = (resource) => { Log("Return -> " + resource.GetHashCode() + " , connection: " + resource.Connection.GetHashCode() + ", status : " + resource.Connection.State, null, MessageType.Warning); },
@@ -302,21 +302,21 @@ namespace Pure.Data.Test
             { 
                 //var oo = pdb.FirstOrDefault<UserInfo>(p => p.Id == 9);
                 var userinfo9 = pdb.Get<UserInfo>(9);
-                var userinfo = new UserInfo() { Id = 9, Name = "zss", Age = 20, HasDelete = false, StatusCode = 1 };
-                pdb.Insert<UserInfo>(userinfo);
-                userinfo.Role = RoleType.管理员;
-                userinfo.DTCreate = DateTime.Now;
+                //var userinfo = new UserInfo() { Id = 9, Name = "zss", Age = 20, HasDelete = false, StatusCode = 1 };
+                //pdb.Insert<UserInfo>(userinfo);
+                //userinfo.Role = RoleType.管理员;
+                //userinfo.DTCreate = DateTime.Now;
 
-                pdb.Update(userinfo);
+                //pdb.Update(userinfo);
 
                 var oo2 = pdb.FirstOrDefault<UserInfo>(p => p.Name == "zss");
                 var oo4 = pdb.Query<UserInfo>(p => p.Name == "zss");
 
-                pdb.Delete<UserInfo>(p => p.Name == "zss");
+                //pdb.Delete<UserInfo>(p => p.Name == "zss");
 
-                oo2 = pdb.FirstOrDefault<UserInfo>(p => p.Name == "zss");
+                //oo2 = pdb.FirstOrDefault<UserInfo>(p => p.Name == "zss");
 
-                pdb.ReturnPooledDatabase();
+                //pdb.ReturnPooledDatabase();
 
             }
            
@@ -342,26 +342,22 @@ namespace Pure.Data.Test
                   {
                       ExeTExt();
 
-                  }, () =>
+                  }
+                  , () =>
                   {
                       ExeTExt();
-                  }, () =>
-                  {
-                      ExeTExt();
-
-                  }, () =>
-                  {
-                      ExeTExt();
-
-                  }, () =>
+                  }
+                  , () =>
                   {
                       ExeTExt();
 
-                  }, () =>
+                  }
+                  , () =>
                   {
                       ExeTExt();
 
-                  }, () =>
+                  }
+                  , () =>
                   {
                       ExeTExt();
 
@@ -377,49 +373,60 @@ namespace Pure.Data.Test
                   {
                       ExeTExt();
 
-                  } 
-                  /////////////////////////////////////
-                  //() =>
-                  //{
-                  //    ExeTExt();
+                  }, () =>
+                  {
+                      ExeTExt();
 
-                  //}, () =>
-                  //{
-                  //    ExeTExt();
+                  }, () =>
+                  {
+                      ExeTExt();
 
-                  //}, () =>
-                  //{
-                  //    ExeTExt();
+                  }
 
-                  //}, () =>
-                  //{
-                  //    ExeTExt();
 
-                  //}, () =>
-                  //{
-                  //    ExeTExt();
 
-                  //}, () =>
-                  //{
-                  //    ExeTExt();
+              /////////////////////////////////////
+              //() =>
+              //{
+              //    ExeTExt();
 
-                  //}, () =>
-                  //{
-                  //    ExeTExt();
+              //}, () =>
+              //{
+              //    ExeTExt();
 
-                  //}, () =>
-                  //{
-                  //    ExeTExt();
+              //}, () =>
+              //{
+              //    ExeTExt();
 
-                  //}, () =>
-                  //{
-                  //    ExeTExt();
+              //}, () =>
+              //{
+              //    ExeTExt();
 
-                  //}, () =>
-                  //{
-                  //    ExeTExt();
+              //}, () =>
+              //{
+              //    ExeTExt();
 
-                  //}
+              //}, () =>
+              //{
+              //    ExeTExt();
+
+              //}, () =>
+              //{
+              //    ExeTExt();
+
+              //}, () =>
+              //{
+              //    ExeTExt();
+
+              //}, () =>
+              //{
+              //    ExeTExt();
+
+              //}, () =>
+              //{
+              //    ExeTExt();
+
+              //}
               );
 
             

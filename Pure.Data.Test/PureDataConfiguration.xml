@@ -76,11 +76,11 @@
   />
 
   <DataSources >
-    <!--<DataSource Name="WriteDB"  ConnectionString="Database=test;server=localhost;port=3306;userid=root;pwd=root;sslmode=none" Provider="MYSQL"
-                IsMaster="true"  ParameterPrefix=":" Type="Write" Weight="100"  />-->
-    
-    <DataSource Name="WriteDB"  ConnectionString="Server=192.168.6.176;User ID=sa;Password=aaa0.0;Database=Test" Provider="SQLSERVER" 
+    <DataSource Name="WriteDB"  ConnectionString="Database=test;server=localhost;port=3306;userid=root;pwd=root;sslmode=none" Provider="MYSQL"
                 IsMaster="true"  ParameterPrefix=":" Type="Write" Weight="100"  />
+    
+    <!--<DataSource Name="WriteDB"  ConnectionString="Server=192.168.6.176;User ID=sa;Password=aaa0.0;Database=Test" Provider="SQLSERVER" 
+                IsMaster="true"  ParameterPrefix=":" Type="Write" Weight="100"  />-->
     <!--<DataSource Name="WriteDB"  ConnectionString="Data Source=E:\Benson\Source\RoGenerator\Pure\Pure.Data\Pure.Data\Pure.Data.Test\Data\sqlitetest.db;" Provider="SQLITE"
             IsMaster="true"  ParameterPrefix=":" Type="Write" Weight="100"  />-->
 

@@ -1395,10 +1395,10 @@ this IDbConnection cnn, string sql, object param = null, IDbTransaction transact
             IDatabase database = command.Database;
             if (database != null)
             {
-                if (database.Config.KeepConnectionAlive == true)
-                {
-                    return;
-                }
+                //if (database.Config.KeepConnectionAlive == true)
+                //{
+                //    return;
+                //}
 
                 if (database.Config.EnableIntercept)
                 {
@@ -1425,27 +1425,20 @@ this IDbConnection cnn, string sql, object param = null, IDbTransaction transact
         private static void CloseDbCommand(IDbCommand cmd, CommandDefinition command, bool disposeCommand = true )
         {
             
-            IDatabase database = command.Database;
-            if (database != null)
-            {
-                if (database.Config.KeepConnectionAlive == true)
-                {
-                    return;
-                }
+            //IDatabase database = command.Database;
+            //if (database != null)
+            //{
+            //    //if (database.Config.KeepConnectionAlive == true)
+            //    //{
+            //    //    return;
+            //    //}
 
-                //if (database.Config.EnableIntercept)
-                //{
-                //    foreach (var interceptor in database.Config.Interceptors.OfType<IConnectionInterceptor>())
-                //    {
-                //        interceptor.OnConnectionClosing(database, database.Connection);
-                //    }
-                //}
+                
 
-
-                //close   
+            //    //close   
                 if (cmd != null && disposeCommand) cmd.Dispose();
 
-            }
+            //}
         }
 
         private static void DoPreExecute(IDbConnection cnn, IDbCommand cmd, CommandDefinition command)
