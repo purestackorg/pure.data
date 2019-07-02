@@ -68,7 +68,7 @@ namespace Pure.Data.Pooling
                 _trackedMemoryStream.SetLength(0L);
             };
 
-            OnReleaseResources += (o) =>
+            OnReleaseResource += (o) =>
             {
                 _trackedMemoryStream.Parent = null;
                 _trackedMemoryStream.Dispose();

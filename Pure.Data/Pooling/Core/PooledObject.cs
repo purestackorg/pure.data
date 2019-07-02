@@ -30,11 +30,11 @@ namespace Pure.Data.Pooling
         /// </summary>
         internal bool ReleaseResources()
         {
-            if (OnReleaseResources != null)
+            if (OnReleaseResource != null)
             {
                 try
                 {
-                    OnReleaseResources(this);
+                    OnReleaseResource(this);
                 }
                 catch (Exception ex)
                 {
@@ -107,7 +107,7 @@ namespace Pure.Data.Pooling
         /// <summary>
         ///   Releases the object's resources.
         /// </summary>
-        public Action<PooledObject> OnReleaseResources { get; set; }
+        public Action<PooledObject> OnReleaseResource { get; set; }
 
         /// <summary>
         ///   Reset the object state to allow this object to be re-used by other parts of the application.

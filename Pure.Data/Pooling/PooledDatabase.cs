@@ -27,7 +27,7 @@ namespace Pure.Data
     /// </summary>
     public class PooledDatabase : PooledObject, IDatabase
     {
-        private bool IsPooled = true; 
+        //private bool IsPooled = true; 
         public bool IsBusy { get; private set; }//是否进入到池里
         public void SetPoolStatus(bool status)
         {
@@ -101,18 +101,18 @@ namespace Pure.Data
                     Connection.Close();
                 }
 
-                if (IsPooled == false) //这个很关键，避免导致connection为null的错误
-                {
-                    if (Config.AutoDisposeConnection == true)
-                    {
-                        Connection.Dispose();
-                        Connection = null;
-                        //if (Config.EnableDebug)
-                        //{
-                        //    LogHelper.Debug("Connection has Disposed.");
-                        //}
-                    }
-                }
+                //if (IsPooled == false) //这个很关键，避免导致connection为null的错误
+                //{
+                //    if (Config.AutoDisposeConnection == true)
+                //    {
+                //        Connection.Dispose();
+                //        Connection = null;
+                //        //if (Config.EnableDebug)
+                //        //{
+                //        //    LogHelper.Debug("Connection has Disposed.");
+                //        //}
+                //    }
+                //}
 
 
                 //}

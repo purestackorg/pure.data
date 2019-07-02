@@ -44,7 +44,7 @@ namespace Pure.Data.Pooling
 
             OnResetState += ClearStringBuilder;
 
-            OnReleaseResources += ClearStringBuilder;
+            OnReleaseResource += ClearStringBuilder;
         }
 
         /// <summary>

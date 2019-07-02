@@ -221,7 +221,7 @@ namespace Pure.Data.Pooling
         /// <exception cref="ArgumentOutOfRangeException">
         ///   <paramref name="maximumPoolSize"/> is less than or equal to zero.
         /// </exception>
-        private ObjectPool(int maximumPoolSize, Func<T> factoryMethod, Func<CancellationToken, bool, Task<T>> asyncFactoryMethod, EvictionSettings evictionSettings, IEvictionTimer evictionTimer, bool enableDiagnostics = true)
+        public ObjectPool(int maximumPoolSize, Func<T> factoryMethod, Func<CancellationToken, bool, Task<T>> asyncFactoryMethod, EvictionSettings evictionSettings, IEvictionTimer evictionTimer, bool enableDiagnostics = true)
         {
             // Preconditions
             if (maximumPoolSize <= 0) throw new ArgumentOutOfRangeException(nameof(maximumPoolSize), ErrorMessages.NegativeOrZeroMaximumPoolSize);

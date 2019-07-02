@@ -34,7 +34,7 @@ namespace Pure.Data.Pooling
         {
             InternalResource = resource ?? throw new ArgumentNullException(nameof(resource), ErrorMessages.NullResource);
 
-            base.OnReleaseResources += (o) => OnReleaseResources?.Invoke(InternalResource);
+            base.OnReleaseResource += (o) => OnReleaseResources?.Invoke(InternalResource);
             base.OnResetState += (o) => OnResetState?.Invoke(InternalResource);
 
             base.OnEvictResource += (o) => OnEvictResource?.Invoke(InternalResource);

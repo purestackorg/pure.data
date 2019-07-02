@@ -13,15 +13,151 @@ using System.Linq.Expressions;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Threading;
+using System.Threading.Tasks;
+
 namespace Pure.Data
 {
-   
-    public class DatabasePool: IDisposable
+
+    public class DatabasePoolPolicy
+    {
+        /// <summary>
+        /// 最大连接池，默认16
+        /// </summary>
+        public int MaxPoolSize { get; set; } = 16;
+        /// <summary>
+        /// 是否统计连接池信息
+        /// </summary>
+        public bool EnableDiagnostics { get; set; } = true;
+        /// <summary>
+        /// 定期移除池对象配置
+        /// </summary>
+        public EvictionSettings EvictionSettings { get; set; } = EvictionSettings.Default;
+
+        public IEvictionTimer EvictionTimer { get; set; }
+
+        /// <summary>
+        /// 创建工厂，如果指定了同步工厂，则可以使用同步和异步获取对象GetObject或者GetObjectAsync。
+        /// </summary>
+        public Func<PooledDatabase> CreateFactory { get; set; }
+        /// <summary>
+        /// 异步创建工厂，如果指定了异步工厂，则只能使用异步获取对象GetObjectAsync。
+        /// </summary>
+        public Func<CancellationToken, bool, Task<PooledDatabase>> AsyncCreateFactory { get; set; }
+
+
+        public OutputActionDelegate LogAction { get; set; }
+        public Action<PooledObject> OnEvictResource { get; set; }
+        public Action<PooledObject> OnGetResource { get; set; }
+        public Action<PooledObject> OnCreateResource { get; set; }
+        public Action<PooledObject> OnReturnResource { get; set; }
+        public Action<PooledObject> OnReleaseResource { get; set; }
+        public Action<PooledObject> OnResetState { get; set; }
+        public Func<PooledObjectValidationContext, bool> OnValidateObject { get; set; }
+    }
+
+    public class DatabasePool : IDisposable
     {
         #region PooledDatabase
-       
+
         public IObjectPool<PooledDatabase> Pool = null;
- 
+
+        public DatabasePool(DatabasePoolPolicy policy)
+        {
+            if (policy == null)
+            {
+                throw new ArgumentException("policy can not be null!");
+            }
+            //DatabasePoolPolicy policy = new DatabasePoolPolicy();
+            //if (policyConfig != null)
+            //{
+            //    policyConfig(policy);
+            //}
+            currentDatabaseLocal = new AsyncLocal<PooledDatabase>();
+
+            int maximumRetained = policy.MaxPoolSize;
+
+            if (maximumRetained == 0)
+            {
+                maximumRetained = Environment.ProcessorCount * 2;
+            }
+
+            var createDelegate = policy.CreateFactory;
+             
+            var asyncCreateDelegate = policy.AsyncCreateFactory ;
+
+
+            Pool = new ObjectPool<PooledDatabase>(maximumRetained, () =>
+            {
+                PooledDatabase db = createDelegate();//createFunc();
+                db.OnCreateResource = (pooledObj) =>
+                {
+                    policy.OnCreateResource?.Invoke(pooledObj);
+                };
+                db.OnGetResource = (pooledObj) =>
+                {
+                    policy.OnGetResource?.Invoke(pooledObj);
+                };
+                db.OnReturnResource = (pooledObj) =>
+                {
+                    policy.OnReturnResource?.Invoke(pooledObj);
+                };
+                db.OnReleaseResource = (pooledObj) =>
+                {
+                    policy.OnReleaseResource?.Invoke(pooledObj);
+                };
+                db.OnResetState = (pooledObj) =>
+                {
+                    policy.OnResetState?.Invoke(pooledObj);
+                };
+
+                db.OnEvictResource = (pooledObj) =>
+                {
+                    policy.OnEvictResource?.Invoke(pooledObj);
+                };
+                db.OnValidateObject = (pooledObj) =>
+                {
+                    return policy.OnValidateObject != null ? policy.OnValidateObject(pooledObj) : true;
+                };
+                db.SetPool(this); //设置池
+                return db;
+            }
+            ,async (c, b) =>
+            {
+                PooledDatabase db = await asyncCreateDelegate(c, b);//createFunc();
+                db.OnCreateResource = (pooledObj) =>
+                {
+                    policy.OnCreateResource?.Invoke(pooledObj);
+                };
+                db.OnGetResource = (pooledObj) =>
+                {
+                    policy.OnGetResource?.Invoke(pooledObj);
+                };
+                db.OnReturnResource = (pooledObj) =>
+                {
+                    policy.OnReturnResource?.Invoke(pooledObj);
+                };
+                db.OnReleaseResource = (pooledObj) =>
+                {
+                    policy.OnReleaseResource?.Invoke(pooledObj);
+                };
+                db.OnResetState = (pooledObj) =>
+                {
+                    policy.OnResetState?.Invoke(pooledObj);
+                };
+
+                db.OnEvictResource = (pooledObj) =>
+                {
+                    policy.OnEvictResource?.Invoke(pooledObj);
+                };
+                db.OnValidateObject = (pooledObj) =>
+                {
+                    return policy.OnValidateObject != null ? policy.OnValidateObject(pooledObj) : true;
+                };
+                db.SetPool(this); //设置池
+                return db;
+            }
+            , policy.EvictionSettings, policy.EvictionTimer, policy.EnableDiagnostics);
+        }
         public DatabasePool(Func<PooledDatabase> createFunc, int maximumRetained = 0, EvictionSettings evictSetting = null)
         {
             if (maximumRetained == 0)
@@ -31,7 +167,7 @@ namespace Pure.Data
 
             currentDatabaseLocal = new AsyncLocal<PooledDatabase>();
 
-            
+
             Pool = new ObjectPool<PooledDatabase>(maximumRetained, () =>
             {
                 PooledDatabase db = createFunc();
@@ -41,7 +177,7 @@ namespace Pure.Data
             , evictSetting, null);
         }
         private AsyncLocal<PooledDatabase> currentDatabaseLocal = null;
- 
+
         public PooledDatabase GetPooledDatabase()
         {
             //PooledDatabase obj = Pool.GetObject();
@@ -50,21 +186,21 @@ namespace Pure.Data
 
             if (currentDatabaseLocal.Value == null)
             {
-               
-                    PooledDatabase obj = Pool.GetObject();
-                    currentDatabaseLocal.Value = obj;
 
-                    if (currentDatabaseLocal.Value == null)
-                    {
-                        throw new PureDataException("DatabasePool GetPooledDatabase has been null!", null);
-                    }
-                
+                PooledDatabase obj = Pool.GetObject();
+                currentDatabaseLocal.Value = obj;
+
+                if (currentDatabaseLocal.Value == null)
+                {
+                    throw new PureDataException("DatabasePool GetPooledDatabase has been null!", null);
+                }
+
             }
             return currentDatabaseLocal.Value;
         }
-        
-       
-     
+
+
+
         public void ReturnPooledDatabase(PooledDatabase database)
         {
 
@@ -84,7 +220,8 @@ namespace Pure.Data
         }
 
 
-        public void RunInAction(Action<PooledDatabase> action) {
+        public void RunInAction(Action<PooledDatabase> action)
+        {
             using (var pdb = this.GetPooledDatabase())
             {
                 action(pdb);
@@ -99,6 +236,14 @@ namespace Pure.Data
                 r = func(pdb);
             }
             return r;
+        }
+
+        /// <summary>
+        /// 输出数据库连接池统计信息
+        /// </summary>
+        /// <returns></returns>
+        public string ShowStatisticsInfo() {
+            return Pool.ShowStatisticsInfo();
         }
         #endregion
 

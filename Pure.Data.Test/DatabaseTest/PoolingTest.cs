@@ -8,6 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Collections.Concurrent;
 using System.Threading;
+using Pure.Data.Pooling;
 //using Pure.Data.Pooling.Impl;
 
 namespace Pure.Data.Test
@@ -22,13 +23,13 @@ namespace Pure.Data.Test
             string title = "PoolingTest";
             Console.Title = title;
 
-            CodeTimer.Time(title, 10, () =>
+            CodeTimer.Time(title, 30, () =>
             {
                 //TestGetAndReturn();
                 //TestRun();
                 //TestDbContext();
-                //TestGetAndReturnPoolDatabase();
-                TestDbContext();
+                TestGetAndReturnPoolDatabase();
+                //TestDbContext();
             });
 
 
@@ -80,66 +81,133 @@ namespace Pure.Data.Test
             //FastLogger.WriteLog(msg);
         }
 
-        public static DatabasePool databasePool = new DatabasePool(() => new PooledDatabase("PureDataConfiguration.xml", Log,
-        config => {
-
-
-        })
-        {
-            
-            LogAction = Log,
-            OnValidateObject = (ctx) =>
-            {
-                if (ctx.Direction == Pooling.PooledObjectDirection.Inbound)
+        public static DatabasePool databasePool = new DatabasePool(
+            new DatabasePoolPolicy() {
+                CreateFactory = ()=> new PooledDatabase("PureDataConfiguration.xml", Log,
+                                 config => {
+                                 }),
+                AsyncCreateFactory = null,
+                LogAction = Log,
+                MaxPoolSize = 16,
+                EnableDiagnostics = true,
+                EvictionSettings = EvictionSettings.Default,
+                EvictionTimer = null,
+                
+                OnValidateObject = (ctx) =>
                 {
-                    return true;
-                }
-                else
+                    if (ctx.Direction == Pooling.PooledObjectDirection.Inbound)
+                    {
+                        return true;
+                    }
+                    else
+                    {
+                        return true;
+                    }
+                },
+                OnReleaseResource = (o) =>
                 {
-                    return true;
+                    var resource = o as PooledDatabase;
+                    Log("Release -> " + resource.GetHashCode() + " , connection: " + resource.Connection.GetHashCode() + ", status : " + resource.Connection.State, null, MessageType.Error);
+                    //resource?.Close();
+                },
+                OnResetState = (o) =>
+                {
+                    var resource = o as PooledDatabase;
+
+                    Log("Reset -> " + resource.GetHashCode() + " , connection: " + resource.Connection.GetHashCode() + ", status : " + resource.Connection.State, null, MessageType.Info);
+                    //resource?.Close();
+                },
+                OnCreateResource = (o) =>
+                {
+                    var resource = o as PooledDatabase;
+                    Log("Create -> " + resource.GetHashCode() + " , connection: " + resource.Connection.GetHashCode() + ", status : " + resource.Connection.State, null, MessageType.Warning);
+                },
+                OnEvictResource = (o) =>
+                {
+                    var resource = o as PooledDatabase;
+
+                    Log("Evict -> " + resource.GetHashCode() + " , connection: " + resource.Connection.GetHashCode() + ", status : " + resource.Connection.State, null, MessageType.Error);
+                    //resource?.Close();
+                },
+                OnGetResource = (o) =>
+                {
+                    var resource = o as PooledDatabase;
+                    Log("Get -> " + resource.GetHashCode() + " , connection: " + resource.Connection.GetHashCode() + ", status : " + resource.Connection.State, null, MessageType.Info);
+                },
+                OnReturnResource = (o) =>
+                {
+                    var resource = o as PooledDatabase;
+                    Log("Return -> " + resource.GetHashCode() + " , connection: " + resource.Connection.GetHashCode() + ", status : " + resource.Connection.State, null, MessageType.Warning);
                 }
-            },
-            OnReleaseResources = (o) =>
-            {
-                var resource = o as PooledDatabase;
-                Log("Release -> " + resource.GetHashCode() + " , connection: " + resource.Connection.GetHashCode() + ", status : " + resource.Connection.State, null, MessageType.Error);
-                //resource?.Close();
-            },
-            OnResetState = (o) =>
-            {
-                var resource = o as PooledDatabase;
-
-                Log("Reset -> " + resource.GetHashCode() + " , connection: " + resource.Connection.GetHashCode() + ", status : " + resource.Connection.State, null, MessageType.Info);
-                //resource?.Close();
-            },
-            OnCreateResource = (o) =>
-            {
-                var resource = o as PooledDatabase;
-
-                Log("Create -> " + resource.GetHashCode() + " , connection: " + resource.Connection.GetHashCode() + ", status : " + resource.Connection.State, null, MessageType.Warning);
-            },
-            OnEvictResource = (o) =>
-            {
-                var resource = o as PooledDatabase;
-
-                Log("Evict -> " + resource.GetHashCode() + " , connection: " + resource.Connection.GetHashCode() + ", status : " + resource.Connection.State, null, MessageType.Error);
-                //resource?.Close();
-            },
-            OnGetResource = (o) =>
-            {
-                var resource = o as PooledDatabase;
-                Log("Get -> " + resource.GetHashCode() + " , connection: " + resource.Connection.GetHashCode() + ", status : " + resource.Connection.State, null, MessageType.Info);
-            },
-            OnReturnResource = (o) =>
-            {
-                var resource = o as PooledDatabase;
-                Log("Return -> " + resource.GetHashCode() + " , connection: " + resource.Connection.GetHashCode() + ", status : " + resource.Connection.State, null, MessageType.Warning);
-            },
-
-
-        }, Environment.ProcessorCount * 2
-           //, new Pooling.EvictionSettings() { Enabled = true, Period = TimeSpan.FromMilliseconds(1000) }
+            }
            );
+
+
+        //public static DatabasePool databasePool = new DatabasePool(() => new PooledDatabase("PureDataConfiguration.xml", Log,
+        //config => {
+        //})
+        //{
+            
+        //    LogAction = Log,
+        //    OnValidateObject = (ctx) =>
+        //    {
+        //        if (ctx.Direction == Pooling.PooledObjectDirection.Inbound)
+        //        {
+        //            return true;
+        //        }
+        //        else
+        //        {
+        //            return true;
+        //        }
+        //    },
+        //    OnReleaseResources = (o) =>
+        //    {
+        //        var resource = o as PooledDatabase;
+        //        Log("Release -> " + resource.GetHashCode() + " , connection: " + resource.Connection.GetHashCode() + ", status : " + resource.Connection.State, null, MessageType.Error);
+        //        //resource?.Close();
+        //    },
+        //    OnResetState = (o) =>
+        //    {
+        //        var resource = o as PooledDatabase;
+
+        //        Log("Reset -> " + resource.GetHashCode() + " , connection: " + resource.Connection.GetHashCode() + ", status : " + resource.Connection.State, null, MessageType.Info);
+        //        //resource?.Close();
+        //    },
+        //    OnCreateResource = (o) =>
+        //    {
+        //        var resource = o as PooledDatabase;
+
+        //        Log("Create -> " + resource.GetHashCode() + " , connection: " + resource.Connection.GetHashCode() + ", status : " + resource.Connection.State, null, MessageType.Warning);
+        //    },
+        //    OnEvictResource = (o) =>
+        //    {
+        //        var resource = o as PooledDatabase;
+
+        //        Log("Evict -> " + resource.GetHashCode() + " , connection: " + resource.Connection.GetHashCode() + ", status : " + resource.Connection.State, null, MessageType.Error);
+        //        //resource?.Close();
+        //    },
+        //    OnGetResource = (o) =>
+        //    {
+        //        var resource = o as PooledDatabase;
+        //        Log("Get -> " + resource.GetHashCode() + " , connection: " + resource.Connection.GetHashCode() + ", status : " + resource.Connection.State, null, MessageType.Info);
+        //    },
+        //    OnReturnResource = (o) =>
+        //    {
+        //        var resource = o as PooledDatabase;
+        //        Log("Return -> " + resource.GetHashCode() + " , connection: " + resource.Connection.GetHashCode() + ", status : " + resource.Connection.State, null, MessageType.Warning);
+        //    },
+
+
+        //}, Environment.ProcessorCount * 2
+        //   //, new Pooling.EvictionSettings() { Enabled = true, Period = TimeSpan.FromMilliseconds(1000) }
+        //   );
+
+
+
+
+
+
+
 
         public static DatabaseWrapperPool databaseWrapperPool = new DatabaseWrapperPool(() => new Pooling.PooledObjectWrapper<IDatabase>(new Database("PureDataConfiguration.xml", Log,
          config => {
@@ -188,10 +256,10 @@ namespace Pure.Data.Test
             //var olist = db11.GetAll<UserInfo>();
 
 
-            using (var pdb = databasePool.GetPooledDatabase())
+            var pdb = databasePool.GetPooledDatabase();
+            pdb.RunInAction(() =>
             {
-                //pdb.BeginTransaction();
-                //var oo = pdb.FirstOrDefault<UserInfo>(p => p.Id == 9);
+                pdb.SetConnectionAlive(true);
                 var userinfo9 = pdb.Get<UserInfo>(9);
                 var userinfo = new UserInfo() { Id = 9, Name = "zss", Age = 20, HasDelete = false, StatusCode = 1 };
                 pdb.Insert<UserInfo>(userinfo);
@@ -208,10 +276,34 @@ namespace Pure.Data.Test
                 //oo2 = pdb.FirstOrDefault<UserInfo>(p => p.Name == "zss");
 
                 //pdb.CommitTransaction();
+                pdb.SetConnectionAlive(true);
 
-                pdb.ReturnPooledDatabase();
-                //pdb.Close();
-            }
+            }); 
+
+            //using (var pdb = databasePool.GetPooledDatabase())
+            //{
+            //    //pdb.BeginTransaction();
+            //    //var oo = pdb.FirstOrDefault<UserInfo>(p => p.Id == 9);
+            //    var userinfo9 = pdb.Get<UserInfo>(9);
+            //    var userinfo = new UserInfo() { Id = 9, Name = "zss", Age = 20, HasDelete = false, StatusCode = 1 };
+            //    pdb.Insert<UserInfo>(userinfo);
+            //    userinfo.Role = RoleType.管理员;
+            //    userinfo.DTCreate = DateTime.Now;
+
+            //    //pdb.Update(userinfo);
+
+            //    var oo2 = pdb.FirstOrDefault<UserInfo>(p => p.Name == "zss");
+            //    //var oo4 = pdb.Query<UserInfo>(p => p.Name == "zss");
+
+            //    //pdb.Delete<UserInfo>(p => p.Name == "zss");
+
+            //    //oo2 = pdb.FirstOrDefault<UserInfo>(p => p.Name == "zss");
+
+            //    //pdb.CommitTransaction();
+
+            //    pdb.ReturnPooledDatabase();
+            //    //pdb.Close();
+            //}
 
 
             //using (var pdb = databasePool.GetPooledDatabase())
