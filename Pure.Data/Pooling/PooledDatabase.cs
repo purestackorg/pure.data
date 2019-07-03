@@ -39,7 +39,14 @@ namespace Pure.Data
         {
             Pool = pool;
         }
-
+        public void SetConnection(IDbConnection conn)
+        {
+            if (conn == null)
+            {
+                throw new ArgumentException("Could not set null to Connection!");
+            }
+            Connection = conn; 
+        }
 
         public void RunInAction(Action action)
         {
