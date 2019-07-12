@@ -194,8 +194,13 @@ namespace Pure.Data
                 {
                     throw new PureDataException("DatabasePool GetPooledDatabase has been null!", null);
                 }
-
             }
+
+            if (currentDatabaseLocal.Value != null)
+            {
+                currentDatabaseLocal.Value.EnsureConnectionNotNull();
+            }
+
             return currentDatabaseLocal.Value;
         }
 

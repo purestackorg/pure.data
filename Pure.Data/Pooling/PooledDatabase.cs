@@ -48,6 +48,14 @@ namespace Pure.Data
             Connection = conn; 
         }
 
+        public void EnsureConnectionNotNull() {
+            if (Connection == null)
+            {
+                CreateAndInitConnection();
+
+            }
+        }
+
         public void RunInAction(Action action)
         {
             try
