@@ -1492,7 +1492,10 @@ namespace Pure.Data
             }
 
             if (TransactionIsOk())
+            {
                 _transaction.Rollback();
+                OnRollbackTransactionInternal();
+            }
 
             if (_transaction != null)
             {
@@ -1528,7 +1531,11 @@ namespace Pure.Data
             }
 
             if (TransactionIsOk())
+            {
                 _transaction.Commit();
+                OnCommitTransactionInternal();
+
+            }
 
             if (_transaction != null)
                 _transaction.Dispose();
@@ -1603,6 +1610,7 @@ namespace Pure.Data
                         if (_transaction != null)
                         {
                             _transaction.Rollback();
+                            OnRollbackTransactionInternal();
                         }
                         //OnConnectionClosingInternal(Connection);
                         OnConnectionClosingWithIntercept();
@@ -1651,6 +1659,7 @@ namespace Pure.Data
                         if (_transaction != null)
                         {
                             _transaction.Rollback();
+                            OnRollbackTransactionInternal();
                         }
                        // OnConnectionClosingInternal(Connection);
                         OnConnectionClosingWithIntercept();
@@ -2045,6 +2054,26 @@ namespace Pure.Data
             }
         }
 
+        private void OnRollbackTransactionInternal()
+        {
+            if (Config.EnableIntercept)
+            {
+                foreach (var interceptor in Config.Interceptors.OfType<ITransactionInterceptor>())
+                {
+                    interceptor.OnRollbackTransaction(this);
+                }
+            }
+        }
+        private void OnCommitTransactionInternal()
+        {
+            if (Config.EnableIntercept)
+            {
+                foreach (var interceptor in Config.Interceptors.OfType<ITransactionInterceptor>())
+                {
+                    interceptor.OnCommitTransaction(this);
+                }
+            }
+        }
         #endregion
 
         #region ConnectionInterceptor

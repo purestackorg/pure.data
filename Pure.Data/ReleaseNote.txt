@@ -1,5 +1,8 @@
 ﻿ 
  ---------------需要将xsd文件都放到vs安装目录下的Xml\Schemas文件夹里
+ 4.3.0.1
+ 增强事务中断器 TransactionTestIntercept
+
  4.3.0.0 20190630
  引入数据库连接池DatabasePool/DatabaseWrapperPool两个连接池
  增加池对象框架

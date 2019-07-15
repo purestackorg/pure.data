@@ -36,5 +36,8 @@ namespace Pure.Data
         void OnBeginTransaction(IDatabase database);
         void OnAbortTransaction(IDatabase database);
         void OnCompleteTransaction(IDatabase database);
+
+        void OnRollbackTransaction(IDatabase database);
+        void OnCommitTransaction(IDatabase database);
     }
 }
