@@ -9,19 +9,19 @@ namespace Pure.Data
 
         public void OnBeginTransaction(IDatabase database)
         {
-            string str = string.Format(database.DatabaseName + " Begin Trancetion!" + database.Connection.GetHashCode());
+            string str = string.Format(database.DatabaseName + " Begin Transaction!" + database.Connection.GetHashCode());
             database.LogHelper.Warning(str);
         }
 
         public void OnAbortTransaction(IDatabase database)
         {
-            string str = string.Format(database.DatabaseName + " Abort Trancetion!" + database.Connection.GetHashCode());
+            string str = string.Format(database.DatabaseName + " Abort Transaction!" + database.Connection.GetHashCode());
             database.LogHelper.Warning(str);
         }
 
         public void OnCompleteTransaction(IDatabase database)
         {
-            string str = string.Format(database.DatabaseName + " Complete Trancetion!" + database.Connection.GetHashCode());
+            string str = string.Format(database.DatabaseName + " Complete Transaction!" + database.Connection.GetHashCode());
             database.LogHelper.Warning(str);
         }
 
