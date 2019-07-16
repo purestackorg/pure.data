@@ -176,7 +176,7 @@ namespace Pure.Data
             }
             , evictSetting, null);
         }
-        private AsyncLocal<PooledDatabase> currentDatabaseLocal = null;
+        private static AsyncLocal<PooledDatabase> currentDatabaseLocal = null;
 
         public PooledDatabase GetPooledDatabase()
         {

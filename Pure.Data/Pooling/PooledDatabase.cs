@@ -47,11 +47,15 @@ namespace Pure.Data
             }
             Connection = conn; 
         }
-
+        private static object oEnsureConnectionLock = new object();
         public void EnsureConnectionNotNull() {
             if (Connection == null)
             {
-                CreateAndInitConnection();
+                lock (oEnsureConnectionLock)
+                {
+                    CreateAndInitConnection();
+
+                }
 
             }
         }

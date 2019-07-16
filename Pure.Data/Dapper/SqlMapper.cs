@@ -1400,18 +1400,20 @@ this IDbConnection cnn, string sql, object param = null, IDbTransaction transact
                 //    return;
                 //}
 
-                if (database.Config.EnableIntercept)
-                {
-                    foreach (var interceptor in database.Config.Interceptors.OfType<IConnectionInterceptor>())
-                    {
-                        interceptor.OnConnectionClosing(database, database.Connection);
-                    }
-                }
+           
 
 
                 //close reader 
                 if (withClose == true)
                 {
+                    if (database.Config.EnableIntercept)
+                    {
+                        foreach (var interceptor in database.Config.Interceptors.OfType<IConnectionInterceptor>())
+                        {
+                            interceptor.OnConnectionClosing(database, database.Connection);
+                        }
+                    }
+
                     reader.Close();
                 }
                 reader.Dispose();
