@@ -114,6 +114,7 @@ namespace Pure.Data
                         }
                         command.Connection = connection;
                         command.CommandText = GenerateInserSql(database, command, dataTable);
+                        database.LogToDebug(command);
                         command.ExecuteNonQuery();
                     }
                 }

@@ -45,6 +45,8 @@ namespace Pure.Data
                             ConfigAction(sqlBulkCopy);
                         }
                         sqlBulkCopy.WriteToServer(Table);
+                        database.LogHelper.Debug("insert batch success !");
+
                     }
                 }
                 catch (Exception)
@@ -87,6 +89,9 @@ namespace Pure.Data
                             ConfigAction(sqlBulkCopy);
                         }
                         await sqlBulkCopy.WriteToServerAsync(Table);
+
+                        database.LogHelper.Debug("insert batch success !");
+
                     }
                 }
                 catch (Exception)
@@ -144,6 +149,8 @@ namespace Pure.Data
 
                         bulk.WriteToServer(dataTable);
                         bulk.Close();
+
+                        database.LogHelper.Debug("insert batch success !");
                     }
                 }
                 catch (Exception exp)

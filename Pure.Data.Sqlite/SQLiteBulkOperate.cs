@@ -88,6 +88,7 @@ namespace Pure.Data
                             }
 
                             ProcessCommandParameters(database, dataTable, command, row, first);
+                            database.LogToDebug(command);
                             command.ExecuteNonQuery();
                         }
 
