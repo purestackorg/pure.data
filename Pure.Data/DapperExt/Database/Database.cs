@@ -361,7 +361,8 @@ namespace Pure.Data
                 conn.ConnectionString = ConnectionString;
 
             }
-            Connection = conn;
+            //不需要赋值，否则会自动释放了连接
+            //Connection = conn;
 
             return conn;
         }

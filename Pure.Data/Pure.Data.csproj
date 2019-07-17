@@ -9,10 +9,10 @@
     <!--<TargetFramework>net45</TargetFramework>-->
     <Description>Database Operation Library</Description>
     <Copyright>Copyright © Benson Kwok  2015</Copyright>
-    <Version>4.3.0.6</Version>
+    <Version>4.3.0.7</Version>
     <Authors>ice</Authors>
-    <AssemblyVersion>4.3.0.6</AssemblyVersion>
-    <FileVersion>4.3.0.6</FileVersion>
+    <AssemblyVersion>4.3.0.7</AssemblyVersion>
+    <FileVersion>4.3.0.7</FileVersion>
     <PackageReleaseNotes>Database Operation Library</PackageReleaseNotes>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
   </PropertyGroup>

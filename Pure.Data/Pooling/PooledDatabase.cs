@@ -45,10 +45,11 @@ namespace Pure.Data
             {
                 throw new ArgumentException("Could not set null to Connection!");
             }
-            Connection = conn; 
+            Connection = conn;
         }
         private static object oEnsureConnectionLock = new object();
-        public void EnsureConnectionNotNull() {
+        public void EnsureConnectionNotNull()
+        {
             if (Connection == null)
             {
                 lock (oEnsureConnectionLock)
@@ -59,7 +60,32 @@ namespace Pure.Data
 
             }
         }
+        private IDbConnection _connection = null;
+        private static object oConnectionLock = new object();
+        /// <summary>
+        /// 数据库连接对象
+        /// </summary>
+        public IDbConnection Connection
+        {
+            get
+            {
+                if (_connection == null)
+                {
+                    lock (oConnectionLock)
+                    {
+                        LogHelper.Debug("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! Connection is null , then creating new connection !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
 
+                        _connection = CreateNewDbConnection(Config.DbConnectionInit != null); 
+                        return _connection;
+                    }
+                }
+                return _connection;
+            }
+            private set
+            {
+                _connection = value;
+            }
+        }
         public void RunInAction(Action action)
         {
             try
@@ -81,7 +107,7 @@ namespace Pure.Data
         {
             try
             {
-                T result = func(); 
+                T result = func();
                 return result;
             }
             catch (Exception ex)
@@ -97,7 +123,7 @@ namespace Pure.Data
         public void ReturnPooledDatabase()
         {
             Pool.ReturnPooledDatabase(this); //返还当前的数据库
-             
+
             //if (Config.KeepConnectionAlive) return;
 
             if (Connection != null)
@@ -149,7 +175,7 @@ namespace Pure.Data
         /// 返还给数据库池，关闭数据库连接，当开启KeepConnectionAlive为true则不关闭
         /// </summary>
         public void Close()
-        {  
+        {
 
             if (Config.KeepConnectionAlive) return;
             if (Connection == null) return;
@@ -309,14 +335,7 @@ namespace Pure.Data
 
         public string ConnectionString { get; private set; }
 
-        /// <summary>
-        /// 数据库连接对象
-        /// </summary>
-        public IDbConnection Connection
-        {
-            get;
-            private set;
-        }
+
 
         internal bool TransactionIsAborted { get; set; }
         internal int TransactionCount { get; set; }
@@ -426,7 +445,7 @@ namespace Pure.Data
         #endregion
 
         #region Construct
-
+        
         /// <summary>
         /// 创建新的连接对象
         /// </summary>
@@ -523,7 +542,8 @@ namespace Pure.Data
                 conn.ConnectionString = ConnectionString;
 
             }
-            Connection = conn;
+            //不需要赋值，否则会自动释放了连接
+            //Connection = conn;
 
             return conn;
         }
@@ -1658,7 +1678,7 @@ namespace Pure.Data
                 _transaction.Rollback();
                 OnRollbackTransactionInternal();
             }
-            
+
 
 
             if (_transaction != null)
@@ -1750,7 +1770,7 @@ namespace Pure.Data
                 {
                     RollbackTransaction();
                 }
-                throw new PureDataException("RunInTransaction", ex); 
+                throw new PureDataException("RunInTransaction", ex);
             }
             //finally
             //{
@@ -2241,7 +2261,7 @@ namespace Pure.Data
         }
         #endregion
 
- 
+
 
         #region Batch Command
         /// <summary>
