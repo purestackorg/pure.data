@@ -60,6 +60,8 @@ namespace Pure.Data.Pooling
                 try
                 {
                     OnResetState(this);
+
+                    this.PooledObjectInfo.LastOperateTime = DateTime.UtcNow;
                 }
                 catch (Exception ex)
                 {

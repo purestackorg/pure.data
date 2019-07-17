@@ -9,6 +9,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.Data.Common;
 using System.Diagnostics;
+using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
 using System.Runtime.CompilerServices;
@@ -59,7 +60,7 @@ namespace Pure.Data
     {
         #region PooledDatabase
 
-        public IObjectPool<PooledDatabase> Pool = null;
+        public ObjectPool<PooledDatabase> Pool = null;
 
         public DatabasePool(DatabasePoolPolicy policy)
         {
@@ -248,7 +249,32 @@ namespace Pure.Data
         /// </summary>
         /// <returns></returns>
         public string ShowStatisticsInfo() {
-            return Pool.ShowStatisticsInfo();
+            string msg = Pool.ShowStatisticsInfo();
+
+            // Local copy, since the buffer might change.
+            var pooledObjects = Pool.PooledObjects.ToArray();
+            msg += "-------- Pool Object List --------\r\n";
+            // All items which are not valid will be destroyed.
+            foreach (var pooledObject in pooledObjects)
+            {
+                if (pooledObject != null)
+                {
+                    msg += "Conn:"+ pooledObject.Connection.GetHashCode() + ", State:" + pooledObject.Connection.State+", "+ pooledObject.PooledObjectInfo.ToString()+ "\r\n";
+                }
+            }
+
+            var createdObjects = Pool.CreatedObjects.ToArray();
+            msg += "-------- Create Object List --------\r\n";
+            // All items which are not valid will be destroyed.
+            foreach (var pooledObject in createdObjects)
+            {
+                if (pooledObject != null)
+                {
+                    msg += "Conn:" + pooledObject.Connection.GetHashCode() + ", State:" + pooledObject.Connection.State + ", " + pooledObject.PooledObjectInfo.ToString() + "\r\n";
+                }
+            }
+
+            return msg;
         }
         #endregion
 

@@ -33,6 +33,7 @@ namespace Pure.Data.Pooling
         ///   this identifier increases monotonically as new objects are created.
         /// </summary>
         public int Id { get; internal set; }
+        public DateTime LastOperateTime { get; set; }
 
         /// <summary>
         ///   Payload which can be used to add custom information to a pooled object.
@@ -108,6 +109,6 @@ namespace Pure.Data.Pooling
         ///   Returns a string that represents the current object.
         /// </summary>
         /// <returns>A string that represents the current object.</returns>
-        public override string ToString() => $"{nameof(Id)}: {Id}, {nameof(Payload)}: {Payload}";
+        public override string ToString() => $"{nameof(Id)}: {Id}, {nameof(LastOperateTime)}: {LastOperateTime}, {nameof(Payload)}: {Payload}";
     }
 }

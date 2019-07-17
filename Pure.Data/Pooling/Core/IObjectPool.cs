@@ -309,7 +309,8 @@ namespace Pure.Data.Pooling
         /// <summary>
         ///   The concurrent buffer containing pooled objects.
         /// </summary>
-        protected PooledObjectBuffer<T> PooledObjects { get; } = new PooledObjectBuffer<T>();
+        public PooledObjectBuffer<T> PooledObjects { get; } = new PooledObjectBuffer<T>();
+        public PooledObjectBuffer<T> CreatedObjects { get; } = new PooledObjectBuffer<T>();
 
         #endregion Public Properties
 
@@ -341,6 +342,8 @@ namespace Pure.Data.Pooling
             {
                 DestroyPooledObject(dequeuedObjectToDestroy);
             }
+
+
         }
 
         /// <summary>
@@ -524,6 +527,8 @@ namespace Pure.Data.Pooling
 
             var newObject = FactoryMethod();
 
+            CreatedObjects.TryEnqueue(newObject);//加入创建的队列
+
             return PrepareNewPooledObject(newObject);
         }
 
@@ -546,6 +551,8 @@ namespace Pure.Data.Pooling
 
             var newObject = await AsyncFactoryMethod(cancellationToken, continueOnCapturedContext)
                 .ConfigureAwait(continueOnCapturedContext);
+
+            CreatedObjects.TryEnqueue(newObject);//加入创建的队列
 
             return PrepareNewPooledObject(newObject);
         }
@@ -608,6 +615,21 @@ namespace Pure.Data.Pooling
                                 DestroyPooledObject(pooledObject);
                             }
                         }
+
+                        //created  object need check all
+                        var createdObjects = CreatedObjects.ToArray();
+
+                        // All items which are not valid will be destroyed.
+                        foreach (var pooledObject in createdObjects.Where(p=>p != null))
+                        { 
+                            if (!pooledObject.ValidateObject(PooledObjectValidationContext.Outbound(pooledObject)) && CreatedObjects.TryRemove(pooledObject))
+                            {
+                                pooledObject.OnEvictResource(pooledObject);
+
+                                DestroyPooledObject(pooledObject);
+                            }
+                        }
+
                     }, settings.Delay, settings.Period);
                 }
             }
@@ -623,6 +645,7 @@ namespace Pure.Data.Pooling
             newObject.PooledObjectInfo.Id = Interlocked.Increment(ref _lastPooledObjectId);
             newObject.PooledObjectInfo.State = PooledObjectState.Available;
             newObject.PooledObjectInfo.Handle = this;
+            newObject.PooledObjectInfo.LastOperateTime = DateTime.UtcNow;
 
             newObject.OnCreateResource(newObject);
             return newObject;
@@ -636,7 +659,9 @@ namespace Pure.Data.Pooling
                 "Diagnostics -> " + Diagnostics.ToString()  
                 ;
 
-            return msg;
+         
+
+                return msg;
         }
         #endregion Private Methods
     }
