@@ -248,6 +248,8 @@ namespace Pure.Data.Pooling
             // Max pool size.
             MaximumPoolSize = maximumPoolSize;
 
+            CreatedObjects.Resize(1000);//存活最大1000个创建对象
+
             // Creating a new instance for the Diagnostics class.
             Diagnostics = new ObjectPoolDiagnostics(enableDiagnostics);
 
@@ -527,7 +529,7 @@ namespace Pure.Data.Pooling
 
             var newObject = FactoryMethod();
 
-            CreatedObjects.TryEnqueue(newObject);//加入创建的队列
+          
 
             return PrepareNewPooledObject(newObject);
         }
@@ -552,7 +554,7 @@ namespace Pure.Data.Pooling
             var newObject = await AsyncFactoryMethod(cancellationToken, continueOnCapturedContext)
                 .ConfigureAwait(continueOnCapturedContext);
 
-            CreatedObjects.TryEnqueue(newObject);//加入创建的队列
+
 
             return PrepareNewPooledObject(newObject);
         }
@@ -639,6 +641,10 @@ namespace Pure.Data.Pooling
 
         #region Private Methods
 
+        public void TryEnqueueCreatedObject(T newObject) {
+            CreatedObjects.TryEnqueue(newObject); 
+        }
+
         private T PrepareNewPooledObject(T newObject)
         {
             // Sets the "return to pool" action and other properties in the newly created pooled object.
@@ -646,6 +652,8 @@ namespace Pure.Data.Pooling
             newObject.PooledObjectInfo.State = PooledObjectState.Available;
             newObject.PooledObjectInfo.Handle = this;
             newObject.PooledObjectInfo.LastOperateTime = DateTime.UtcNow;
+
+            CreatedObjects.TryEnqueue(newObject);//加入创建的队列
 
             newObject.OnCreateResource(newObject);
             return newObject;

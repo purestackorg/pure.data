@@ -222,6 +222,7 @@ namespace Pure.Data
 
         public void Dispose()
         {
+             
             Pool.Clear();
         }
 
@@ -253,7 +254,7 @@ namespace Pure.Data
 
             // Local copy, since the buffer might change.
             var pooledObjects = Pool.PooledObjects.ToArray();
-            msg += "-------- Pool Object List --------\r\n";
+            msg += "\r\n-------- Pool Object List --------\r\n";
             // All items which are not valid will be destroyed.
             foreach (var pooledObject in pooledObjects)
             {

@@ -50,7 +50,7 @@ namespace Pure.Data
         private static object oEnsureConnectionLock = new object();
         public void EnsureConnectionNotNull()
         {
-            if (Connection == null)
+            if (_connection == null)
             {
                 lock (oEnsureConnectionLock)
                 {
@@ -62,6 +62,11 @@ namespace Pure.Data
         }
         private IDbConnection _connection = null;
         private static object oConnectionLock = new object();
+        
+        public IDbConnection GetConnection() {
+            
+            return _connection;
+        }
         /// <summary>
         /// 数据库连接对象
         /// </summary>
@@ -73,9 +78,13 @@ namespace Pure.Data
                 {
                     lock (oConnectionLock)
                     {
-                        LogHelper.Debug("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! Connection is null , then creating new connection !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
 
-                        _connection = CreateNewDbConnection(Config.DbConnectionInit != null); 
+                        _connection = CreateNewDbConnection(Config.DbConnectionInit != null);
+
+                        LogHelper.Debug("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! Connection is null , then creating new connection(" + _connection.GetHashCode() + ") !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+
+                        Pool.Pool.TryEnqueueCreatedObject(this); //加入队列
+
                         return _connection;
                     }
                 }
@@ -126,7 +135,7 @@ namespace Pure.Data
 
             //if (Config.KeepConnectionAlive) return;
 
-            if (Connection != null)
+            if (_connection != null)
             {
                 //if (Config.EnableConnectionPool == true)
                 //{
@@ -135,7 +144,7 @@ namespace Pure.Data
                 //}
                 //else
                 //{
-                if (Connection.State != ConnectionState.Closed)
+                if (_connection.State != ConnectionState.Closed)
                 {
                     if (_transaction != null)
                     {
@@ -144,7 +153,7 @@ namespace Pure.Data
                     }
                     //OnConnectionClosingInternal(Connection);
                     OnConnectionClosingWithIntercept();
-                    Connection.Close();
+                    _connection.Close();
                 }
 
                 //if (IsPooled == false) //这个很关键，避免导致connection为null的错误
@@ -166,6 +175,34 @@ namespace Pure.Data
             }
         }
 
+        public void DisposeInternal() {
+            if (_connection != null)
+            {
+                //if (Config.EnableConnectionPool == true)
+                //{
+                //   // Pooling.DbConnectionPoolProxy.Instance.ReturnObject(this, Connection);
+
+                //}
+                //else
+                //{
+                if (_connection.State != ConnectionState.Closed)
+                {
+                    if (_transaction != null)
+                    {
+                        _transaction.Rollback();
+                        OnRollbackTransactionInternal();
+                    }
+                    //OnConnectionClosingInternal(Connection);
+                    OnConnectionClosingWithIntercept();
+                    _connection.Close();
+                }
+
+                _connection.Dispose();
+                _connection = null;
+
+            }
+        }
+
         public void Dispose()
         {
             ReturnPooledDatabase(); // 自动返回池里 
@@ -178,7 +215,7 @@ namespace Pure.Data
         {
 
             if (Config.KeepConnectionAlive) return;
-            if (Connection == null) return;
+            if (_connection == null) return;
 
             if (HasActiveTransaction == false)
             {
@@ -190,7 +227,7 @@ namespace Pure.Data
                 //}
                 //else
                 //{
-                if (Connection.State != ConnectionState.Closed)
+                if (_connection.State != ConnectionState.Closed)
                 {
                     if (_transaction != null)
                     {
@@ -200,7 +237,7 @@ namespace Pure.Data
                     }
                     // OnConnectionClosingInternal(Connection);
                     OnConnectionClosingWithIntercept();
-                    Connection.Close();
+                    _connection.Close();
 
                 }
                 // } 
@@ -451,7 +488,7 @@ namespace Pure.Data
         /// </summary>
         private void CreateAndInitConnection(IDbConnection initConnection = null)
         {
-            if (Connection != null)
+            if (_connection != null)
             {
                 return;
             }
@@ -462,33 +499,13 @@ namespace Pure.Data
                 {
                     initConnection = Config.DbConnectionInit(initConnection);
                 }
-                Connection = initConnection;
+                _connection = initConnection;
 
                 return;
             }
             else
             {
-                //if (Config.EnableConnectionPool == true)
-                //{
-
-                //    Connection = Pooling.DbConnectionPoolProxy.Instance.BorrowObject(this);
-                //    if (Config.DbConnectionInit != null)
-                //    {
-                //        Connection = Config.DbConnectionInit(Connection);
-                //    }
-
-                //    if (Connection == null) throw new Exception("DB Connection failed to configure.");
-                //    if (Connection.State != ConnectionState.Open)
-                //    {
-                //        Connection.ConnectionString = Connection.ConnectionString;
-                //    }
-
-                //    return;
-
-
-                //}
-                //else
-                //{
+                
                 if (DbFactory == null)
                 {
                     DbFactory = DbConnectionFactory.CreateConnection(ConnectionString, ProviderName).DbFactory;
@@ -502,11 +519,11 @@ namespace Pure.Data
                 {
                     conn = Config.DbConnectionInit(conn);
                 }
-                Connection = conn;
-                if (Connection == null) throw new Exception("DB Connection failed to configure.");
-                if (Connection.State != ConnectionState.Open)
+                _connection = conn;
+                if (_connection == null) throw new Exception("DB Connection failed to configure.");
+                if (_connection.State != ConnectionState.Open)
                 {
-                    Connection.ConnectionString = ConnectionString;
+                    _connection.ConnectionString = ConnectionString;
 
                 }
 
@@ -1799,11 +1816,11 @@ namespace Pure.Data
 
         public void EnsureOpenConnection()
         {
-            if (Connection != null)
+            if (_connection != null)
             {
-                if (Connection.State != ConnectionState.Open)
+                if (_connection.State != ConnectionState.Open)
                 {
-                    Connection.Open();
+                    _connection.Open();
                 }
             }
         }
@@ -1819,34 +1836,23 @@ namespace Pure.Data
         public IDatabase OpenNewConnection()
         {
             ShouldCloseConnectionAutomatically = true;
-            if (Connection.State == ConnectionState.Broken)
+            if (_connection.State == ConnectionState.Broken)
             {
-                Connection.Close();
+                _connection.Close();
             }
-            if (Connection.State == ConnectionState.Closed)
+            if (_connection.State == ConnectionState.Closed)
             {
-                //Connection = DbFactory != null ? DbFactory.CreateConnection() : DbConnectionFactory.CreateConnection(ConnectionString, ProviderName).Connection;
+                //_connection = DbFactory != null ? DbFactory.CreateConnection() : DbConnectionFactory.CreateConnection(ConnectionString, ProviderName).Connection;
                 this.CreateAndInitConnection();
 
-                if (Connection == null) throw new Exception("DB Connection failed to configure.");
+                if (_connection == null) throw new Exception("DB Connection failed to configure.");
 
-                Connection.ConnectionString = ConnectionString;
+                _connection.ConnectionString = ConnectionString;
 
-                Connection.Open();
+                _connection.Open();
             }
 
-
-            //if (Connection.State == ConnectionState.Broken)
-            //{
-            //    Connection.Close();
-            //}
-
-            //if (Connection.State == ConnectionState.Closed)
-            //{
-            //    Connection.Open();
-            //    Connection = OnConnectionOpenedInternal(Connection);
-            //}
-            //LogHelper.Debug("New Connection Created." + Connection.GetHashCode());
+ 
             return this;
         }
 
@@ -1857,26 +1863,26 @@ namespace Pure.Data
 
         private void OpenSharedConnectionImp(bool isInternal)
         {
-            if (Connection != null && Connection.State != ConnectionState.Broken && Connection.State != ConnectionState.Closed)
+            if (_connection != null && _connection.State != ConnectionState.Broken && _connection.State != ConnectionState.Closed)
                 return;
 
             ShouldCloseConnectionAutomatically = isInternal;
 
             //Connection = DbFactory != null ? DbFactory.CreateConnection() : DbConnectionFactory.CreateConnection(ConnectionString, ProviderName).Connection; // DbFactory.CreateConnection();
             this.CreateAndInitConnection(); // DbFactory.CreateConnection());
-            if (Connection == null) throw new Exception("DB Connection failed to configure.");
+            if (_connection == null) throw new Exception("DB Connection failed to configure.");
 
-            Connection.ConnectionString = ConnectionString;
+            _connection.ConnectionString = ConnectionString;
 
-            if (Connection.State == ConnectionState.Broken)
+            if (_connection.State == ConnectionState.Broken)
             {
-                Connection.Close();
+                _connection.Close();
             }
 
-            if (Connection.State == ConnectionState.Closed)
+            if (_connection.State == ConnectionState.Closed)
             {
-                Connection.Open();
-                Connection = OnConnectionOpenedInternal(Connection);
+                _connection.Open();
+                _connection = OnConnectionOpenedInternal(_connection);
             }
             //LogHelper.Debug("New Connection has Open."+Connection.GetHashCode());
 
