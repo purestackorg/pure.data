@@ -28,7 +28,12 @@ namespace PureGen
                 string type = options.Type;
 
                 var projectConfig = DbLoader.ConvertDatabaseConfigToProjectConfig(database);
-                var tables = DbLoader.GetTableInfos(database, projectConfig);
+                LogHelpers.LogStatic(projectConfig.ToString());
+
+                string msg = "";
+                var tables = DbLoader.GetTableInfos(database, projectConfig,null, null, out msg);
+                LogHelpers.LogStatic(msg);
+
 
                 string docName = projectConfig.DatabaseName;
                 OutputContext _OutputContext = new OutputContext();

@@ -48,14 +48,8 @@
     CodeGenPropertyNameMode="Origin"
     CodeGenProjectName="MyCodeGen"
     CodeGenNameSpace="MyCodeGen.Test"
-    CodeGenTableFilter="LR_Base_;LR_"
+    CodeGenTableFilter="B_;A_"
     CodeGenBaseDirectory=""
-    
-    EnableConnectionPool="false"
-    EnableLogConnectionPool="true"
-    ConnectionPoolMinSize="10"
-    ConnectionPoolMaxSize="200"
-    ConnectionPoolStepSize="10"
 
   />
 
@@ -66,8 +60,10 @@
                 IsMaster="true"  ParameterPrefix=":" Type="Write" Weight="100"  />-->
     <!--<DataSource Name="WriteDB"  ConnectionString="Server=.;User ID=sa;Password=aaa0.0;Database=LearunFramework_Base_61" Provider="System.Data.SqlClient" 
                 IsMaster="true"  ParameterPrefix=":" Type="Write" Weight="100"  />-->
-    <DataSource Name="WriteDB"  ConnectionString="Server=192.168.6.176;User ID=sa;Password=aaa0.0;Database=Test" Provider="System.Data.SqlClient"
-                IsMaster="true"  ParameterPrefix=":" Type="Write" Weight="100"  />
+    <!--<DataSource Name="WriteDB"  ConnectionString="Server=192.168.6.176;User ID=sa;Password=aaa0.0;Database=Test" Provider="System.Data.SqlClient"
+                IsMaster="true"  ParameterPrefix=":" Type="Write" Weight="100"  />-->
+        <DataSource Name="WriteDB"  ConnectionString="Database=KJXM;server=192.168.6.52;port=3306;userid=KJXM;pwd=123456;sslmode=none" Provider="MySql.Data.MySqlClient"
+           IsMaster="true"  ParameterPrefix="?" Type="Write" Weight="100"  />
     <!--<DataSource Name="WriteDB"  ConnectionString="Data Source=E:\Benson\Source\RoGenerator\Pure\Pure.Data\Pure.Data\Pure.Data.Test\Data\sqlitetest.db;" Provider="SQLITE"
             IsMaster="true"  ParameterPrefix=":" Type="Write" Weight="100"  />-->
 
@@ -84,7 +80,7 @@
 
   <MapperSources>
     <!--<MapperSource Type="File" Path="Pure.Data.Test.exe"></MapperSource>-->
-    <MapperSource Type="ClassType" ClassName="PureGen.User,PureGen"></MapperSource>
+    <!--<MapperSource Type="ClassType" ClassName="PureGen.User,PureGen"></MapperSource>-->
   </MapperSources>
 
 
@@ -119,6 +115,7 @@
     
     <!--实体类-->
     <CodeGenTemplate
+   OutputType="Table"
       Enabled="true"
       Name="Entity"
       Append="false"
@@ -147,6 +144,7 @@
       ></CodeGenTemplate>-->
 
     <CodeGenTemplate
+   OutputType="Table"
    Enabled="true"
    Name="Mapper"
    Append="false"
@@ -162,6 +160,7 @@
     <!--服务类-->
     <CodeGenTemplate
  Enabled="false"
+   OutputType="Table"
  Name="Service"
  Append="false"
  Encoding="utf-8"
@@ -170,11 +169,12 @@
  FilePrefix=""
  FileSuffix="Service"
  FileNameFormat=""
- OutputDirectory="\PureGen\{%ObjectName%}\Service"
+ OutputDirectory="\PureGen\{%ProjectName%}\{%ObjectName%}\Service"
       ></CodeGenTemplate>
 
     <!--SQLMap-->
     <CodeGenTemplate
+   OutputType="Table"
  Enabled="false"
  Name="SQLMap"
  Append="false"
@@ -189,6 +189,7 @@
 
     <!--Controller 控制器-->
     <CodeGenTemplate
+   OutputType="Table"
    Enabled="false"
    Name="Controller"
    Append="false"
@@ -198,11 +199,12 @@
    FilePrefix=""
    FileSuffix="Controller"
    FileNameFormat=""
-   OutputDirectory="\PureGen\{%ObjectName%}\Controllers"
+   OutputDirectory="\PureGen\{%ProjectName%}\{%ObjectName%}\Controllers"
       ></CodeGenTemplate>
 
     <!--列表视图-->
     <CodeGenTemplate
+   OutputType="Table"
   Enabled="false"
   Name="MvcViewList"
   Append="false"
@@ -212,11 +214,12 @@
   FilePrefix=""
   FileSuffix=""
   FileNameFormat="{%ObjectName%}\List"
-  OutputDirectory="\PureGen\{%ObjectName%}\Views"
+  OutputDirectory="\PureGen\{%ProjectName%}\{%ObjectName%}\Views"
       ></CodeGenTemplate>
 
     <!--表单视图-->
     <CodeGenTemplate
+   OutputType="Table"
   Enabled="false"
   Name="MVCViewForm"
   Append="false"
@@ -226,11 +229,12 @@
   FilePrefix=""
   FileSuffix=""
   FileNameFormat="{%ObjectName%}\Form"
-  OutputDirectory="\PureGen\{%ObjectName%}\Views"
+  OutputDirectory="\PureGen\{%ProjectName%}\{%ObjectName%}\Views"
       ></CodeGenTemplate>
 
     <!--列表Js模块-->
     <CodeGenTemplate
+   OutputType="Table"
    Enabled="false"
    Name="JsListModule"
    Append="false"
@@ -240,7 +244,7 @@
    FilePrefix=""
    FileSuffix="Module"
    FileNameFormat=""
-   OutputDirectory="\PureGen\{%ObjectName%}\JsModules"
+   OutputDirectory="\PureGen\{%ProjectName%}\{%ObjectName%}\JsModules"
       ></CodeGenTemplate>
      
 

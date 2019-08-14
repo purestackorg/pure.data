@@ -11,6 +11,31 @@ namespace Pure.Data.Gen
 
     public class ProjectConfig
     {
+
+        public override string ToString()
+        {
+            string newline = ";\r\n\t\t";
+            string str = "ProjectConfig:"+ "\r\n\t\t"
+                + "DatabaseType:" + DatabaseType + newline
+                + "DatabaseName:" + DatabaseName + newline
+                + "ProviderName:" + ProviderName + newline
+                + "Name:" + Name + newline
+                + "NameSpace:" + NameSpace + newline
+                + "Enable:" + Enable + newline
+                + "TableFilter:" + TableFilter + newline  
+                + "ClassNameMode:" + ClassNameMode + newline
+                + "PropertyNameMode:" + PropertyNameMode + newline 
+                ;
+
+            str += "" + "\r\n";
+            str += "GeneraterConfigs:" + newline;
+            foreach (var tmp in GeneraterConfigs)
+            {
+                str +=tmp.ToString() + newline;
+            }
+
+            return str;
+        }
         public IDatabase Database { get; set; }
         public DatabaseType DatabaseType { get {
                 if (Database != null)

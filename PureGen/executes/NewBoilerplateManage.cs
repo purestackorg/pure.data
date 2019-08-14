@@ -32,7 +32,7 @@ namespace PureGen
                 //result = provider.Process(ctx);
 
                 string config = DbLoader.CombinePathWithAppDirectory(@"Boilerplats\" + options.Boilerplate + @"\config.xml");
-                NewBoilerplateManage.DoGen(config, options.Project, options.NameSpace, options.TablePrefixFilter, options.OnlyGenTable);
+                NewBoilerplateManage.DoGen(config, options.Project, options.NameSpace, options.PrefixFilter, options.OnlyGenTable);
 
 
                 string genDir = DbLoader.CombinePathWithAppDirectory(@"generate\" + options.Boilerplate ); 

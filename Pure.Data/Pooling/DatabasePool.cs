@@ -73,7 +73,13 @@ namespace Pure.Data
             //{
             //    policyConfig(policy);
             //}
+#if NET45
+            currentDatabaseLocal = new ThreadLocal<PooledDatabase>();
+
+#else
             currentDatabaseLocal = new AsyncLocal<PooledDatabase>();
+
+#endif
 
             int maximumRetained = policy.MaxPoolSize;
 
@@ -165,11 +171,16 @@ namespace Pure.Data
             {
                 maximumRetained = Environment.ProcessorCount * 2;
             }
+#if NET45 
+        currentDatabaseLocal = new ThreadLocal<PooledDatabase>();
 
-            currentDatabaseLocal = new AsyncLocal<PooledDatabase>();
+#else
+        currentDatabaseLocal = new AsyncLocal<PooledDatabase>();
+
+#endif
 
 
-            Pool = new ObjectPool<PooledDatabase>(maximumRetained, () =>
+        Pool = new ObjectPool<PooledDatabase>(maximumRetained, () =>
             {
                 PooledDatabase db = createFunc();
                 db.SetPool(this); //设置池
@@ -177,8 +188,13 @@ namespace Pure.Data
             }
             , evictSetting, null);
         }
-        private static AsyncLocal<PooledDatabase> currentDatabaseLocal = null;
+#if NET45 
+        private static ThreadLocal<PooledDatabase> currentDatabaseLocal = null;
 
+#else
+               private static AsyncLocal<PooledDatabase> currentDatabaseLocal = null;
+
+#endif
         public PooledDatabase GetPooledDatabase()
         {
             //PooledDatabase obj = Pool.GetObject();

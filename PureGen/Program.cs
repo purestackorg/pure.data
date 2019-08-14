@@ -33,11 +33,19 @@ namespace PureGen
 
 
             string testCmd = "new -b csharp_mvc -t article;comments -p AGRYGL -n AGRYGL.Core";
-            testCmd = @"doc --help";
+            testCmd = @"--help";
+            //testCmd = @"doc --help";
             //testCmd = @"doc -t docx -c PureDataConfiguration.xml -z";
-            //testCmd = @"build -l csharp -p D:\Life\Source\github\pure.data\PureGen\bin\Debug\generate\csharp_mvc";
+            //testCmd = @"build -l csharp -p G:\Benson\Source\RoGenerator\Pure\Pure.Data\Pure.Data.stardard\Pure.Data\PureGen\bin\Debug\generate\csharp_mvc\AGRYGL.sln";
+            //testCmd = @"run -l csharp -p G:\Benson\Source\RoGenerator\Pure\Pure.Data\Pure.Data.stardard\Pure.Data\PureGen\bin\Debug\generate\csharp_mvc\AGRYGL.sln";
+            //testCmd = @"run -l csharp -p G:\Benson\Source\RoGenerator\Pure\Pure.Data\Pure.Data.stardard\Pure.Data\PureGen\bin\Debug\generate\csharp_mvc\AGRYGL.Web\bin\Debug\netcoreapp2.1\AGRYGL.Web.dll";
             //testCmd = @"run -l csharp -p C:\Users\benson\source\repos\PureGen.Web\PureGen.Web\bin\Debug\netcoreapp2.1\PureGen.Web.dll";
-            //testCmd = "gen";
+            //testCmd = "gen -c PureDataConfiguration2.xml -p TestDEmo -n TestDEmo.NameSpac";
+            //testCmd = "new -b csharp_mvc -t article;comments -p AGRYGL -n AGRYGL.Core";
+
+            Console.WriteLine(testCmd);
+            Console.WriteLine("------------------------");
+
             args = testCmd.Split(new char[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
             ParseAndExecute(args);
 
@@ -52,7 +60,7 @@ namespace PureGen
             Parser.Default.ParseArguments<GenOptions, NewOptions, DocOptions, BuildOptions, RunOptions, RestoreOptions>(args)
    .WithParsed<GenOptions>(opts =>
    { //生成代码
-       DoWhenNoArgs(opts.ConfigFile);
+       DoWhenNoArgs(opts);
    })
    .WithParsed<NewOptions>(opts =>
    { //创建新模板项目
@@ -93,7 +101,7 @@ namespace PureGen
        }
        else
        {
-           CmdHelper.RunCmd(CmdHelper.GetBuildCmd(opts));
+            CmdHelper.Run(CmdHelper.GetBuildCmd(opts));
        }
 
    })
@@ -112,7 +120,8 @@ namespace PureGen
        }
        else
        {
-           CmdHelper.RunCmd(CmdHelper.GetRunCmd(opts), true);
+           CmdHelper.Run(CmdHelper.GetRunCmd(opts));
+           //CmdHelper.RunCmd(CmdHelper.GetRunCmd(opts), true);
        }
 
    })
@@ -131,18 +140,10 @@ namespace PureGen
 
         }
 
-        private static void DoWhenNoArgs(params string[] args)
+        private static void DoWhenNoArgs(GenOptions options)
         {
-
-
-
-            string config = "";
-            if (args.Length > 0)
-            {
-                config = args[0];
-
-            }
-            NewBoilerplateManage.DoGen(config);
+             
+            NewBoilerplateManage.DoGen(options.ConfigFile, options.Project, options.NameSpace, options.PrefixFilter, options.OnlyGenTable);
 
 
             Console.ReadLine();

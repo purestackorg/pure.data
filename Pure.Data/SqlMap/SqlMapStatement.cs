@@ -1392,6 +1392,7 @@ namespace Pure.Data.SqlMap
 
             try
             {
+                
                 var o =await TryGetOrSetCacheAsync(async () =>
                 {
 

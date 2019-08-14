@@ -1,0 +1,22 @@
+﻿/*
+  Summary:命令配置文件
+  Time:2018-06-12
+  App: PureGen 
+*/
+
+{
+  "cmd": {
+    "csharp": {
+      "build": "C:\\Program Files\\dotnet\\dotnet.exe",
+      "buildargs": "build {%path%}",
+      "run": "C:\\Program Files\\dotnet\\dotnet.exe",
+      "runargs": "run --project {%path%}"
+    },
+    "java": {
+      "build": "",
+      "buildargs": ""
+    }
+  }
+    
+}
+ 									

@@ -53,6 +53,7 @@ namespace Pure.Data.Gen
 
 
                 var projectConfig = DbLoader.ConvertDatabaseConfigToProjectConfig(database);
+                database.LogHelper.Write(projectConfig.ToString());
 
                 var generater = GeneratorHelper.NewGenerator(database);
 

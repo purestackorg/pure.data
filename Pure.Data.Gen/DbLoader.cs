@@ -231,10 +231,10 @@ namespace Pure.Data.Gen
 
 
         #region Get Tables and Columns
-        public static List<Table> GetTableInfos(IDatabase database, ProjectConfig config, List<string> filterTables = null, List<string> withoutTables = null) {
+        public static List<Table> GetTableInfos(IDatabase database, ProjectConfig config, List<string> filterTables , List<string> withoutTables , out string msg) {
 
             List<Table> tables = null;
-
+            msg = "";
             if (database.Config.CodeGenType == CodeGenType.CodeFirst)
             {
                 var mapperDict = database.GetAllMap();
@@ -250,6 +250,7 @@ namespace Pure.Data.Gen
                     throw new ArgumentException("找不到任何Mapper中的表");
                 }
 
+                msg = "There are "+ classMaps.Count +" tables finded by "+ database.Config.CodeGenType +" mode .";
 
 
                 //转换表
@@ -276,6 +277,9 @@ namespace Pure.Data.Gen
                 {
                     throw new ArgumentException("找不到任何数据库中的表");
                 }
+                msg = "There are " + tablesInDb.Count + " tables finded by " + database.Config.CodeGenType + " mode .";
+
+
                 ///转换表
                 tables = ConvertDatabaseTableToTables(config, tablesInDb, filterTables, withoutTables);
                 //转换类名和属性名

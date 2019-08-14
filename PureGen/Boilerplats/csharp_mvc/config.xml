@@ -67,8 +67,11 @@
     <!--<DataSource Name="WriteDB"  ConnectionString="Database=AGRYGL;server=192.168.6.52;port=3306;userid=AGRYGL;pwd=123456;sslmode=none" Provider="MySql.Data.MySqlClient"
                   IsMaster="true"  ParameterPrefix="?" Type="Write" Weight="100"  />-->
     
-        <DataSource Name="WriteDB"  ConnectionString="Database=vueblog2;server=localhost;port=3306;userid=root;pwd=root;sslmode=none" Provider="MySql.Data.MySqlClient"
-                  IsMaster="true"  ParameterPrefix="?" Type="Write" Weight="100"  />
+        <!--<DataSource Name="WriteDB"  ConnectionString="Database=vueblog2;server=localhost;port=3306;userid=root;pwd=root;sslmode=none" Provider="MySql.Data.MySqlClient"
+                  IsMaster="true"  ParameterPrefix="?" Type="Write" Weight="100"  />-->
+
+    <DataSource Name="WriteDB"  ConnectionString="Database=KJXM;server=192.168.6.52;port=3306;userid=KJXM;pwd=123456;sslmode=none" Provider="MySql.Data.MySqlClient"
+       IsMaster="true"  ParameterPrefix="?" Type="Write" Weight="100"  />
     <!--<DataSource Name="WriteDB"  ConnectionString="Server=192.168.6.176;User ID=sa;Password=aaa0.0;Database=Test" Provider="SQLSERVER" 
                 IsMaster="true"  ParameterPrefix=":" Type="Write" Weight="100"  />-->
     <!--<DataSource Name="WriteDB"  ConnectionString="Server=.;User ID=sa;Password=aaa0.0;Database=LearunFramework_Base_61" Provider="System.Data.SqlClient" 

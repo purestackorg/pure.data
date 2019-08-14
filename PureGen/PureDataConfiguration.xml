@@ -105,7 +105,8 @@
   </SqlMaps>
 
   <Interceptors>
-    <Interceptor Type="ConnectionInterceptor" AssemblyName="Pure.Data" ClassFullName="Pure.Data.ConnectionTestIntercept" ></Interceptor>
+    <Interceptor Type="ConnectionInterceptor" AssemblyName="Pure.Data" ClassFullName="Pure.Data.ConnectionTestIntercept" ></Interceptor> 
+    <Interceptor Type="ExecutingInterceptor" AssemblyName="Pure.Data" ClassFullName="Pure.Data.OutputSQLIntercept" ></Interceptor>
     <!--<Interceptor Type="ExecutingInterceptor"  AssemblyName="" ClassFullName="" ></Interceptor>
     <Interceptor Type="ExceptionInterceptor" AssemblyName="" ClassFullName="" ></Interceptor>
     <Interceptor Type="DataInterceptor"  AssemblyName="" ClassFullName=""></Interceptor>

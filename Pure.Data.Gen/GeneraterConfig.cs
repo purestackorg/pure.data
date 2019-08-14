@@ -4,6 +4,25 @@
     public class GeneraterConfig
     {
 
+        public override string ToString()
+        {
+            string newline = "\r\n\t\t";
+            string str = "Name:"+Name+ newline
+                + "Enabled:" + Enabled + newline 
+                + "OutputType:" + OutputType.ToString() + newline
+                + "TemplateFileName:" + TemplateFileName + newline
+
+                 + "OutputDirectory:" + OutputDirectory + newline
+                + "FileNameFormat:" + FileNameFormat + newline
+                + "OutputFileExtension:" + OutputFileExtension + newline
+               
+                + "Encoding:" + Encoding + newline
+                + "Append:" + Append + newline 
+                ;
+
+            return str;
+        }
+
         private string _name;
         //private string _nameSpace;
         private string _filePrefix;

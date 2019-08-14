@@ -52,6 +52,9 @@
       <HintPath>lib\System.Data.SQLite.dll</HintPath>
     </Reference>
     <Reference Include="System.Data.SqlServerCe, Version=3.5.1.0, Culture=neutral, PublicKeyToken=89845dcd8080cc91, processorArchitecture=MSIL" />
+    <Reference Include="System.Runtime.Serialization">
+      <Private>True</Private>
+    </Reference>
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
@@ -61,6 +64,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Bases\CmdHelper.cs" />
+    <Compile Include="Bases\TinyJsonConfig.cs" />
     <Compile Include="CommandLine\BaseAttribute.cs" />
     <Compile Include="CommandLine\Core\ArgumentsExtensions.cs" />
     <Compile Include="CommandLine\Core\InstanceBuilder.cs" />
@@ -134,7 +138,11 @@
     <Compile Include="executes\INewBoilerplate.cs" />
     <Compile Include="executes\providers\CSharpMvcNewBoilerplate.cs" />
     <Compile Include="Boostrapers.cs" />
-    <Compile Include="ConfigHelpers.cs" />
+    <Compile Include="Bases\ConfigHelpers.cs" />
+    <Compile Include="ExternalCommand\Command.cs" />
+    <Compile Include="ExternalCommand\NonZeroExitCodeException.cs" />
+    <Compile Include="ExternalCommand\ProcessExtensions.cs" />
+    <Compile Include="ExternalCommand\ProcessStartInfo.cs" />
     <Compile Include="LogHelpers.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -231,6 +239,9 @@
     <None Include="gen\template\SQLMap.cshtm">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <Content Include="CmdConfig.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Pure.Data.Gen\Pure.Data.Gen.csproj">

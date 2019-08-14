@@ -94,9 +94,10 @@ namespace Pure.Data.Gen
                 List<Table> tables = null;
 
 
+                string msg = "";
+                tables = DbLoader.GetTableInfos(database, config, filterTables, withoutTables, out msg);
+                OnLogReport(msg);
 
-                tables = DbLoader.GetTableInfos(database, config, filterTables, withoutTables);
- 
 
 
                 OutputContext context = new OutputContext();
@@ -134,7 +135,8 @@ namespace Pure.Data.Gen
                 {
                      
                 }
-                
+
+                OnLogReport("EnabledTemplates count:" + enabledTemplates.Count() +" -> ("+enabledTemplates.Select(p=>p.Name).Join(", ")+")");
 
                 foreach (var template in enabledTemplates)
                 {
@@ -154,6 +156,8 @@ namespace Pure.Data.Gen
                         string reallyOutputFileName = "";
 
                         var outType = template.OutputType;
+                        OnLogReport("Starting generate template:"+ template.Name + " , outputType:"+ template.OutputType.ToString() + " , templateKey:" + templateKey);
+
                         if (outType == OutputType.Table)
                         {
                             foreach (Table table in context.Tables)

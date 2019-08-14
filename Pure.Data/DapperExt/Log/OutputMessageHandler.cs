@@ -19,7 +19,7 @@ namespace Pure.Data
         public void OutputWelcomInfo(IDatabase db)
         {
             
-            if (hasOutput == false)
+            if (hasOutput == false && db.Config.EnableCodeGen == false)
             {
                 lock (olock)
                 {

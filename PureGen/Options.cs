@@ -22,7 +22,7 @@ namespace PureGen
         csharp,
         java,
         python,
-        golang,
+        go,
         php
     }
     //public enum FrontType
@@ -49,8 +49,28 @@ namespace PureGen
     //    //php
     //}
 
+    [Verb("gen", HelpText = "生成代码: gen -config PureDataConfiguration.xml -project 项目名 -namespace 命名空间 [-table 指定表] [-filter 过滤表前缀]")]
+    public class GenOptions
+    { //normal options here
+        [Option('c', "config", MetaValue = "PureDataConfiguration.xml", Required = false, HelpText = "生成配置文件，默认：PureDataConfiguration.xml")]
+        public string ConfigFile { get; set; }
+
+        [Option('p', "project", Default = "TestDemo", MetaValue = "TestDemo", Required = false, HelpText = "项目名称，默认：TestDemo")]
+        public string Project { get; set; }
+
+        [Option('n', "namespace", Default = "TestDemo.Test", Required = false, HelpText = "命名空间，默认：TestDemo.Test")]
+        public string NameSpace { get; set; }
+
+
+        [Option('f', "filter", Default = "", Required = false, HelpText = "过滤表前缀，以;分割")]
+        public string PrefixFilter { get; set; }
+
+        [Option('t', "table", Default = "", Required = false, HelpText = "只生成指定表的代码，以;分割")]
+        public string OnlyGenTable { get; set; }
+    }
+
     //创建code 程序
-    [Verb("new", HelpText = "创建项目脚手架")]
+    [Verb("new", HelpText = "创建项目脚手架: new -boilerplate 模板名 -project 项目名 -namespace 命名空间 [-table 指定表] [-filter 过滤表前缀]")]
     public class NewOptions
     { //normal options here
         [Option('b', "boilerplate", Default = "",  MetaValue = "none", Required = false, HelpText = "生成脚手架模板类型，默认：none")]
@@ -60,14 +80,14 @@ namespace PureGen
         [Option('p', "project", Default = "TestDemo", MetaValue = "TestDemo", Required = false, HelpText = "项目名称，默认：TestDemo")]
         public string Project { get; set; }
 
-        [Option('n', "NameSpace", Default = "TestDemo.Test", Required = false, HelpText = "命名空间，默认：TestDemo.Test")]
+        [Option('n', "namespace", Default = "TestDemo.Test", Required = false, HelpText = "命名空间，默认：TestDemo.Test")]
         public string NameSpace { get; set; }
 
 
-        [Option('f', "TablePrefixFilter", Default = "", Required = false, HelpText = "过滤表前缀，以;分割")]
-        public string TablePrefixFilter { get; set; }
+        [Option('f', "filter", Default = "", Required = false, HelpText = "过滤表前缀，以;分割")]
+        public string PrefixFilter { get; set; }
 
-        [Option('t', "Table", Default = "", Required = false, HelpText = "只生成指定表的代码，以;分割")]
+        [Option('t', "table", Default = "", Required = false, HelpText = "只生成指定表的代码，以;分割")]
         public string OnlyGenTable { get; set; } 
 
     }
@@ -75,7 +95,7 @@ namespace PureGen
 
 
     //创建code 程序
-    [Verb("doc", HelpText = "生成数据库字典文档")]
+    [Verb("doc", HelpText = "生成数据库字典文档: doc -type docx -config PureDataConfiguration.xml [-zip]")]
     public class DocOptions
     { //normal options here
         [Option('c', "config", Default = "PureDataConfiguration.xml", Required = false, HelpText = "配置文件")]
@@ -87,37 +107,37 @@ namespace PureGen
         public bool Zip { get; set; }
     }
 
-    [Verb("restore", HelpText = "还原项目包")]
+    [Verb("restore", HelpText = "还原项目包: restore -lang csharp -path 路径")]
     public class RestoreOptions
     { //normal options here
+        [Option('l', "lang", Default = LangType.csharp, MetaValue = "none", Required = true, HelpText = "编译语言类型，默认：csharp, java, python, go, php")]
+        public LangType LangType { get; set; }
+
+        [Option('p', "path", Default = "", Required = false, HelpText = "编译目录路径")]
+        public string Path { get; set; }
     }
 
-    [Verb("build", HelpText = "编译项目")]
+    [Verb("build", HelpText = "编译项目: build -lang csharp -path 路径")]
     public class BuildOptions
     { //normal options here
 
-        [Option('l', "LangType", Default = LangType.none, MetaValue = "none", Required = true, HelpText = "编译语言类型，默认：none")]
+        [Option('l', "lang", Default = LangType.csharp, MetaValue = "none", Required = true, HelpText = "编译语言类型，默认：csharp, java, python, go, php")]
         public LangType LangType { get; set; }
 
-        [Option('p', "Path", Default = "", Required = false, HelpText = "编译目录路径")]
+        [Option('p', "path", Default = "", Required = false, HelpText = "编译目录路径")]
         public string Path { get; set; }
     }
-    [Verb("run", HelpText = "运行项目")]
+    [Verb("run", HelpText = "运行项目: run -lang csharp -path 路径")]
     public class RunOptions
     { //normal options here
 
-        [Option('l', "LangType", Default = LangType.none, MetaValue = "none", Required = true, HelpText = "编译语言类型，默认：none")]
+        [Option('l', "lang", Default = LangType.csharp, MetaValue = "none", Required = true, HelpText = "编译语言类型，默认：csharp, java, python, go, php")]
         public LangType LangType { get; set; }
-
-        [Option('p', "Path", Default = "", Required = false, HelpText = "编译目录路径")]
+       
+        [Option('p', "path", Default = "", Required = false, HelpText = "编译目录路径")]
         public string Path { get; set; }
     }
-    [Verb("gen", HelpText = "生成代码:doc -t docx -c PureDataConfiguration.xml -z")]
-    public class GenOptions
-    { //normal options here
-        [Option('c', "config", MetaValue = "PureDataConfiguration.xml", Required = false, HelpText = "生成配置文件，默认：PureDataConfiguration.xml")]
-        public string ConfigFile { get; set; }
-    }
+   
     public class Options
     {
 

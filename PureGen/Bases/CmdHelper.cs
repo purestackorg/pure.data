@@ -1,4 +1,5 @@
-﻿using System;
+﻿using SimpleExec;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
@@ -9,73 +10,130 @@ namespace PureGen
 {
     public class CmdHelper
     {
-        public static string GetBuildCmd(BuildOptions option) {
-            string result = "";
-            string path = option.Path;
-            switch (option.LangType)
-            {
-                case LangType.none:
-                    break;
-                case LangType.csharp:
-                    //https://docs.microsoft.com/zh-cn/dotnet/core/tools/dotnet-build?tabs=netcore2x
-                    //            dotnet build[< PROJECT >|< SOLUTION >] [-c|--configuration]
-                    //[-f|--framework]
-                    //[--force]
-                    //[--no-dependencies]
-                    //[--no-incremental]
-                    //[--no-restore]
-                    //[-o|--output]
-                    //[-r|--runtime]
-                    //[-v|--verbosity]
-                    //[--version-suffix]
+        public static CommandInfo GetBuildCmd(BuildOptions option) {
+            CommandInfo result = new CommandInfo();
 
-                    //dotnet build[-h | --help]
-                    result = "dotnet build "+ path;
-                    break;
-                case LangType.java:
-                    break;
-                case LangType.python:
-                    break;
-                case LangType.golang:
-                    break;
-                case LangType.php:
-                    break;
-                default:
-                    break;
-            }
+            var config = ConfigHelpers.GetDynamicConfig();
+            string lang = option.LangType.ToString().ToLower();
+            var cmdName = config["cmd"][lang]["build"];
+            var cmdArgs = (string)config["cmd"][lang]["buildargs"];
+
+            cmdArgs = cmdArgs.Replace("{%path%}",option.Path);
+
+            result.name = cmdName;
+            result.args = cmdArgs;
+            //result.noEcho = true;
+            //result.workingDirectory = System.IO.Directory.GetCurrentDirectory();// System.IO.Directory.GetDirectories(option.Path).FirstOrDefault();
+            result.isNewWin = true;
+
+            //string path = option.Path;
+            //switch (option.LangType)
+            //{
+            //    case LangType.none:
+            //        break;
+            //    case LangType.csharp:
+            //        //https://docs.microsoft.com/zh-cn/dotnet/core/tools/dotnet-build?tabs=netcore2x
+            //        //            dotnet build[< PROJECT >|< SOLUTION >] [-c|--configuration]
+            //        //[-f|--framework]
+            //        //[--force]
+            //        //[--no-dependencies]
+            //        //[--no-incremental]
+            //        //[--no-restore]
+            //        //[-o|--output]
+            //        //[-r|--runtime]
+            //        //[-v|--verbosity]
+            //        //[--version-suffix]
+
+            //        //dotnet build[-h | --help]
+            //        result = "dotnet build "+ path;
+            //        break;
+            //    case LangType.java:
+            //        break;
+            //    case LangType.python:
+            //        break;
+            //    case LangType.go:
+            //        break;
+            //    case LangType.php:
+            //        break;
+            //    default:
+            //        break;
+            //}
+
+            return result;
+        }
+
+        public static CommandInfo GetRunCmd(RunOptions option)
+        {
+            CommandInfo result = new CommandInfo();
+
+            var config = ConfigHelpers.GetDynamicConfig();
+            string lang = option.LangType.ToString().ToLower();
+            var cmdName = config["cmd"][lang]["run"];
+            var cmdArgs = (string)config["cmd"][lang]["runargs"];
+
+            cmdArgs = cmdArgs.Replace("{%path%}", option.Path);
+
+            result.name = cmdName;
+            result.args = cmdArgs;
+            result.noEcho = true;
+            result.workingDirectory = System.IO.Directory.GetCurrentDirectory();// System.IO.Directory.GetDirectories(option.Path).FirstOrDefault();
+            result.isNewWin = false;
+
+            //string path = option.Path;
+            //switch (option.LangType)
+            //{
+            //    case LangType.none:
+            //        break;
+            //    case LangType.csharp:
+            //        //https://docs.microsoft.com/zh-cn/dotnet/core/tools/dotnet-build?tabs=netcore2x
+            //        // dotnet run --project ./projects/proj1/proj1.csproj
+            //        result = "dotnet " + path;
+            //        break;
+            //    case LangType.java:
+            //        break;
+            //    case LangType.python:
+            //        break;
+            //    case LangType.go:
+            //        break;
+            //    case LangType.php:
+            //        break;
+            //    default:
+            //        break;
+            //}
 
             return result;
         }
 
-        public static string GetRunCmd(RunOptions option)
-        {
-            string result = "";
-            string path = option.Path;
-            switch (option.LangType)
-            {
-                case LangType.none:
-                    break;
-                case LangType.csharp:
-                    //https://docs.microsoft.com/zh-cn/dotnet/core/tools/dotnet-build?tabs=netcore2x
-                    // dotnet run --project ./projects/proj1/proj1.csproj
-                    result = "dotnet " + path;
-                    break;
-                case LangType.java:
-                    break;
-                case LangType.python:
-                    break;
-                case LangType.golang:
-                    break;
-                case LangType.php:
-                    break;
-                default:
-                    break;
-            }
+        public static  string Run(CommandInfo cmd) {
+            string cmdStr = cmd.name + " " + cmd.args;
+            LogHelpers.LogStatic(cmdStr);
+            string msg = "";
 
-            return result;
+            msg = Command.Read(cmd.name, cmd.args, cmd.workingDirectory, cmd.noEcho, cmd.windowsName, cmd.windowsArgs);
+            //if (cmd.isNewWin == true)
+            //{
+            //    RunCmdWithNewWin(cmdStr, out msg);
+
+            //}
+            //else
+            //{
+            //    RunCmd(cmdStr, out msg);
+            //}
+
+
+            LogHelpers.LogStatic(msg);
+
+            LogHelpers.LogStatic("------------------ end ----------------- ");
+            Console.ReadLine();
+            return msg;
         }
-        public static string RunCmd(  string cmdStr, bool isNewWin = false)
+
+        public static string RunCmd(  string name, string args, bool isNewWin = false)
         {
+            //Command.Run(cmdStr, args);
+
+            string cmdStr = name + " " + args;
+
             string msg = "";
             if (isNewWin == true)
             {
@@ -85,7 +143,6 @@ namespace PureGen
             else
             {
                 RunCmd(cmdStr, out msg);
-
             }
             Console.WriteLine(msg);
             Console.WriteLine("------------------ end ----------------- ");
@@ -109,7 +166,7 @@ namespace PureGen
         /// <param name="output"></param>
         public static void RunCmd(string cmd, out string output)
         {
-            cmd = cmd.Trim().TrimEnd('&') + "&exit";//说明：不管命令是否成功均执行exit命令，否则当调用ReadToEnd()方法时，会处于假死状态
+            cmd = cmd.Trim();//.TrimEnd('&') + "&exit";//说明：不管命令是否成功均执行exit命令，否则当调用ReadToEnd()方法时，会处于假死状态
             using (Process p = new Process())
             {
                 p.StartInfo.FileName = CmdPath;
@@ -118,8 +175,28 @@ namespace PureGen
                 p.StartInfo.RedirectStandardOutput = true;  //由调用程序获取输出信息
                 p.StartInfo.RedirectStandardError = true;   //重定向标准错误输出
                 p.StartInfo.CreateNoWindow = true;          //不显示程序窗口
-                p.Start();//启动程序
+                //p.OutputDataReceived += new DataReceivedEventHandler((sender1, e1) =>
+                //{
+                //    if (!string.IsNullOrEmpty(e1.Data))
+                //    {
+                //        string sData = e1.Data;
+                //        LogHelpers.LogStatic(sData);
+                        
+                //    }
+                //});
+                //p.ErrorDataReceived += new DataReceivedEventHandler((sender1, e1) =>
+                //{
+                //    if (!string.IsNullOrEmpty(e1.Data))
+                //    {
+                //        string sData = e1.Data;
+                //        LogHelpers.LogStatic(sData); 
+                //    }
+                //});
+               
 
+                p.Start();//启动程序
+                //p.BeginOutputReadLine();
+                //p.BeginErrorReadLine();
                 //向cmd窗口写入命令
                 p.StandardInput.WriteLine(cmd);
                 p.StandardInput.AutoFlush = true;
@@ -148,7 +225,26 @@ namespace PureGen
                 p.StartInfo.RedirectStandardOutput = true;  //由调用程序获取输出信息
                 p.StartInfo.RedirectStandardError = true;   //重定向标准错误输出
                 p.StartInfo.CreateNoWindow = true;          //不显示程序窗口
+                //p.OutputDataReceived += new DataReceivedEventHandler((sender1, e1) =>
+                //{
+                //    if (!string.IsNullOrEmpty(e1.Data))
+                //    {
+                //        string sData = e1.Data;
+                //        LogHelpers.LogStatic(sData);
+
+                //    }
+                //});
+                //p.ErrorDataReceived += new DataReceivedEventHandler((sender1, e1) =>
+                //{
+                //    if (!string.IsNullOrEmpty(e1.Data))
+                //    {
+                //        string sData = e1.Data;
+                //        LogHelpers.LogStatic(sData);
+                //    }
+                //});
                 p.Start();//启动程序
+                //p.BeginOutputReadLine();
+                //p.BeginErrorReadLine();
 
                 //向cmd窗口写入命令
                 p.StandardInput.WriteLine(cmd);

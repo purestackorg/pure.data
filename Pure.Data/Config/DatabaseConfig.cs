@@ -826,27 +826,7 @@ namespace Pure.Data
                     CodeGenNameSpace=" + CodeGenNameSpace + @"
                     CodeGenTableFilter=" + CodeGenTableFilter + @"
     
-                    EnableConnectionPool=" + EnableConnectionPool + @"
-                    EnableLogConnectionPool=" + EnableLogConnectionPool + @"
-                    MinIdle=" + MinIdle + @"
-                    MaxIdle=" + MaxIdle + @"
-                    MaxTotal=" + MaxTotal + @"
-                    InitialSize=" + InitialSize + @"
-                    MaxWaitMillis=" + MaxWaitMillis + @"
-                    TimeBetweenEvictionRunsMillis=" + TimeBetweenEvictionRunsMillis + @"
-                    MinEvictableIdleTimeMillis=" + MinEvictableIdleTimeMillis + @"
-                    SoftMinEvictableIdleTimeMillis=" + SoftMinEvictableIdleTimeMillis + @"
-                    EnableRemoveAbandoned=" + EnableRemoveAbandoned + @"
-                    RemoveAbandonedOnBorrow=" + RemoveAbandonedOnBorrow + @"
-                    RemoveAbandonedOnMaintenance=" + RemoveAbandonedOnMaintenance + @"
-                    RemoveAbandonedTimeout=" + RemoveAbandonedTimeout + @"
-                    NumTestsPerEvictionRun=" + NumTestsPerEvictionRun + @"
-                    ValidationQuery=" + ValidationQuery + @"
-                    TestOnBorrow=" + TestOnBorrow + @"
-                    TestOnCreate=" + TestOnCreate + @"
-                    TestOnReturn=" + TestOnReturn + @"
-                    TestWhileIdle=" + TestWhileIdle + @"
-                          
+                  
                     Interceptors=" + string.Join( ";", Interceptors.Select(p=> (p!=null? p.ToString():""))) + @"
                     MappingAssemblies=" + string.Join(";", MappingAssemblies.Select(p => (p != null ? p.ToString() : ""))) + @"
                     DataSources=" + string.Join(";", DataSources.Select(p => p.Name + "_" + p.Type + "_" + p.Weight)) + @"
@@ -857,8 +837,32 @@ namespace Pure.Data
                     @""
                                              
                                              ;
+
+
+            //EnableConnectionPool = " + EnableConnectionPool + @"
+            //        EnableLogConnectionPool = " + EnableLogConnectionPool + @"
+            //        MinIdle = " + MinIdle + @"
+            //        MaxIdle = " + MaxIdle + @"
+            //        MaxTotal = " + MaxTotal + @"
+            //        InitialSize = " + InitialSize + @"
+            //        MaxWaitMillis = " + MaxWaitMillis + @"
+            //        TimeBetweenEvictionRunsMillis = " + TimeBetweenEvictionRunsMillis + @"
+            //        MinEvictableIdleTimeMillis = " + MinEvictableIdleTimeMillis + @"
+            //        SoftMinEvictableIdleTimeMillis = " + SoftMinEvictableIdleTimeMillis + @"
+            //        EnableRemoveAbandoned = " + EnableRemoveAbandoned + @"
+            //        RemoveAbandonedOnBorrow = " + RemoveAbandonedOnBorrow + @"
+            //        RemoveAbandonedOnMaintenance = " + RemoveAbandonedOnMaintenance + @"
+            //        RemoveAbandonedTimeout = " + RemoveAbandonedTimeout + @"
+            //        NumTestsPerEvictionRun = " + NumTestsPerEvictionRun + @"
+            //        ValidationQuery = " + ValidationQuery + @"
+            //        TestOnBorrow = " + TestOnBorrow + @"
+            //        TestOnCreate = " + TestOnCreate + @"
+            //        TestOnReturn = " + TestOnReturn + @"
+            //        TestWhileIdle = " + TestWhileIdle + @"
+
+
         }
- 
+
 
     }
 

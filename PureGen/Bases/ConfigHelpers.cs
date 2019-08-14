@@ -22,6 +22,17 @@ namespace PureGen
 
         }
 
+        private static object emptyobj = new object();
+        public static dynamic config = emptyobj;
+        public static dynamic GetDynamicConfig()
+        {
+            if (config == emptyobj)
+            {
+                config = TinyJsonConfig.LoadConfig("CmdConfig.json", null, false);
+
+            }
+            return config;
+        }
 
         public static void OpenDir(string outputPath) {
             if (System.IO.Directory.Exists(outputPath))
