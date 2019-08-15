@@ -117,6 +117,16 @@ namespace PureGen
         public string Path { get; set; }
     }
 
+    [Verb("sqlmap", HelpText = "导出sqlmap: sql -query sqlmap目录 -output 保存路径")]
+    public class SqlMapOptions
+    {  
+        [Option('q', "query", Default = "", Required = false, HelpText = "sqlmap目录")]
+        public string QueryPath { get; set; }
+
+        [Option('o', "output", Default = "", Required = false, HelpText = "保存路径")]
+        public string OutPutPath { get; set; }
+    }
+
     [Verb("build", HelpText = "编译项目: build -lang csharp -path 路径")]
     public class BuildOptions
     { //normal options here

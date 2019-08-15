@@ -42,6 +42,7 @@ namespace PureGen
             //testCmd = @"run -l csharp -p C:\Users\benson\source\repos\PureGen.Web\PureGen.Web\bin\Debug\netcoreapp2.1\PureGen.Web.dll";
             //testCmd = "gen -c PureDataConfiguration2.xml -p TestDEmo -n TestDEmo.NameSpac";
             //testCmd = "new -b csharp_mvc -t article;comments -p AGRYGL -n AGRYGL.Core";
+            testCmd = @"sqlmap -q F:\gitdata\AuthServer\GDCIC.AUTHSERVER.Domain\Data\ -o F:\gitdata\AuthServer\GDCIC.AUTHSERVER.Domain\Data2";
 
             Console.WriteLine(testCmd);
             Console.WriteLine("------------------------");
@@ -57,7 +58,7 @@ namespace PureGen
         {
 
 
-            Parser.Default.ParseArguments<GenOptions, NewOptions, DocOptions, BuildOptions, RunOptions, RestoreOptions>(args)
+            Parser.Default.ParseArguments<GenOptions, NewOptions, DocOptions, BuildOptions, RunOptions, RestoreOptions, SqlMapOptions>(args)
    .WithParsed<GenOptions>(opts =>
    { //生成代码
        DoWhenNoArgs(opts);
@@ -87,6 +88,11 @@ namespace PureGen
          DocGenerator.Process(opts);
 
      })
+       .WithParsed<SqlMapOptions>(opts =>
+       { //生成数据库字典文档
+           SqlmapHelpers.Export(opts);
+
+       })
    .WithParsed<BuildOptions>(opts =>
    { //编译项目
        if (opts.LangType == LangType.none)

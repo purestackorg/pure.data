@@ -143,6 +143,7 @@
     <Compile Include="ExternalCommand\NonZeroExitCodeException.cs" />
     <Compile Include="ExternalCommand\ProcessExtensions.cs" />
     <Compile Include="ExternalCommand\ProcessStartInfo.cs" />
+    <Compile Include="SqlmapHelpers.cs" />
     <Compile Include="LogHelpers.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
