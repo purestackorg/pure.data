@@ -1415,6 +1415,21 @@ this IDbConnection cnn, string sql, object param = null, IDbTransaction transact
                     }
 
                     reader.Close();
+
+                    database.Close();
+                }
+                reader.Dispose();
+                if (setNull == true)
+                {
+                    reader = null;
+                }
+
+            }
+            else
+            {
+                if (withClose == true)
+                {
+                    reader.Close(); 
                 }
                 reader.Dispose();
                 if (setNull == true)
@@ -4932,7 +4947,7 @@ Type type, IDataReader reader, int startBound = 0, int length = -1, bool returnN
                     if (!reader.IsClosed && command != null) command.Cancel();
                     //reader.Dispose();
                     //reader = null;
-                    CloseDataReader(reader, default(CommandDefinition), false, true);
+                    CloseDataReader(reader, default(CommandDefinition), true, true);
 
                 }
                 if (command != null)
