@@ -7,7 +7,7 @@ using System.Linq;
 
 namespace Pure.Data.SqlMap
 {
-     /// <summary>
+    /// <summary>
     /// Sql 请求上下文
     /// </summary>
     public class RequestContext
@@ -23,8 +23,8 @@ namespace Pure.Data.SqlMap
         }
 
         public string ParameterPrefix { get {
-            return Database.Config.ParameterPrefix;
-        } }
+                return Database.Config.ParameterPrefix;
+            } }
         public string ParameterSuffix
         {
             get
@@ -46,9 +46,14 @@ namespace Pure.Data.SqlMap
         {
             get
             {
-            
-            return string.Format("{0}.{1}", Scope, SqlId);
-        }}
+
+                return GetFullSqlIdOfStatement(Scope, SqlId); // string.Format("{0}.{1}", Scope, SqlId);
+            } }
+
+        public static string GetFullSqlIdOfStatement(string scope, string sqlid) {
+            return string.Format("{0}.{1}", scope, sqlid);
+
+        }
 
         /// <summary>
         /// 用于分页的Orderby字符串

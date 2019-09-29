@@ -1,6 +1,7 @@
 ﻿
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Xml;
 using System.Xml.Serialization;
 
@@ -19,6 +20,11 @@ namespace Pure.Data.SqlMap
         public IList<SqlMapCache> Caches { get; set; }
         [XmlArray]
         public List<Statement> Statements { get; set; }
+
+        public SqlMapCache GetCache(string id) {
+            return Caches?.FirstOrDefault(p=>p.Id == id);
+        }
+
     }
 
 }

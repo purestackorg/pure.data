@@ -12,22 +12,22 @@ namespace Pure.Data.SqlMap
 {
     public class Statement
     {
-        [XmlIgnore]
-        public SqlMapInfo SmartSqlMap { get; private set; }
-        public static Statement Load(XmlElement statementNode, SqlMapInfo smartSqlMap)
+        [XmlIgnore] 
+        public SqlMapInfo SqlMapInfo { get;  set; }
+        public static Statement Load(XmlElement statementNode, SqlMapInfo sqlMapInfo)
         {
             var statement = new Statement
             {
                 Id = statementNode.Attributes["Id"].Value,
 
                 SqlTags = new List<ITag> { },
-                SmartSqlMap = smartSqlMap
+                SqlMapInfo = sqlMapInfo
             };
 
             string cacheId = statementNode.GetValueInXmlAttributes("Cache");
             if (!String.IsNullOrEmpty(cacheId))
             {
-                var cache = smartSqlMap.Caches.FirstOrDefault(m => m.Id == cacheId);
+                var cache = sqlMapInfo.Caches.FirstOrDefault(m => m.Id == cacheId);
                 if (cache == null)
                 {
 
@@ -590,7 +590,7 @@ namespace Pure.Data.SqlMap
         {
             get
             {
-                return string.Format("{0}.{1}", SmartSqlMap.Scope, Id);
+                return string.Format("{0}.{1}", SqlMapInfo.Scope, Id);
             }
         }
         public List<ITag> SqlTags { get; set; }

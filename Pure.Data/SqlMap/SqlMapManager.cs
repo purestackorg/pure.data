@@ -171,8 +171,53 @@ namespace Pure.Data.SqlMap
         }
 
 
+        public Statement GetStatement(IDatabase db, string scope, string sqlID )
+        {
+            var NameSpacePrefix = db.Config.NameSpacePrefix;
+            var newScope = NameSpacePrefix + scope;
+            string fullSqlId = RequestContext.GetFullSqlIdOfStatement(newScope, sqlID);
+            Statement statement = null;
+            if (statements.Count == 0)
+            {
+                throw new ArgumentException(string.Format("No SqlMap Statements Finded. Please Config SqlMap Setting Before Use !"));
+            }
+            if (statements.TryGetValue(fullSqlId, out statement))
+            {
+                if (statement == null)
+                {
+                    throw new ArgumentException(string.Format("SqlMap could not find statement:{0}", fullSqlId));
+                }
+                
+                return statement;
+            }
+            else
+            {
+                throw new ArgumentException(string.Format("SqlMap could not find statement:{0}", fullSqlId));
+            }
+        }
 
+        public void AddOrSetStatement(Statement st)
+        {
+            statements[st.FullSqlId] = st;
+           
+        }
+        public void AddOrSetSqlMapInfo(SqlMapInfo sm)
+        { 
+            var v = SqlMaps.FirstOrDefault(p => p.Path == sm.Path && p.Scope == sm.Scope);
+            if (v != null)
+            {
+                //Statement tmp = null;
+                //foreach (var st in v.Statements)
+                //{
+                //    statements.TryRemove(st.FullSqlId, out tmp);
+                //}
 
+                SqlMaps.Remove(v);
+
+            }
+
+            SqlMaps.Add(sm);
+        }
     }
 
 }
