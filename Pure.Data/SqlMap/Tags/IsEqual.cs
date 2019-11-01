@@ -27,7 +27,7 @@ namespace Pure.Data.SqlMap.Tags
             {
                 reqValStr = reqVal.ToString();
             }
-            return reqVal.Equals(CompareValue);
+            return reqValStr.Equals(CompareValue);
         }
     }
 }
