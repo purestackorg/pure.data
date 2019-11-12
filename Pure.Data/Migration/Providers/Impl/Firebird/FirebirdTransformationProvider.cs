@@ -224,7 +224,13 @@ T.RDB$FIELD_NAME = 'RDB$FIELD_TYPE' ;";
 
 
 
-        public override List<TableInfo> GetTableInfos()
+        public virtual List<TableInfo> GetViewInfos(bool isCache = true)
+        {
+            List<TableInfo> tables = new List<TableInfo>();
+
+            return tables;
+        }
+        public override List<TableInfo> GetTableInfos(bool isCache = true)
         {
             List<TableInfo> tables = new List<TableInfo>();
             

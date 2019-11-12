@@ -1,4 +1,4 @@
-﻿using Dapper;
+﻿ 
 using System.Data;
 using System.Data.Common;
 using FluentExpressionSQL;
@@ -53,18 +53,19 @@ namespace Pure.Data
         private SqlBuilder _SqlBuilder = null;
 
         public SqlBuilder SqlBuilder { get {
-                if (_SqlBuilder == null)
-                {
-                    lock (DatabaseConfigPool._DatabaseSqlBuilderLock)
-                    {
-                        if (_SqlBuilder == null)
-                        {
-                            _SqlBuilder = new SqlBuilder(this);
-                            return _SqlBuilder;
-                        }
-                    }
-                }
-                return _SqlBuilder;
+                //if (_SqlBuilder == null)
+                //{
+                //    lock (DatabaseConfigPool._DatabaseSqlBuilderLock)
+                //    {
+                //        if (_SqlBuilder == null)
+                //        {
+                //            _SqlBuilder = new SqlBuilder(this);
+                //            return _SqlBuilder;
+                //        }
+                //    }
+                //}
+                //return _SqlBuilder;
+                return new SqlBuilder(this);
             } }
 
         public string DatabaseName { get; private set; }
@@ -878,7 +879,33 @@ namespace Pure.Data
             }
 
         }
+        public IDictionary<string, object> ExecuteDictionary(string sql, object param = null, IDbTransaction transaction = null, int? commandTimeout = null, CommandType? commandType = null)
+        {
 
+            try
+            {
+
+                var result = ExecuteReader(sql, param, transaction, commandTimeout, commandType);
+                if (result != null)
+                {
+                    var data = result.ToDictionary(true);
+
+                    return data;
+                }
+                else
+                    return null;
+            }
+            catch (Exception ex)
+            {
+                throw new PureDataException("ExecuteExpandoObject", ex);
+
+            }
+            finally
+            {
+                Close();
+            }
+
+        }
         public dynamic ExecuteExpandoObject(string sql, object param = null, IDbTransaction transaction = null, int? commandTimeout = null, CommandType? commandType = null)
         {
 
@@ -2312,9 +2339,9 @@ namespace Pure.Data
              return CodeGenHelper.Instance.Gen(this );
         }
 
-        public Migration.Framework.ITransformationProvider CreateTransformationProvider()
+        public Migration.Framework.ITransformationProvider CreateTransformationProvider(bool isCache = true)
         {
-            return DbMigrateService.Instance.CreateTransformationProviderByDatabaseType(this);
+            return DbMigrateService.Instance.CreateTransformationProviderByDatabaseType(this, isCache);
         }
         #endregion
 

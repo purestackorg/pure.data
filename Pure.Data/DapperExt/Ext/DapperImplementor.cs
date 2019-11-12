@@ -3,8 +3,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.Dynamic;
 using System.Linq;
-using System.Text;
-using Dapper;
+using System.Text; 
 using Pure.Data.Sql;
 using System.Reflection;
 

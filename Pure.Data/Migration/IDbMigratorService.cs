@@ -25,8 +25,8 @@ namespace Pure.Data.Migration
         void MigrateDown(MigrateOption option);
 
 
-        ITransformationProvider CreateTransformationProvider(MigratorDbType type, string connStr);
-        ITransformationProvider CreateTransformationProviderByDatabaseType(  IDatabase db);
+        ITransformationProvider CreateTransformationProvider(MigratorDbType type, string connStr, bool cached = true);
+        ITransformationProvider CreateTransformationProviderByDatabaseType(  IDatabase db, bool cached = true);
         DbType GetDBType(System.Type theType);
 
         void AutoMigrate(IDatabase db);

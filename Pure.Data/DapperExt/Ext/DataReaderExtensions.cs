@@ -13,6 +13,11 @@ namespace Pure.Data
     /// </summary>
     public static class DataReaderExtensions
     {
+        public static string FormatColumnName(this string str)
+        {
+            return str;//.ToUpper()
+        }
+
         /// <summary>
         ///  将IDataReader转换为DataTable
         /// </summary>
@@ -79,7 +84,7 @@ namespace Pure.Data
                         int intFieldCount = reader.FieldCount;
                         for (int intCounter = 0; intCounter < intFieldCount; ++intCounter)
                         {
-                            objDataTable.Columns.Add(reader.GetName(intCounter).ToUpper(), reader.GetFieldType(intCounter));
+                            objDataTable.Columns.Add(reader.GetName(intCounter).FormatColumnName(), reader.GetFieldType(intCounter));
                         }
                         objDataTable.BeginLoadData();
                         object[] objValues = new object[intFieldCount];
@@ -101,7 +106,7 @@ namespace Pure.Data
                     int intFieldCount = reader.FieldCount;
                     for (int intCounter = 0; intCounter < intFieldCount; ++intCounter)
                     {
-                        objDataTable.Columns.Add(reader.GetName(intCounter).ToUpper(), reader.GetFieldType(intCounter));
+                        objDataTable.Columns.Add(reader.GetName(intCounter).FormatColumnName(), reader.GetFieldType(intCounter));
                     }
                     objDataTable.BeginLoadData();
                     object[] objValues = new object[intFieldCount];
@@ -436,7 +441,67 @@ namespace Pure.Data
 
         }
 
+        public static IDictionary<string, object> ToDictionary(this IDataReader @this, bool autoClose = true)
+        {
+            IDictionary<string, object> expandoDict = new Dictionary<string, object>();
+            try
+            {
+                if (autoClose)
+                {
+                    using (@this)
+                    {
+                        Dictionary<int, KeyValuePair<int, string>> columnNames = Enumerable.Range(0, @this.FieldCount)
+                        .Select(x => new KeyValuePair<int, string>(x, @this.GetName(x)))
+                        .ToDictionary(pair => pair.Key);
 
+                        
+                        while (@this.Read())
+                        {
+
+                            Enumerable.Range(0, @this.FieldCount)
+                               .ToList()
+                               .ForEach(x => expandoDict.Add(columnNames[x].Value.FormatColumnName(), @this[x]));
+
+                            break;
+                        }
+
+                    }
+
+                    return expandoDict;
+                }
+                else
+                {
+
+                    Dictionary<int, KeyValuePair<int, string>> columnNames = Enumerable.Range(0, @this.FieldCount)
+                    .Select(x => new KeyValuePair<int, string>(x, @this.GetName(x)))
+                    .ToDictionary(pair => pair.Key);
+                     
+
+                    while (@this.Read())
+                    {
+
+                        Enumerable.Range(0, @this.FieldCount)
+                           .ToList()
+                           .ForEach(x => expandoDict.Add(columnNames[x].Value.FormatColumnName(), @this[x]));
+
+                        break;
+                    }
+
+
+                    return expandoDict;
+                }
+
+            }
+            catch (Exception ex)
+            {
+                if (@this != null)
+                {
+                    @this.Close();
+                }
+                throw new PureDataException("DataReaderExtensions", ex);
+            }
+
+        }
         /// <summary>
         ///     An IDataReader extension method that converts the @this to an expando object.
         /// </summary>
@@ -462,7 +527,7 @@ namespace Pure.Data
 
                             Enumerable.Range(0, @this.FieldCount)
                                .ToList()
-                               .ForEach(x => expandoDict.Add(columnNames[x].Value.ToUpper(), @this[x]));
+                               .ForEach(x => expandoDict.Add(columnNames[x].Value.FormatColumnName(), @this[x]));
 
                             break;
                         }
@@ -485,7 +550,7 @@ namespace Pure.Data
 
                         Enumerable.Range(0, @this.FieldCount)
                            .ToList()
-                           .ForEach(x => expandoDict.Add(columnNames[x].Value.ToUpper(), @this[x]));
+                           .ForEach(x => expandoDict.Add(columnNames[x].Value.FormatColumnName(), @this[x]));
 
                         break;
                     }
@@ -532,7 +597,7 @@ namespace Pure.Data
 
                             Enumerable.Range(0, @this.FieldCount)
                                 .ToList()
-                                .ForEach(x => expandoDict.Add(columnNames[x].Value.ToUpper(), @this[x]));
+                                .ForEach(x => expandoDict.Add(columnNames[x].Value.FormatColumnName(), @this[x]));
 
                             list.Add(entity);
                         }
@@ -556,7 +621,7 @@ namespace Pure.Data
 
                         Enumerable.Range(0, @this.FieldCount)
                             .ToList()
-                            .ForEach(x => expandoDict.Add(columnNames[x].Value.ToUpper(), @this[x]));
+                            .ForEach(x => expandoDict.Add(columnNames[x].Value.FormatColumnName(), @this[x]));
 
                         list.Add(entity);
                     }
@@ -842,5 +907,6 @@ namespace Pure.Data
         }
 
 
+       
     }
 }

@@ -23,7 +23,7 @@ using DataException = global::System.InvalidOperationException;
 using ApplicationException = global::System.InvalidOperationException;
 #endif
 
-namespace Dapper
+namespace Pure.Data
 {
 
 

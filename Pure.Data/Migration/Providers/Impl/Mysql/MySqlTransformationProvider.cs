@@ -204,16 +204,117 @@ namespace Pure.Data.Migration.Providers.Mysql
         {
             //
         }
+        private static List<TableInfo> cacheViewInfos = null;
 
-
-        public override List<TableInfo> GetTableInfos()
+        public virtual List<TableInfo> GetViewInfos(bool isCache = true)
         {
+            if (isCache == true)
+            {
+                if (cacheViewInfos != null)
+                {
+                    return cacheViewInfos;
+                }
+            }
             List<TableInfo> tables = new List<TableInfo>();
+            //         string TABLE_SQL = @"
+            //SELECT * 
+            //FROM information_schema.tables 
+            //WHERE  TABLE_SCHEMA=(select database()) AND TABLE_TYPE='VIEW'
+            //";
+
             string TABLE_SQL = @"
 			SELECT * 
 			FROM information_schema.tables 
-			WHERE (table_type='BASE TABLE'  ) AND TABLE_SCHEMA = '{0}'
+			WHERE  TABLE_TYPE='VIEW'
 			";
+
+            var schemaStr = string.IsNullOrEmpty(_schemaName) ? string.Empty : " AND TABLE_SCHEMA = '" + (_schemaName) + "' ";
+
+            TABLE_SQL = TABLE_SQL + schemaStr;
+
+            using (IDataReader reader = Database.ExecuteReader(string.Format(TABLE_SQL, _schemaName)))
+            {
+                while (reader.Read())
+                {
+                    TableInfo tbl = new TableInfo();
+                    tbl.TableName = reader["TABLE_NAME"].ToString();
+                    tbl.Schema = reader["TABLE_SCHEMA"].ToString();
+                    tbl.TableDescription = reader["TABLE_COMMENT"].ToString();
+                    tables.Add(tbl);
+                }
+            }
+
+            //this will return everything for the DB
+            var schema = ((System.Data.Common.DbConnection)Database.Connection).GetSchema("COLUMNS");// ((System.Data.Common.DbConnection)_connection).GetSchema("COLUMNS");
+
+            //loop again - but this time pull by table name
+            foreach (var item in tables)
+            {
+                item.Columns = new List<ColumnInfo>();
+
+                //pull the columns from the schema
+                var columns = schema.Select("TABLE_NAME='" + item.TableName + "'");
+                foreach (var row in columns)
+                {
+                    ColumnInfo col = new ColumnInfo();
+                    col.ColumnName = row["COLUMN_NAME"].ToString();
+                    col.RawType = row["COLUMN_TYPE"].ToString();
+
+                    col.PropertyName = CleanUpHelper.CleanUp(col.ColumnName);
+                    col.PropertyType = GetPropertyType(col.RawType);
+                    col.DataType = GetDataType(col.PropertyType);
+
+                    col.DefaultValue = row["COLUMN_DEFAULT"];
+                    col.ColumnScale = ToInt(row["NUMERIC_SCALE"].ToString());
+                    col.ColumnPrecision = ToInt(row["NUMERIC_PRECISION"].ToString());
+                    col.ColumnLength = ToInt(row["CHARACTER_MAXIMUM_LENGTH"].ToString());
+                    col.OrdinalPosition = ToInt(row["ORDINAL_POSITION"].ToString());
+
+                    col.IsNullable = row["IS_NULLABLE"].ToString() == "YES";
+                    col.IsPrimaryKey = row["COLUMN_KEY"].ToString() == "PRI";
+                    col.IsAutoIncrement = row["extra"].ToString().ToLower().IndexOf("auto_increment") >= 0;
+                    col.ColumnDescription = row["COLUMN_COMMENT"].ToString();
+
+                    item.Columns.Add(col);
+
+                }
+            }
+
+            if (isCache == true)
+            {
+                cacheViewInfos = tables;
+            }
+
+            return tables;
+        }
+        private static List<TableInfo> cacheTableInfos = null;
+
+        public override List<TableInfo> GetTableInfos(bool isCache = true)
+        {
+            if (isCache == true)
+            {
+                if (cacheTableInfos != null)
+                {
+                    return cacheTableInfos;
+                }
+            }
+            List<TableInfo> tables = new List<TableInfo>();
+   //         string TABLE_SQL = @"
+			//SELECT * 
+			//FROM information_schema.tables 
+			//WHERE (table_type='BASE TABLE'  ) AND TABLE_SCHEMA = '{0}'
+			//";
+            string TABLE_SQL = @"
+			SELECT * 
+			FROM information_schema.tables 
+			WHERE (table_type='BASE TABLE'  )  
+			";
+            //@"select TABLE_NAME as Name,TABLE_COMMENT as Description from information_schema.tables
+            //             where  TABLE_SCHEMA=(select database())  AND TABLE_TYPE='BASE TABLE'";
+            var schemaStr = string.IsNullOrEmpty(_schemaName) ? string.Empty : " AND TABLE_SCHEMA = '" + (_schemaName) + "' ";
+
+            TABLE_SQL = TABLE_SQL + schemaStr;
+
             using (IDataReader reader = Database.ExecuteReader(string.Format(TABLE_SQL, _schemaName)))
             {
                 while (reader.Read())
@@ -260,6 +361,11 @@ namespace Pure.Data.Migration.Providers.Mysql
                     item.Columns.Add(col);
                      
                 }
+            }
+
+            if (isCache == true)
+            {
+                cacheTableInfos = tables;
             }
 
             return tables ;

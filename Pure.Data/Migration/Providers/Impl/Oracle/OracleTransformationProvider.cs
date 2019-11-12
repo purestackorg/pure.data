@@ -377,11 +377,94 @@ END;", trg.Name,
             return Convert.ToInt32(count) > 0;
         }
 
+        private static List<TableInfo> cacheTableInfos = null;
+        private static List<TableInfo> cacheViewInfos = null;
 
 
-
-        public override List<TableInfo> GetTableInfos()
+        public virtual List<TableInfo> GetViewInfos(bool isCache = true)
         {
+            if (isCache == true)
+            {
+                if (cacheViewInfos != null)
+                {
+                    return cacheViewInfos;
+                }
+            }
+            List<TableInfo> tables = new List<TableInfo>();
+
+            //@"select view_name name  from user_views 
+            //                                    WHERE VIEW_name NOT LIKE '%$%'
+            //                                    AND VIEW_NAME !='PRODUCT_PRIVS'
+            //            AND VIEW_NAME NOT LIKE 'MVIEW_%' ";
+
+            string TABLE_SQL = @"SELECT view_name AS  TableName, '' AS  TableDescription FROM user_views WHERE VIEW_name NOT LIKE '%$%'
+                        AND VIEW_NAME !='PRODUCT_PRIVS'
+                        AND VIEW_NAME NOT LIKE 'MVIEW_%' ";
+
+            using (IDataReader reader = ExecuteQuery((TABLE_SQL)))
+            {
+                while (reader.Read())
+                {
+                    TableInfo tbl = new TableInfo();
+                    tbl.TableName = reader["TableName"].ToString();
+                    tbl.TableDescription = reader["TableDescription"].ToString();
+
+                    tbl.CreateSQL = "";
+                    tables.Add(tbl);
+                }
+            }
+
+            var dataColumnDTOs = GetObjectDTO<ColumnInfo>(@"select table_name TableName, 
+ column_name ColumnName, 
+ data_type RawType, 
+ data_scale ColumnScale,
+DATA_LENGTH ColumnLength,
+DATA_DEFAULT DefaultValue,
+DATA_PRECISION ColumnPrecision,
+  (CASE WHEN nullable ='N' THEN 0 ELSE 1 END) IsNullable
+ from USER_TAB_COLS utc  
+ order by column_id");
+
+            var dataColumnCommentDTOs = GetObjectDTO<ColumnInfo>(@"SELECT  TABLE_NAME AS  TableName,COLUMN_NAME AS ColumnName,  COMMENTS AS  ColumnDescription FROM USER_COL_COMMENTS");
+
+
+            var dataPrimaryData = GetObjectDTO<PrimaryInfo>(@"SELECT UC.CONSTRAINT_NAME NAME, UC.TABLE_NAME TABLENAME, COLUMN_NAME COLUMNNAME FROM USER_CONSTRAINTS UC
+INNER JOIN USER_CONS_COLUMNS UCC ON UC.CONSTRAINT_NAME = UCC.CONSTRAINT_NAME
+WHERE UC.CONSTRAINT_TYPE = 'P'
+AND UCC.POSITION = 1");
+
+            foreach (var tbl in tables)
+            {
+                tbl.Columns = LoadColumns(tbl, dataColumnDTOs, dataColumnCommentDTOs);
+
+                // Mark the primary key
+                var pkColums = dataPrimaryData.Where(p => p.TableName == tbl.TableName);
+                foreach (var pkcol in pkColums)
+                {
+                    var colToSet = tbl.Columns.FirstOrDefault(pr => pr.ColumnName == pkcol.ColumnName);
+                    if (colToSet != null)
+                    {
+                        colToSet.IsPrimaryKey = true;
+                    }
+                }
+
+            }
+            if (isCache == true)
+            {
+                cacheViewInfos = tables;
+            }
+            return tables;
+        }
+
+        public override List<TableInfo> GetTableInfos(bool isCache = true)
+        {
+            if (isCache == true)
+            {
+                if (cacheTableInfos != null)
+                {
+                    return cacheTableInfos;
+                }
+            }
             List<TableInfo> tables = new List<TableInfo>();
             string TABLE_SQL = @"SELECT TABLE_NAME AS  TableName, COMMENTS AS  TableDescription FROM USER_TAB_COMMENTS";
             
@@ -433,7 +516,10 @@ AND UCC.POSITION = 1");
                 }
                  
             }
-
+            if (isCache == true)
+            {
+                cacheTableInfos = tables;
+            }
             return tables;
         }
 

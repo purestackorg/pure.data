@@ -255,9 +255,103 @@ namespace Pure.Data.Migration.Providers.SQLite
         {
             //
         }
+        private static List<TableInfo> cacheTableInfos = null;
+        private static List<TableInfo> cacheViewInfos = null;
 
-        public override List<TableInfo> GetTableInfos()
+
+        public virtual List<TableInfo> GetViewInfos(bool isCache = true)
         {
+            if (isCache == true)
+            {
+                if (cacheViewInfos != null)
+                {
+                    return cacheViewInfos;
+                }
+            }
+            List<TableInfo> tables = new List<TableInfo>();
+            //@"select Name from sqlite_master where type='view'  order by name;";
+
+            string TABLE_SQL = @"select Name TABLENAME, sql CREATESQL from sqlite_master where type='view' order by name ";
+            using (IDataReader reader = ExecuteQuery((TABLE_SQL)))
+            {
+                while (reader.Read())
+                {
+                    TableInfo tbl = new TableInfo();
+                    tbl.TableName = reader["TABLENAME"].ToString();
+                    tbl.CreateSQL = reader["CREATESQL"].ToString();
+
+                    tables.Add(tbl);
+
+                }
+            }
+
+
+            foreach (var table in tables)
+            {
+                table.Columns = new List<ColumnInfo>();
+
+                using (IDataReader reader = ExecuteQuery(string.Format("PRAGMA table_info([{0}])", table.TableName)))
+                {
+                    while (reader.Read())
+                    {
+                        ColumnInfo col = new ColumnInfo();
+                        col.ColumnName = reader["name"].ToString();
+                        //col.ColumnLength = item.Size;
+                        col.IsPrimaryKey = reader["pk"].ToString() == "1";
+                        col.IsNullable = reader["notnull"].ToString() == "0";
+                        col.DefaultValue = reader["dflt_value"];
+                        col.RawType = reader["type"].ToString();
+
+
+                        col.PropertyName = CleanUpHelper.CleanUp(col.ColumnName);
+                        col.PropertyType = GetPropertyType(col.RawType);
+                        col.DataType = GetDataType(col.PropertyType);
+
+                        table.Columns.Add(col);
+
+
+                    }
+                }
+
+
+                //var columns = GetColumns(table.TableName);
+
+                //if (columns != null)
+                //{
+                //    foreach (var item in columns)
+                //    {
+                //        ColumnInfo col = new ColumnInfo();
+                //        col.ColumnName = item.Name;
+                //        col.ColumnLength = item.Size;
+                //        col.IsPrimaryKey = item.IsPrimaryKey;
+                //        col.IsNullable = !item.IsNotNull ;
+                //        col.DefaultValue = item.DefaultValue;
+                //        col.RawType = item.TypeString;
+
+
+                //        col.PropertyName = CleanUpHelper.CleanUp(col.ColumnName);
+                //        col.PropertyType = GetPropertyType(col.RawType);
+                //        col.DataType = GetDataType(col.PropertyType);
+
+                //        table.Columns.Add(col);
+                //    }
+                //}
+            }
+            if (isCache == true)
+            {
+                cacheViewInfos = tables;
+            }
+            return tables;
+        }
+        public override List<TableInfo> GetTableInfos(bool isCache = true)
+        {
+            if (isCache == true)
+            {
+                if (cacheTableInfos != null)
+                {
+                    return cacheTableInfos;
+                }
+            }
             List<TableInfo> tables = new List<TableInfo>();
             string TABLE_SQL = @"select tbl_name TABLENAME, sql CREATESQL from sqlite_master where type='table' order by rootpage ";
             using (IDataReader reader = ExecuteQuery((TABLE_SQL)))
@@ -325,7 +419,10 @@ namespace Pure.Data.Migration.Providers.SQLite
                 //    }
                 //}
             }
-
+            if (isCache == true)
+            {
+                cacheTableInfos = tables;
+            }
             return tables;
         }
 

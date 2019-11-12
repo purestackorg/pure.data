@@ -76,10 +76,89 @@ namespace Pure.Data.Migration.Providers.SqlServer
 		}
 
 
-
-
-        public override List<TableInfo> GetTableInfos()
+        private static List<TableInfo> cacheTableInfos = null;
+        private static List<TableInfo> cacheViewInfos = null;
+        public virtual List<TableInfo> GetViewInfos(bool isCache = true)
         {
+
+            if (isCache == true)
+            {
+                if (cacheViewInfos != null)
+                {
+                    return cacheViewInfos;
+                }
+            }
+            List<TableInfo> tables = new List<TableInfo>();
+            string TABLE_SQL = @"SELECT *
+		FROM  INFORMATION_SCHEMA.TABLES
+		WHERE TABLE_TYPE='VIEW'";
+            using (IDataReader reader = ExecuteQuery((TABLE_SQL)))
+            {
+                while (reader.Read())
+                {
+                    TableInfo tbl = new TableInfo();
+                    tbl.TableName = reader["TABLE_NAME"].ToString();
+                    tbl.Schema = _schemaName;
+                    tables.Add(tbl);
+
+                }
+            }
+
+            var dataColumnData2 = GetObjectDTO<ColumnInfo>(@" SELECT  
+			TABLE_SCHEMA AS [Schema], 
+			TABLE_NAME AS TableName, 
+			COLUMN_NAME AS ColumnName, 
+			ORDINAL_POSITION AS OrdinalPosition, 
+			COLUMN_DEFAULT AS  DefaultValue, 
+			IS_NULLABLE AS IsNullable, DATA_TYPE AS RawType, 
+			CHARACTER_MAXIMUM_LENGTH AS CharacterMaximumLength, 
+			DATETIME_PRECISION AS ColumnPrecision,
+			AUTOINC_INCREMENT AS IsAutoIncrement
+            FROM  INFORMATION_SCHEMA.COLUMNS  
+		    ORDER BY ORDINAL_POSITION ASC");
+            var dataPrimaryData = GetObjectDTO<PrimaryInfo>("SELECT u.COLUMN_NAME AS COLUMNNAME, c.CONSTRAINT_NAME AS NAME, c.TABLE_NAME AS TABLENAME " +
+                "FROM INFORMATION_SCHEMA.TABLE_CONSTRAINTS AS c INNER JOIN " +
+                "INFORMATION_SCHEMA.KEY_COLUMN_USAGE AS u ON c.CONSTRAINT_NAME = u.CONSTRAINT_NAME AND u.TABLE_NAME = c.TABLE_NAME " +
+                "where c.CONSTRAINT_TYPE = 'PRIMARY KEY' ORDER BY u.TABLE_NAME, c.CONSTRAINT_NAME, u.ORDINAL_POSITION ");
+
+
+            foreach (var tbl in tables)
+            {
+                //tbl.Columns = LoadColumns(tbl);
+
+                //// Mark the primary key
+                //string PrimaryKey = GetPK(tbl.Name);
+                //var pkColumn = tbl.Columns.SingleOrDefault(x => x.Name.ToLower().Trim() == PrimaryKey.ToLower().Trim());
+                //if (pkColumn != null)
+                //    pkColumn.IsPK = true;
+                tbl.Columns = LoadColumns(tbl, dataColumnData2, dataColumnData2);
+
+
+                var pkColums = dataPrimaryData.Where(p => p.TableName == tbl.TableName);
+                foreach (var pkcol in pkColums)
+                {
+                    var colToSet = tbl.Columns.FirstOrDefault(pr => pr.ColumnName == pkcol.ColumnName);
+                    if (colToSet != null)
+                    {
+                        colToSet.IsPrimaryKey = true;
+                    }
+                }
+            }
+            if (isCache == true)
+            {
+                cacheViewInfos = tables;
+            }
+            return tables;
+        }
+        public override List<TableInfo> GetTableInfos(bool isCache = true)
+        {
+            if (isCache == true)
+            {
+                if (cacheTableInfos != null)
+                {
+                    return cacheTableInfos;
+                }
+            }
             List<TableInfo> tables = new List<TableInfo>();
             string TABLE_SQL = @"SELECT *
 		FROM  INFORMATION_SCHEMA.TABLES
@@ -136,7 +215,10 @@ namespace Pure.Data.Migration.Providers.SqlServer
                     }
                 }
             }
-
+            if (isCache == true)
+            {
+                cacheTableInfos = tables;
+            }
             return tables;
         }
         List<ColumnInfo> LoadColumns(TableInfo tbl, IList<ColumnInfo> dataColumnDTOs, IList<ColumnInfo> dataColumnDTO2s)

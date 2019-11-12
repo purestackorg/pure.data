@@ -1064,11 +1064,14 @@ namespace Pure.Data.Migration.Providers
             throw new NotImplementedException();
         }
 
-        public virtual  List<TableInfo> GetTableInfos()
+        public virtual  List<TableInfo> GetTableInfos(bool isCache = true)
         {
             throw new NotImplementedException();
         }
-
+        public virtual List<TableInfo> GetViewInfos(bool isCache = true)
+        {
+            throw new NotImplementedException();
+        }
         //public virtual string GetColumnDefinition(IPropertyMap fieldDef)
         //{
         //    var fieldDefinition =

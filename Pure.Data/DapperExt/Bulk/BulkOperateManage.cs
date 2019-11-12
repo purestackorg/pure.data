@@ -25,7 +25,7 @@ namespace Pure.Data
             {
                 throw new PureDataException("Please config PureDataConfiguration in `BulkOperateClassName` or register IBulkOperate before use !", null);
             }
-            return providers[className];
+            return providers.ContainsKey(className)? providers[className]:null;
 
         }
 

@@ -36,7 +36,7 @@ using System.Linq.Expressions;
 using System.Data.Common;
 using Pure.Data;
 
-namespace Dapper
+namespace Pure.Data
 {
     [AssemblyNeutral, AttributeUsage(AttributeTargets.Class | AttributeTargets.Interface | AttributeTargets.Struct, AllowMultiple = false, Inherited = false)]
     internal sealed class AssemblyNeutralAttribute : Attribute { }
@@ -5580,7 +5580,7 @@ string name, object value = null, DbType? dbType = null, ParameterDirection? dir
         }
     }
 #if !DNXCORE50
-    sealed class DataTableHandler : Dapper.SqlMapper.ITypeHandler
+    sealed class DataTableHandler :  SqlMapper.ITypeHandler
     {
         public object Parse(Type destinationType, object value)
         {
@@ -5593,7 +5593,7 @@ string name, object value = null, DbType? dbType = null, ParameterDirection? dir
         }
     }
 
-    sealed class SqlDataRecordHandler : Dapper.SqlMapper.ITypeHandler
+    sealed class SqlDataRecordHandler : SqlMapper.ITypeHandler
     {
         public object Parse(Type destinationType, object value)
         {
@@ -5609,7 +5609,7 @@ string name, object value = null, DbType? dbType = null, ParameterDirection? dir
     /// <summary>
     /// Used to pass a IEnumerable&lt;SqlDataRecord&gt; as a SqlDataRecordListTVPParameter
     /// </summary>
-    sealed partial class SqlDataRecordListTVPParameter : Dapper.SqlMapper.ICustomQueryParameter
+    sealed partial class SqlDataRecordListTVPParameter : SqlMapper.ICustomQueryParameter
     {
         private readonly IEnumerable<Microsoft.SqlServer.Server.SqlDataRecord> data;
         private readonly string typeName;
@@ -5653,7 +5653,7 @@ string name, object value = null, DbType? dbType = null, ParameterDirection? dir
     /// <summary>
     /// Used to pass a DataTable as a TableValuedParameter
     /// </summary>
-    sealed partial class TableValuedParameter : Dapper.SqlMapper.ICustomQueryParameter
+    sealed partial class TableValuedParameter : SqlMapper.ICustomQueryParameter
     {
         private readonly DataTable table;
         private readonly string typeName;
@@ -5709,7 +5709,7 @@ string name, object value = null, DbType? dbType = null, ParameterDirection? dir
     /// <summary>
     /// This class represents a SQL string, it can be used if you need to denote your parameter is a Char vs VarChar vs nVarChar vs nChar
     /// </summary>
-    sealed partial class DbString : Dapper.SqlMapper.ICustomQueryParameter
+    sealed partial class DbString : SqlMapper.ICustomQueryParameter
     {
         /// <summary>
         /// Default value for IsAnsi.

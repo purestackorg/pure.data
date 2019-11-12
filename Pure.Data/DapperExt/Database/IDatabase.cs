@@ -1,4 +1,4 @@
-﻿using Dapper;
+﻿ 
 using FluentExpressionSQL;
 using FluentExpressionSQL.Sql;
 using Pure.Data.Sql;
@@ -33,6 +33,7 @@ namespace Pure.Data
         DataTable ExecuteDataTableWithRowDelegate(string sql, object param = null, IDbTransaction transaction = null, int? commandTimeout = null, CommandType? commandType = null);
         System.Data.DataSet ExecuteDataSet(string sql, object param = null, IDbTransaction transaction = null, int? commandTimeout = null, CommandType? commandType = null);
         Dictionary<TKey, TValue> ExecuteDictionary<TKey, TValue>(string sql, object param = null, IDbTransaction transaction = null, int? commandTimeout = null, CommandType? commandType = null);
+        IDictionary<string, object> ExecuteDictionary(string sql, object param = null, IDbTransaction transaction = null, int? commandTimeout = null, CommandType? commandType = null);
         dynamic ExecuteExpandoObject(string sql, object param = null, IDbTransaction transaction = null, int? commandTimeout = null, CommandType? commandType = null);
         IEnumerable<dynamic> ExecuteExpandoObjects(string sql, object param = null, IDbTransaction transaction = null, int? commandTimeout = null, CommandType? commandType = null);
         IEnumerable<T> SqlQuery<T>(string sql, object param = null, IDbTransaction transaction = null, bool buffer = true, int? commandTimeout = null, CommandType? commandType = null);
@@ -291,7 +292,7 @@ namespace Pure.Data
         string Backup<T>(BackupOption option) where T : class;
         string GenerateCode( );
 
-        Migration.Framework.ITransformationProvider CreateTransformationProvider();
+        Migration.Framework.ITransformationProvider CreateTransformationProvider(bool isCache = true);
         #endregion
 
         #region UpdateOnly

@@ -4,7 +4,6 @@ using System.Text;
 using System.Reflection;
 using System.Linq;
 using System.Collections;
-using Dapper;
 
 namespace Pure.Data.SqlMap
 {

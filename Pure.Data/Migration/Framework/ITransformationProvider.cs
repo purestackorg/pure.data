@@ -321,11 +321,13 @@ namespace Pure.Data.Migration.Framework
         /// <returns>The names of all the tables.</returns>
         string[] GetTables();
 
+
         /// <summary>
         /// 获取所有表信息
         /// </summary>
         /// <returns></returns>
-        List<TableInfo> GetTableInfos();
+        List<TableInfo> GetTableInfos(bool isCache = true); 
+        List<TableInfo> GetViewInfos(bool isCache = true);
 
         /// <summary>
         /// Insert data into a table

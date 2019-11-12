@@ -241,10 +241,114 @@ namespace Pure.Data.Migration.Providers.SqlServer
         //    return Convert.ToInt32(count) > 0;
         //}
 
+        private static List<TableInfo> cacheTableInfos = null;
+        private static List<TableInfo> cacheViewInfos = null;
 
-
-        public override List<TableInfo> GetTableInfos()
+        public virtual List<TableInfo> GetViewInfos(bool isCache = true)
         {
+            if (isCache == true)
+            {
+                if (cacheViewInfos != null)
+                {
+                    return cacheViewInfos;
+                }
+            }
+
+            List<TableInfo> tables = new List<TableInfo>();
+
+           // return @"SELECT s.Name,Convert(varchar(max),tbp.value) as Description
+           //                 FROM sysobjects s
+					     	//LEFT JOIN sys.extended_properties as tbp ON s.id=tbp.major_id and tbp.minor_id=0  AND (tbp.Name='MS_Description' OR tbp.Name is null) WHERE s.xtype IN('V')  ";
+
+
+            string TABLE_SQL = @"SELECT TABLENAME = D.NAME, TABLECOMMENT = F.VALUE FROM SYSOBJECTS D
+LEFT   JOIN   SYS.EXTENDED_PROPERTIES   F   ON   D.ID=F.MAJOR_ID    AND   F.MINOR_ID=0
+WHERE D.XTYPE='V'  ";
+            using (IDataReader reader = ExecuteQuery((TABLE_SQL)))
+            {
+                while (reader.Read())
+                {
+                    TableInfo tbl = new TableInfo();
+                    tbl.TableName = reader["TABLENAME"].ToString();
+                    tbl.Schema = _schemaName;
+                    tbl.TableDescription = reader["TABLECOMMENT"].ToString();
+                    tables.Add(tbl);
+
+                }
+            }
+
+            var dataColumnData2 = GetObjectDTO<ColumnInfo>(@" SELECT 
+			 
+			TABLE_SCHEMA AS [Schema], 
+			TABLE_NAME AS TableName, 
+			COLUMN_NAME AS ColumnName, 
+			ORDINAL_POSITION AS OrdinalPosition, 
+			COLUMN_DEFAULT AS  DefaultValue, 
+			CASE WHEN  (IS_NULLABLE = 'YES')  THEN 1 ELSE 0 END AS IsNullable,
+            DATA_TYPE AS RawType, 
+			CHARACTER_MAXIMUM_LENGTH AS CharacterMaximumLength, 
+			DATETIME_PRECISION AS ColumnPrecision,
+			COLUMNPROPERTY(object_id('[' + TABLE_SCHEMA + '].[' + TABLE_NAME + ']'), COLUMN_NAME, 'IsIdentity') AS IsAutoIncrement,
+			COLUMNPROPERTY(object_id('[' + TABLE_SCHEMA + '].[' + TABLE_NAME + ']'), COLUMN_NAME, 'IsComputed') as IsComputed
+            FROM  INFORMATION_SCHEMA.COLUMNS  
+		    ORDER BY ORDINAL_POSITION ASC");
+            var dataPrimaryData = GetObjectDTO<PrimaryInfo>(@"SELECT I.NAME AS NAME, O.NAME AS TABLENAME, C.NAME AS COLUMNNAME
+                FROM SYS.INDEXES AS I 
+                INNER JOIN SYS.INDEX_COLUMNS AS IC ON I.OBJECT_ID = IC.OBJECT_ID AND I.INDEX_ID = IC.INDEX_ID 
+                INNER JOIN SYS.OBJECTS AS O ON I.OBJECT_ID = O.OBJECT_ID 
+                LEFT OUTER JOIN SYS.COLUMNS AS C ON IC.OBJECT_ID = C.OBJECT_ID AND C.COLUMN_ID = IC.COLUMN_ID
+                WHERE (I.IS_PRIMARY_KEY = 1)");
+
+
+            string COLUMN_COMMENT_SQL = @"SELECT TABLENAME=D.NAME, COLUMNNAME=A.NAME,COLUMNLENGTH=A.LENGTH,COLUMNPRECISION=COLUMNPROPERTY(A.ID,A.NAME,'PRECISION'),COLUMNSCALE=ISNULL(COLUMNPROPERTY(A.ID,A.NAME,'SCALE'),0), COLUMNDESCRIPTION=G.VALUE FROM SYSCOLUMNS A
+                                INNER JOIN SYSOBJECTS D ON A.ID=D.ID  AND D.XTYPE='U' ";
+            //if (IsSQL2005)
+            //{
+            COLUMN_COMMENT_SQL += " LEFT JOIN SYS.EXTENDED_PROPERTIES G ON A.ID=G.MAJOR_ID AND A.COLID=G.MINOR_ID AND G.NAME = 'MS_DESCRIPTION'   ";
+            //}
+            //else
+            //{
+            //    sql += "LEFT JOIN SYSPROPERTIES G ON A.ID=G.ID AND A.COLID=G.SMALLID  ";
+            //}
+            var dataColumnDTOs = GetObjectDTO<ColumnInfo>(COLUMN_COMMENT_SQL);
+
+            foreach (var tbl in tables)
+            {
+                tbl.Columns = LoadColumns(tbl, dataColumnDTOs, dataColumnData2);
+
+                // Mark the primary key
+                //string PrimaryKey = GetPK(tbl.Name);
+                //var pkColumn = tbl.Columns.SingleOrDefault(x => x.Name.ToLower().Trim() == PrimaryKey.ToLower().Trim());
+                //if (pkColumn != null)
+                //{
+                //    pkColumn.IsPK = true;
+                //}
+                var pkColums = dataPrimaryData.Where(p => p.TableName == tbl.TableName);
+                foreach (var pkcol in pkColums)
+                {
+                    var colToSet = tbl.Columns.FirstOrDefault(pr => pr.ColumnName == pkcol.ColumnName);
+                    if (colToSet != null)
+                    {
+                        colToSet.IsPrimaryKey = true;
+                    }
+                }
+            }
+            if (isCache == true)
+            {
+                cacheViewInfos = tables;
+            }
+            return tables;
+        }
+        public override List<TableInfo> GetTableInfos(bool isCache = true)
+        {
+            if (isCache == true)
+            {
+                if (cacheTableInfos != null)
+                {
+                    return cacheTableInfos;
+                }
+            }
+
             List<TableInfo> tables = new List<TableInfo>();
             string TABLE_SQL = @"SELECT TABLENAME = D.NAME, TABLECOMMENT = F.VALUE FROM SYSOBJECTS D
 LEFT   JOIN   SYS.EXTENDED_PROPERTIES   F   ON   D.ID=F.MAJOR_ID    AND   F.MINOR_ID=0
@@ -318,7 +422,10 @@ WHERE D.XTYPE='U'  ";
                     }
                 }
             }
-
+            if (isCache == true)
+            {
+                cacheTableInfos = tables;
+            }
             return tables;
         }
 

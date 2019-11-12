@@ -50,7 +50,13 @@ namespace Pure.Data.Migration.Providers
             return null;
         }
 
-        public List<TableInfo> GetTableInfos()
+        public  List<TableInfo> GetViewInfos(bool isCache = true)
+        {
+            List<TableInfo> tables = new List<TableInfo>();
+
+            return tables;
+        }
+        public  List<TableInfo> GetTableInfos(bool isCache = true)
         {
             return null;
         }

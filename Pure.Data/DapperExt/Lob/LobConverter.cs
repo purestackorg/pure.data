@@ -2,8 +2,7 @@
 
 using System;
 using System.Linq;
-using System.Collections.Concurrent;
-using Dapper;
+using System.Collections.Concurrent; 
 using System.Collections.Generic;
 
 namespace Pure.Data

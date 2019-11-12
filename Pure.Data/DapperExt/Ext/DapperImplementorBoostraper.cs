@@ -4,7 +4,6 @@ using System.Data;
 using System.Dynamic;
 using System.Linq;
 using System.Text;
-using Dapper;
 using Pure.Data.Sql;
 using System.Reflection;
 using System.Collections.Concurrent;

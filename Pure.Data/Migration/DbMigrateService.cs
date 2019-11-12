@@ -5,6 +5,7 @@ using Pure.Data.Migration.Providers.PostgreSQL;
 using Pure.Data.Migration.Providers.SQLite;
 using Pure.Data.Migration.Providers.SqlServer;
 using System;
+using System.Collections.Concurrent;
 using System.Data;
 
 namespace Pure.Data.Migration
@@ -42,9 +43,20 @@ namespace Pure.Data.Migration
             throw new NotImplementedException();
         }
 
-        public ITransformationProvider CreateTransformationProvider(MigratorDbType type, string constr)
+        public ITransformationProvider CreateTransformationProvider(MigratorDbType type, string constr, bool cached = true)
         {
             ITransformationProvider result = null;
+
+            string key = constr;
+            if (cached == true && caches.ContainsKey(key))
+            {
+                result = caches[key];
+                if (result != null)
+                {
+                    return result;
+                }
+            }
+
             switch (type)
             {
                 case MigratorDbType.SqlServer:
@@ -80,17 +92,37 @@ namespace Pure.Data.Migration
             }
 
 
+            if (cached == true)
+            {
+                caches[key] = result;
+            }
 
             return result;
         }
 
 
-        public   ITransformationProvider CreateTransformationProviderByDatabaseType( IDatabase db)
+
+        private ConcurrentDictionary<string, ITransformationProvider> caches = new ConcurrentDictionary<string, ITransformationProvider>();
+        public   ITransformationProvider CreateTransformationProviderByDatabaseType( IDatabase db, bool cached = true)
         {
+            ITransformationProvider _provider = null;
+            string key = db.DatabaseName;
+
+            db.EnsureOpenConnection();//确保打开数据库连接
+
+            if (cached == true && caches.ContainsKey(key))
+            {
+                _provider = caches[key];
+                if (_provider != null)
+                { 
+                    return _provider;
+                }
+            }
+
             string connectionstring = db.ConnectionString;
             DatabaseType dbType = db.DatabaseType;
             var svr = DbMigrateService.Instance;
-            ITransformationProvider _provider = null;
+        
             switch (dbType)
             {
                 case DatabaseType.None:
@@ -144,7 +176,13 @@ namespace Pure.Data.Migration
 
             //设置数据库操作对象
             _provider.Database = db;
-            db.EnsureOpenConnection();//确保打开数据库连接
+
+
+            if (cached == true)
+            { 
+                caches[key] = _provider; 
+            }
+
 
             return _provider;
         }

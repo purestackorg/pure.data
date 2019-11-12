@@ -165,10 +165,84 @@ namespace Pure.Data.Migration.Providers.PostgreSQL
         {
             //
         }
-
-
-        public override List<TableInfo> GetTableInfos()
+        private static List<TableInfo> cacheTableInfos = null;
+        private static List<TableInfo> cacheViewInfos = null;
+        public virtual List<TableInfo> GetViewInfos(bool isCache = true)
         {
+            if (isCache == true)
+            {
+                if (cacheViewInfos != null)
+                {
+                    return cacheViewInfos;
+                }
+            }
+
+            List<TableInfo> tables = new List<TableInfo>();
+
+            string TABLE_SQL = @"select cast(relname as varchar) as table_name, '' AS table_schema, cast(Description as varchar) AS TABLECOMMENT from pg_description
+                         join pg_class on pg_description.objoid = pg_class.oid
+                         where objsubid = 0 and relname in (SELECT viewname from pg_views  
+                         WHERE schemaname ='public')";
+
+   //         string TABLE_SQL = @"
+			//SELECT table_name, table_schema, table_type
+			//FROM information_schema.tables 
+			//WHERE (table_type='BASE TABLE' OR table_type='VIEW')
+			//	AND table_schema NOT IN ('pg_catalog', 'information_schema');'
+			//";
+   //         string sql = string.Format(@"SELECT \r\n    ns.nspname AS SchemaOwner, \r\n    c.relname AS TABLENAME, \r\n    d.description AS TABLECOMMENT  \r\nFROM pg_class c\r\nINNER JOIN pg_namespace ns ON c.relnamespace = ns.oid\r\nINNER JOIN pg_description d ON c.oid = d.objoid\r\nWHERE \r\n    c.relkind = 'r' AND    \r\n    d.objsubid = 0 AND\r\n    (ns.nspname = '{0}'  )", _schemaName);
+
+            using (IDataReader reader = ExecuteQuery((TABLE_SQL)))
+            {
+                while (reader.Read())
+                {
+                    TableInfo tbl = new TableInfo();
+                    tbl.TableName = reader["table_name"].ToString();
+                    tbl.Schema = reader["table_schema"].ToString();
+                    tbl.TableDescription = reader["TABLECOMMENT"].ToString();
+
+                    //using (IDataReader reader1 = ExecuteQuery((sql)))
+                    //{
+                    //    while (reader1.Read())
+                    //    {
+                    //        tbl.TableDescription = reader["TABLECOMMENT"].ToString();
+                    //    }
+                    //}
+                    //var objTableComent = dataTableDTOs.FirstOrDefault(p => p.TableName == tbl.Name);
+                    //tbl.Comment = objTableComent != null ? objTableComent.TableComment : "";
+
+                    tbl.CreateSQL = "";
+                    tables.Add(tbl);
+                }
+            }
+
+
+            foreach (var tbl in tables)
+            {
+                tbl.Columns = LoadColumns(tbl);
+
+                // Mark the primary key
+                string PrimaryKey = GetPK(tbl.TableName);
+                var pkColumn = tbl.Columns.SingleOrDefault(x => x.ColumnName.ToLower().Trim() == PrimaryKey.ToLower().Trim());
+                if (pkColumn != null)
+                    pkColumn.IsPrimaryKey = true;
+            }
+            if (isCache == true)
+            {
+                cacheViewInfos = tables;
+            }
+            return tables;
+        }
+        public override List<TableInfo> GetTableInfos(bool isCache = true)
+        {
+            if (isCache == true)
+            {
+                if (cacheTableInfos != null)
+                {
+                    return cacheTableInfos;
+                }
+            }
+
             List<TableInfo> tables = new List<TableInfo>();
             string TABLE_SQL = @"
 			SELECT table_name, table_schema, table_type
@@ -177,6 +251,12 @@ namespace Pure.Data.Migration.Providers.PostgreSQL
 				AND table_schema NOT IN ('pg_catalog', 'information_schema');'
 			";
             string sql = string.Format(@"SELECT \r\n    ns.nspname AS SchemaOwner, \r\n    c.relname AS TABLENAME, \r\n    d.description AS TABLECOMMENT  \r\nFROM pg_class c\r\nINNER JOIN pg_namespace ns ON c.relnamespace = ns.oid\r\nINNER JOIN pg_description d ON c.oid = d.objoid\r\nWHERE \r\n    c.relkind = 'r' AND    \r\n    d.objsubid = 0 AND\r\n    (ns.nspname = '{0}'  )", _schemaName);
+
+
+
+            //return @"select cast(relname as varchar) as Name,
+            //            cast(obj_description(relfilenode,'pg_class') as varchar) as Description from pg_class c 
+            //            where  relkind = 'r' and relname not like 'pg_%' and relname not like 'sql_%' order by relname";
 
             using (IDataReader reader = ExecuteQuery((TABLE_SQL)))
             {
@@ -212,7 +292,10 @@ namespace Pure.Data.Migration.Providers.PostgreSQL
                 if (pkColumn != null)
                     pkColumn.IsPrimaryKey = true;
             }
-
+            if (isCache == true)
+            {
+                cacheTableInfos = tables;
+            }
             return tables;
         }
 

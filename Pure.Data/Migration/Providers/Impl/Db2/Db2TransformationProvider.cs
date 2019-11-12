@@ -190,8 +190,13 @@ namespace Pure.Data.Migration.Providers.Db2
             return Convert.ToInt32(count) > 0;
         }
 
+        public virtual List<TableInfo> GetViewInfos(bool isCache = true)
+        {
+            List<TableInfo> tables = new List<TableInfo>();
 
-        public override List<TableInfo> GetTableInfos()
+            return tables;
+        }
+        public override List<TableInfo> GetTableInfos(bool isCache = true)
         {
             List<TableInfo> tables = new List<TableInfo>();
 

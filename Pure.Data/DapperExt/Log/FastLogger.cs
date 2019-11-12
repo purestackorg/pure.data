@@ -87,7 +87,7 @@ namespace Pure.Data
             WriteLog(string.Empty, string.Empty, infoData);
              
         }
-
+       
         public static void WriteLog(String preFile, String infoData)
         {
             WriteLog(string.Empty, preFile, infoData);
