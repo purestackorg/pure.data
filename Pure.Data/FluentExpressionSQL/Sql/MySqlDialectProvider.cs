@@ -590,7 +590,12 @@ namespace FluentExpressionSQL.Sql
 
             return result;
         }
-
+        public override string ConvertRegexStr(string colName, string regex)
+        {
+            string str = "";
+            str = colName + " regexp '" + regex + "'";
+            return str;
+        }
         public override string DoCaseWhen(List<CaseThenExpressionPair> listCase)
         {
             StringBuilder sb = new StringBuilder();

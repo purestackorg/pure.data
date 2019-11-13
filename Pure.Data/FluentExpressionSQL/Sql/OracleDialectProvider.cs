@@ -812,6 +812,14 @@ namespace FluentExpressionSQL.Sql
 
             return sb.ToString();
         }
+
+
+        public override string ConvertRegexStr(string colName, string regex)
+        {
+            string str = "";
+            str = "regexp_like("+ colName + ", '" + regex + "')"  ;
+            return str;
+        }
         #endregion
     }
 }

@@ -27,6 +27,7 @@ namespace FluentExpressionSQL.Sql
         bool IsQuoted(string value);
         string QuoteString(string value);
 
+        string ConvertRegexStr(string colName, string regex);
 
         DateTimeDto ConvertDateTime(MemberInfo member, object value);
         string ConvertSqlValue(object castObject, Type type);
@@ -167,6 +168,9 @@ namespace FluentExpressionSQL.Sql
         public abstract object FormatValue(object v, Type type = null);
         public abstract string ConvertDbFunction(DbFunctionType functionType, params object[] parameters);
         public abstract string DoCaseWhen(List<CaseThenExpressionPair> listCase);
+
+        public abstract string ConvertRegexStr(string colName, string regex);
+
         #endregion
     }
 }

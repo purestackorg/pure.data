@@ -727,6 +727,16 @@ namespace FluentExpressionSQL.Sql
 
             return sb.ToString();
         }
+
+
+
+        public override string ConvertRegexStr(string colName, string regex)
+        {
+            string str = "";
+            str = colName + " like " + "'%[" + regex + "]%'";
+            return str;
+            //NAME like '%[^A-Z]%'
+        }
         #endregion
     }
 }

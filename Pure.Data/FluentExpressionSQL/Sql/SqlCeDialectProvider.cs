@@ -700,6 +700,14 @@ namespace FluentExpressionSQL.Sql
 
             return sb.ToString();
         }
+
+        public override string ConvertRegexStr(string colName, string regex)
+        {
+            return "";
+            //string str = "";
+            //str = "regexp_like(" + colName + ", '" + regex + "')";
+            //return str;
+        }
         #endregion
     }
 }

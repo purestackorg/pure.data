@@ -332,13 +332,22 @@ public SqlBuilder AddParameters(dynamic parameters)
 
         public SqlBuilder Where(List<IConditionalModel> models)
         {
-            var conSql = ConditionalModelToSql(models);
+            if (models ==null || models.Count == 0)
+            {
+                return this;
+            }
+            var conSql = ConditionalModelToSql(Database, models);
+            if (conSql.Key == null || conSql.Key == "")
+            {
+                return this;
+
+            }
 
             AddClause("where", conSql.Key, conSql.Value, " ", prefix: "WHERE ", postfix: "\n");
             return this;
         }
 
-        private KeyValuePair<string, DynamicParameters> ConditionalModelToSql(List<IConditionalModel> models, int beginIndex = 0)
+        private KeyValuePair<string, DynamicParameters> ConditionalModelToSql(IDatabase Database, List<IConditionalModel> models, int beginIndex = 0)
         {
             DynamicParameters parameters = new DynamicParameters();
             if (models == null || models.Count == 0) return new KeyValuePair<string, DynamicParameters>();
@@ -430,6 +439,11 @@ public SqlBuilder AddParameters(dynamic parameters)
                                 parameters.Add(parameterName, item.FieldValue);
                             }
                             break;
+                        case ConditionalType.Regex:
+                            string regexStr =Database.SqlDialectProvider.ConvertRegexStr(item.FieldName.ToSqlFilter(), item.FieldValue);
+                            builder.AppendFormat(temp, type, regexStr, "", "");
+
+                            break;
                         default:
                             break;
                     }
@@ -455,7 +469,7 @@ public SqlBuilder AddParameters(dynamic parameters)
                             }
                             List<IConditionalModel> conModels = new List<IConditionalModel>();
                             conModels.Add(con.Value);
-                            var childSqlInfo = ConditionalModelToSql(conModels, 1000 * (1 + index) + models.IndexOf(item));
+                            var childSqlInfo = ConditionalModelToSql( Database, conModels, 1000 * (1 + index) + models.IndexOf(item));
                             if (!isFirst)
                             {
 
@@ -647,6 +661,7 @@ public SqlBuilder AddParameters(dynamic parameters)
         IsNullOrEmpty = 11,
         IsNot = 12,
         NoLike = 13,
+        Regex = 14,
     }
     public enum WhereType
     {
