@@ -329,7 +329,14 @@ public SqlBuilder AddParameters(dynamic parameters)
             return this;
         }
 
-
+        public SqlBuilder Where( ConditionalModelCollections models)
+        {
+            if (models == null  )
+            {
+                return this;
+            }
+            return Where(models.conditions);
+        }
         public SqlBuilder Where(List<IConditionalModel> models)
         {
             if (models ==null || models.Count == 0)
@@ -670,13 +677,26 @@ public SqlBuilder AddParameters(dynamic parameters)
     }
     public interface IConditionalModel
     {
-
+        string FieldName { get; set; }
     }
     public class ConditionalCollections : IConditionalModel
     {
         public List<KeyValuePair<WhereType, ConditionalModel>> ConditionalList { get; set; }
+        public string FieldName { get; set; }
+
     }
 
+    public class ConditionalModelCollections
+    {
+        public List<IConditionalModel> conditions = new List<IConditionalModel>();
+
+        public void Add(IConditionalModel c) {
+            if (!conditions.Any(p=>p.FieldName == c.FieldName))
+            {
+                conditions.Add(c);
+            }
+        }
+    }
     public class ConditionalModel : IConditionalModel
     {
         public ConditionalModel()
