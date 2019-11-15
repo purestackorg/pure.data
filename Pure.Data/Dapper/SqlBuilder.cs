@@ -691,10 +691,12 @@ public SqlBuilder AddParameters(dynamic parameters)
         public List<IConditionalModel> conditions = new List<IConditionalModel>();
 
         public void Add(IConditionalModel c) {
-            if (!conditions.Any(p=>p.FieldName == c.FieldName))
-            {
-                conditions.Add(c);
-            }
+            //if (c.FieldName == null ||  !conditions.Any(p=>p.FieldName == c.FieldName))
+            //{
+            //    conditions.Add(c);
+            //}
+            conditions.Add(c);
+
         }
     }
     public class ConditionalModel : IConditionalModel

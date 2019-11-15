@@ -18,7 +18,7 @@ namespace Pure.Data.SqlMap
         {
             var statement = new Statement
             {
-                Id = statementNode.Attributes["Id"].Value,
+                Id = SqlMapManager.Instance.FormatSqlMapNameCase(statementNode.Attributes["Id"].Value) ,
 
                 SqlTags = new List<ITag> { },
                 SqlMapInfo = sqlMapInfo

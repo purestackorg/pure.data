@@ -30,12 +30,12 @@ namespace Pure.Data.SqlMap
                         foreach (var path in childSqlmapSources)
                         {
                             var sqlmapStream = LoadConfigStream(path);
-                            db.Debug("Loading SqlMap: " + sqlmapStream.Path);
+                            db.Debug("Loading SqlMap : " + sqlmapStream.Path);
                             try
                             {
                                 var sqlmap = LoadSqlMap(db, sqlmapStream);
                                 SqlMapManager.Instance.Add(sqlmap, false);
-                                db.Debug("Loaded Successfully.");
+                                db.Debug("Loaded ("+ sqlmap.Scope + ") Successfully.");
 
                             }
                             catch (Exception ex)
@@ -62,7 +62,7 @@ namespace Pure.Data.SqlMap
                     {
                         var sqlmap = LoadSqlMap(db, sqlmapStream);
                         SqlMapManager.Instance.Add(sqlmap, false);
-                        db.Debug("Loaded Successfully.");
+                        db.Debug("Loaded (" + sqlmap.Scope + ") Successfully.");
 
                     }
                     catch (Exception ex)
@@ -115,7 +115,7 @@ namespace Pure.Data.SqlMap
                 var fullpath = FileLoader.GetPath(sqlmap.Path);
                 string dir = System.IO.Path.GetDirectoryName(fullpath);
                 string filename = System.IO.Path.GetFileName(fullpath);
-                db.Debug("Watch file changed on :" + fullpath);
+                db.Debug("Watch file ("+ sqlmap.Scope + ") changed at :" + fullpath);
                 FileWatcherLoader.Instance.Watch(dir, filename, () =>
                 {
                     lock (olock)
@@ -127,7 +127,7 @@ namespace Pure.Data.SqlMap
                         sqlmap.Caches = newSqlmap.Caches;
                       
                         SqlMapManager.Instance.Add(sqlmap, true);
-                        db.Debug(string.Format(" LocalSqlMapLoader has reloaded SqlMap: {0} ", sqlmap.Path));
+                        db.Debug(string.Format(" LocalSqlMapLoader has reloaded SqlMap ({1}): {0} ", sqlmap.Path, sqlmap.Scope));
                     }
                     
                 }, db.Config.WatchSqlMapInterval);

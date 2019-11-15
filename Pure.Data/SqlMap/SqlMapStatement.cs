@@ -746,6 +746,81 @@ namespace Pure.Data.SqlMap
                 //LogError(ex);
                 throw new PureDataException("SqlMapStatement", ex);
             }
+            //finally
+            //{
+            //    if (database != null)
+            //    {
+            //        database.SetConnectionAlive(false);
+            //        database.Close();
+            //    }
+            //}
+
+        }
+
+        public IEnumerable<dynamic> ExecutePageExpandoObjects(int pageIndex, int pageSize, out int total, string orderText = "", string countSql = "", IDbTransaction transaction = null, int? commandTimeout = null, CommandType? commandType = CommandType.Text)
+        {
+
+
+            try
+            {
+
+                if (database != null)
+                {
+                    database.SetConnectionAlive(true);
+                    string sqltext = this.SqlWithoutOrderBy;
+
+                    pageSize = pageSize == 0 ? database.Config.DefaultPageSize : pageSize;
+                    string strCount = "";
+                    if (countSql != null && countSql != "")
+                    {
+                        strCount = countSql;
+                    }
+                    else
+                    {
+                        strCount = database.GetSqlOfCount(sqltext);
+                    }
+
+                    var filterParameters = FilterParameters(strCount, this.Parameters);
+                    strCount = FilterSql(strCount, filterParameters);
+
+
+                    total = Convert.ToInt32(database.ExecuteScalar(strCount, filterParameters));
+                    if (!string.IsNullOrEmpty(orderText))
+                    {
+                        sqltext = sqltext + " ORDER BY " + orderText;
+                    }
+                    else
+                    {
+                        sqltext = sqltext + " " + Context.OrderByText;
+                    }
+
+
+
+                    var dictParameters = filterParameters;
+                    string sqlPage = database.GetSqlOfPage(pageIndex, pageSize, sqltext, dictParameters);
+                    //var data = database.ExecuteReader(sqlPage, dictParameters, transaction, commandTimeout, commandType);
+                    //return data.ToList<T>(true);
+                    sqlPage = FilterSql(sqlPage, dictParameters);
+                    var result = database.ExecuteExpandoObjects(sqlPage, dictParameters, transaction, commandTimeout, commandType);
+
+                    return result;
+
+
+
+                }
+                else
+                {
+                    total = 0;
+                    return null;
+                }
+
+
+            }
+            catch (Exception ex)
+            {
+                //LogError(ex);
+                throw new PureDataException("SqlMapStatement", ex);
+            }
             finally
             {
                 if (database != null)

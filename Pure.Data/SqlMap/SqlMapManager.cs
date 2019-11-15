@@ -16,6 +16,12 @@ namespace Pure.Data.SqlMap
     {
         //internal SqlMapLoaderOption Config { get; private set; }
         private static object olock = new object();
+
+        //避免大小写 统一小写 20191115
+        public string FormatSqlMapNameCase(string str) {
+
+            return str?.ToLower();
+        }
          
         /// <summary>
         /// 初始化

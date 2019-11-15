@@ -51,7 +51,7 @@ namespace Pure.Data.SqlMap
             } }
 
         public static string GetFullSqlIdOfStatement(string scope, string sqlid) {
-            return string.Format("{0}.{1}", scope, sqlid);
+            return SqlMapManager.Instance.FormatSqlMapNameCase( string.Format("{0}.{1}", scope, sqlid));
 
         }
 
