@@ -113,6 +113,24 @@ namespace Pure.Data.Validations.Internal {
             PropertyName = propertyInfo.Name;// ValidatorOptions.PropertyNameResolver(containerType, member, expression);
             LoadDisplayName = _LoadDisplayName;
         }
+        public PropertyRule(string propertyName, Func<object, string, object> propertyFunc, Func<CascadeMode> cascadeModeThunk,   Func<PropertyRule, string> _LoadDisplayName)
+        {
+          //  Member = propertyInfo;
+            PropertyFunc = (obj) => { return propertyFunc(obj, propertyName); }; // (obj) => { return propertyInfo.GetValue(obj); };// propertyFunc;
+                                                                           // Expression = expression;
+            OnFailure = x => { };
+            //TypeToValidate = typeToValidate;
+            this.cascadeModeThunk = cascadeModeThunk;
+             
+            DependentRules = new List<IValidationRule>();
+            PropertyName = propertyName;// propertyInfo.Name;// ValidatorOptions.PropertyNameResolver(containerType, member, expression);
+            LoadDisplayName = _LoadDisplayName;
+        }
+        public static PropertyRule Create(string propertyName, Func<object, string, object> propertyFunc , Func<CascadeMode> cascadeModeThunk, Func<PropertyRule, string> _LoadDisplayName)
+        {
+            return new PropertyRule(propertyName, propertyFunc, cascadeModeThunk,   _LoadDisplayName);
+        }
+
         public static PropertyRule Create<T, TProperty>(PropertyInfo propertyInfo, Func<CascadeMode> cascadeModeThunk, Func<PropertyRule, string> _LoadDisplayName)
         {
             return new PropertyRule(propertyInfo,  cascadeModeThunk, typeof(TProperty), typeof(T), _LoadDisplayName);
