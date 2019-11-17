@@ -528,5 +528,31 @@ namespace Pure.Data.i18n
                 return ResourceManager.GetString("valid_fail", resourceCulture);
             }
         }
+
+
+        public static string number_error
+        {
+            get
+            {
+                return ResourceManager.GetString("number_error", resourceCulture);
+            }
+        }
+
+        public static string english_error
+        {
+            get
+            {
+                return ResourceManager.GetString("english_error", resourceCulture);
+            }
+        }
+
+        public static string chinese_error
+        {
+            get
+            {
+                return ResourceManager.GetString("chinese_error", resourceCulture);
+            }
+        }
+
     }
 }

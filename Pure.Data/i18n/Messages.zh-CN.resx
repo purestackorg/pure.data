@@ -234,4 +234,13 @@
   <data name="stringsafety_error" xml:space="preserve">
     <value>'{PropertyName}' 存在危险的特殊字符。</value>
   </data>
+  <data name="chinese_error" xml:space="preserve">
+    <value>'{PropertyName}' 不是有效的中文汉字格式。</value>
+  </data>
+  <data name="english_error" xml:space="preserve">
+    <value>'{PropertyName}' 不是有效的英文字母格式。</value>
+  </data>
+  <data name="number_error" xml:space="preserve">
+    <value>'{PropertyName}' 不是有效的数字格式。</value>
+  </data>
 </root>

@@ -1144,7 +1144,38 @@ namespace Pure.Data {
         {
             return ruleBuilder.SetValidator(new CreditCodeValidator());
         }
-        
+
+
+        /// <summary>
+        /// 是否为数字
+        /// </summary>
+        /// <param name="ruleBuilder"></param>
+        /// <returns></returns>
+        public static RuleBuilder<T, string> Number<T>(this RuleBuilder<T, string> ruleBuilder)
+        {
+            return ruleBuilder.SetValidator(new NumberValidator());
+        }
+
+        /// <summary>
+        /// 是否中文汉字
+        /// </summary>
+        /// <param name="ruleBuilder"></param>
+        /// <returns></returns>
+        public static RuleBuilder<T, string> Chinese<T>(this RuleBuilder<T, string> ruleBuilder)
+        {
+            return ruleBuilder.SetValidator(new ChineseValidator());
+        }
+
+        /// <summary>
+        /// 是否英文字母
+        /// </summary>
+        /// <param name="ruleBuilder"></param>
+        /// <returns></returns>
+        public static RuleBuilder<T, string> English<T>(this RuleBuilder<T, string> ruleBuilder)
+        {
+            return ruleBuilder.SetValidator(new EnglishValidator());
+        }
+
         #endregion
     }
 }
