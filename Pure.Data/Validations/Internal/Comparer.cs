@@ -43,8 +43,38 @@ namespace Pure.Data.Validations.Internal {
 				else {
 					// use long integer
 					result = ((long)value).CompareTo((long)valueToCompare);
-				}
-			}
+                }
+
+
+                //else if (value is int || value is short || value is long || value is byte)
+                //{
+                //    result = ((long)value).CompareTo((long)valueToCompare);
+
+                //}
+                //else if (value is string || value is char)
+                //{
+                //    result = ((string)value).CompareTo((string)valueToCompare);
+
+                //}
+                //else if (value is DateTime)
+                //{
+                //    result = ((DateTime)value).CompareTo((DateTime)valueToCompare);
+
+                //}
+                //else if (value is bool)
+                //{
+                //    result = ((bool)value).CompareTo((bool)valueToCompare);
+
+                //}
+                //else if (value is Guid)
+                //{
+                //    result = ((Guid)value).CompareTo((Guid)valueToCompare);
+
+                //}
+
+                //result = -1;
+
+            }
 		}
 
 		/// <summary>
