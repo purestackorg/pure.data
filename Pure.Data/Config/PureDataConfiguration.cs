@@ -959,7 +959,7 @@ namespace Pure.Data
         /// </summary>
         TitleCase = 4,
         /// <summary>
-        /// 
+        /// Project_worker
         /// </summary>
         HumanCase = 5,
         /// <summary>
@@ -967,7 +967,7 @@ namespace Pure.Data
         /// </summary>
         UpperOrigin = 6,
         /// <summary>
-        /// 去除前缀后全小写 PROJECT_WORKER
+        /// 去除前缀后全小写 project_worker
         /// </summary>
         LowerOrigin = 7,
         /// <summary>

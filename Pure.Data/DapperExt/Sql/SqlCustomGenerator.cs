@@ -9,22 +9,31 @@ namespace Pure.Data.Sql
     public interface ISqlCustomGenerator
     {
         IDapperExtensionsConfiguration Configuration { get; }
+        ISqlGenerator SqlGenerator { get; }
 
         string Count(string tableName, IDictionary<string, object> conditions, out IDictionary<string, object> realParameters);
         string Select(string tableName, string[] columnNames, IDictionary<string, object> conditions, IList<ISort> sort, out IDictionary<string, object> realParameters);
         string Insert(string tableName, IDictionary<string, object> parameters, out IDictionary<string, object> realParameters);
         string Update(string tableName, IDictionary<string, object> parameters, IDictionary<string, object> conditions, out IDictionary<string, object> realParameters);
         string Delete(string tableName, IDictionary<string, object> conditions, out IDictionary<string, object> realParameters);
+
+
+
+        string Update(string tableName, IDictionary<string, object> parameters, IPredicate conditions, out IDictionary<string, object> realParameters);
+        string Delete(string tableName, IPredicate conditions, out IDictionary<string, object> realParameters);
     }
 
     public class SqlCustomGenerator : ISqlCustomGenerator
     {
-        ISqlGenerator SqlGenerator;
+        ISqlGenerator _SqlGenerator;
         public SqlCustomGenerator(ISqlGenerator sqlBaseGen)
         {
-            SqlGenerator = sqlBaseGen;
+            _SqlGenerator = sqlBaseGen;
         }
-
+        public ISqlGenerator SqlGenerator
+        {
+            get { return _SqlGenerator; }
+        }
         public IDapperExtensionsConfiguration Configuration
         {
             get { return SqlGenerator.Configuration; }
@@ -246,9 +255,89 @@ namespace Pure.Data.Sql
 
             return sql.ToString();
         }
+
+
+
+
+
+
+        public virtual string Update(string tableName, IDictionary<string, object> parameters, IPredicate conditions, out IDictionary<string, object> realParameters)
+        {
+
+            if (parameters == null || !parameters.Any())
+            {
+                throw new ArgumentException("No parameters .");
+            }
+
+            int index = 0;
+            IDictionary<string, object> out_parameters = new Dictionary<string, object>();
+            var sb = new StringBuilder();
+
+            foreach (var item in parameters)
+            {
+                if (index > 0)
+                    sb.Append(", ");
+
+                string paramName = ParamNamePrefix + index.ToString();
+                sb.AppendFormat("{0} = {1}{2}", GetColumnName(tableName, item.Key), Configuration.Dialect.ParameterPrefix, paramName);
+                var value = item.Value;
+                out_parameters.Add(paramName, value);
+                index++;
+            }
+
+            var setSql = sb.ToString();
+
+            string whereStr = "";
+            if (conditions != null  )
+            {
+                 
+                whereStr = "WHERE " + conditions.GetSql(SqlGenerator, out_parameters); 
+            }
+
+
+
+            realParameters = out_parameters;
+
+            return string.Format("UPDATE {0} SET {1} {2}",
+                GetTableName(tableName),
+                setSql,
+                whereStr);
+
+
+
+        }
+
+        public virtual string Delete(string tableName, IPredicate conditions, out IDictionary<string, object> realParameters)
+        {
+            int index = 0;
+            IDictionary<string, object> out_parameters = new Dictionary<string, object>();
+
+            StringBuilder sql = new StringBuilder(string.Format("DELETE FROM {0}", GetTableName(tableName)));
+
+            string whereStr = "";
+
+            if (conditions != null)
+            {
+
+                whereStr = "WHERE " + conditions.GetSql(SqlGenerator, out_parameters);
+            }
+
+           
+            sql.Append(whereStr);
+            realParameters = out_parameters;
+
+            return sql.ToString();
+        }
+
+
+
+
+
+
+
         #endregion
 
 
-         
+
     }
 }

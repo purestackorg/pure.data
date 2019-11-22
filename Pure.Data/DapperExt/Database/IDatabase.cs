@@ -263,6 +263,9 @@ namespace Pure.Data
         int Count(string tableName, IDictionary<string, object> conditions);
 
         long LongCount(string tableName, IDictionary<string, object> conditions);
+
+        int Update(string tableName, IDictionary<string, object> parameters, IPredicate conditions);
+        int Delete(string tableName, IPredicate conditions);
         #endregion
 
 

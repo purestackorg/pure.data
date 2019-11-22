@@ -303,9 +303,69 @@ namespace Pure.Data
             AddClause("from", sql, parameters, " , ", prefix: "FROM ", postfix: "\n");
             return this;
         }
-         
+        private string ParamNamePrefix = "P";
+      
+        public SqlBuilder Update(string tableName, IDictionary<string, object> parameters, ConditionalModelCollections conditions)
+        {
+            if (parameters == null || !parameters.Any())
+            {
+                throw new ArgumentException("No parameters .");
+            }
 
-public SqlBuilder AddParameters(dynamic parameters)
+            int index = 0;
+            IDictionary<string, object> out_parameters = new Dictionary<string, object>();
+            var sb = new StringBuilder();
+
+            foreach (var item in parameters)
+            {
+                if (index > 0)
+                    sb.Append(", ");
+
+                string paramName = ParamNamePrefix + index.ToString();
+                sb.AppendFormat("{0} = {1}{2}", tableName.GetColumnName(  item.Key, Database), ParameterPrefix, paramName);
+                var value = item.Value;
+                out_parameters.Add(paramName, value);
+                index++;
+            }
+
+            var setSql = sb.ToString();
+
+            //string whereStr = "";
+            //if (conditions != null)
+            //{
+            //    whereStr = "WHERE " + conditions.GetSql(SqlGenerator, out_parameters);
+            //    conditions.ConditionalModelToSql();
+            //}
+
+
+             
+            string sql =  string.Format("UPDATE {0} SET {1} ",
+                tableName.GetTableName(Database),
+                setSql);
+
+            AddClause("update", sql, out_parameters, " ", prefix: "", postfix: "\n");
+
+            return Where(  conditions, tableName);
+            
+        }
+        public SqlBuilder Delete(string tableName,  ConditionalModelCollections conditions)
+        {
+            int index = 0;
+           // IDictionary<string, object> out_parameters = new Dictionary<string, object>();
+
+            StringBuilder sql = new StringBuilder(string.Format("DELETE FROM {0}", tableName.GetTableName(Database)));
+
+          
+
+            string sql2 = sql.ToString();
+
+            AddClause("delete", sql2, null, " ", prefix: "", postfix: "\n");
+
+            return Where(conditions , tableName);
+
+        }
+
+        public SqlBuilder AddParameters(dynamic parameters)
         {
             AddClause("--parameters", "", parameters, "");
             return this;
@@ -329,21 +389,21 @@ public SqlBuilder AddParameters(dynamic parameters)
             return this;
         }
 
-        public SqlBuilder Where( ConditionalModelCollections models)
+        public SqlBuilder Where(  ConditionalModelCollections models, string table)
         {
             if (models == null  )
             {
                 return this;
             }
-            return Where(models.conditions);
+            return Where(  models.conditions, table);
         }
-        public SqlBuilder Where(List<IConditionalModel> models)
+        public SqlBuilder Where(  List<IConditionalModel> models, string table)
         {
             if (models ==null || models.Count == 0)
             {
                 return this;
             }
-            var conSql = ConditionalModelToSql(Database, models);
+            var conSql = ConditionalModelToSql(  Database,table,  models);
             if (conSql.Key == null || conSql.Key == "")
             {
                 return this;
@@ -354,7 +414,7 @@ public SqlBuilder AddParameters(dynamic parameters)
             return this;
         }
 
-        private KeyValuePair<string, DynamicParameters> ConditionalModelToSql(IDatabase Database, List<IConditionalModel> models, int beginIndex = 0)
+        public KeyValuePair<string, DynamicParameters> ConditionalModelToSql(IDatabase Database, string table, List<IConditionalModel> models, int beginIndex = 0)
         {
             DynamicParameters parameters = new DynamicParameters();
             if (models == null || models.Count == 0) return new KeyValuePair<string, DynamicParameters>();
@@ -380,74 +440,74 @@ public SqlBuilder AddParameters(dynamic parameters)
                     switch (item.ConditionalType)
                     {
                         case ConditionalType.Equal:
-                            builder.AppendFormat(temp, type, item.FieldName.ToSqlFilter(), "=", parameterName);
+                            builder.AppendFormat(temp, type, item.FieldName.ToSqlFilter(table, Database), "=", parameterName);
                             parameters.Add(parameterName, GetFieldValue(item));
                             break;
                         case ConditionalType.Like:
-                            builder.AppendFormat(temp, type, item.FieldName.ToSqlFilter(), "LIKE", parameterName);
+                            builder.AppendFormat(temp, type, item.FieldName.ToSqlFilter(table, Database), "LIKE", parameterName);
                             parameters.Add(parameterName, "%" + item.FieldValue + "%");
                             break;
                         case ConditionalType.GreaterThan:
-                            builder.AppendFormat(temp, type, item.FieldName.ToSqlFilter(), ">", parameterName);
+                            builder.AppendFormat(temp, type, item.FieldName.ToSqlFilter(table, Database), ">", parameterName);
                             parameters.Add(parameterName, GetFieldValue(item));
                             break;
                         case ConditionalType.GreaterThanOrEqual:
-                            builder.AppendFormat(temp, type, item.FieldName.ToSqlFilter(), ">=", parameterName);
+                            builder.AppendFormat(temp, type, item.FieldName.ToSqlFilter(table, Database), ">=", parameterName);
                             parameters.Add(parameterName, GetFieldValue(item));
                             break;
                         case ConditionalType.LessThan:
-                            builder.AppendFormat(temp, type, item.FieldName.ToSqlFilter(), "<", parameterName);
+                            builder.AppendFormat(temp, type, item.FieldName.ToSqlFilter(table, Database), "<", parameterName);
                             parameters.Add(parameterName, GetFieldValue(item));
                             break;
                         case ConditionalType.LessThanOrEqual:
-                            builder.AppendFormat(temp, type, item.FieldName.ToSqlFilter(), "<=", parameterName);
+                            builder.AppendFormat(temp, type, item.FieldName.ToSqlFilter(table, Database), "<=", parameterName);
                             parameters.Add(parameterName, GetFieldValue(item));
                             break;
                         case ConditionalType.In:
                             if (item.FieldValue == null) item.FieldValue = string.Empty;
-                            var inValue1 = ("(" + item.FieldValue.Split(',').ToJoinSqlInVals() + ")");
-                            builder.AppendFormat(temp, type, item.FieldName.ToSqlFilter(), "IN", inValue1);
+                            var inValue1 = ("(" + item.FieldValue.Split(',').ToJoinSqlInVals(table, Database) + ")");
+                            builder.AppendFormat(temp, type, item.FieldName.ToSqlFilter(table, Database), "IN", inValue1);
                             parameters.Add(parameterName, item.FieldValue);
                             break;
                         case ConditionalType.NotIn:
                             if (item.FieldValue == null) item.FieldValue = string.Empty;
-                            var inValue2 = ("(" + item.FieldValue.Split(',').ToJoinSqlInVals() + ")");
-                            builder.AppendFormat(temp, type, item.FieldName.ToSqlFilter(), "NOT IN", inValue2);
+                            var inValue2 = ("(" + item.FieldValue.Split(',').ToJoinSqlInVals(table, Database) + ")");
+                            builder.AppendFormat(temp, type, item.FieldName.ToSqlFilter(table, Database), "NOT IN", inValue2);
                             parameters.Add(parameterName, item.FieldValue);
                             break;
                         case ConditionalType.LikeLeft:
-                            builder.AppendFormat(temp, type, item.FieldName.ToSqlFilter(), "LIKE", parameterName);
+                            builder.AppendFormat(temp, type, item.FieldName.ToSqlFilter(table, Database), "LIKE", parameterName);
                             parameters.Add(parameterName, item.FieldValue + "%");
                             break;
                         case ConditionalType.NoLike:
-                            builder.AppendFormat(temp, type, item.FieldName.ToSqlFilter(), " NOT LIKE", parameterName);
+                            builder.AppendFormat(temp, type, item.FieldName.ToSqlFilter(table, Database), " NOT LIKE", parameterName);
                             parameters.Add(parameterName, item.FieldValue + "%");
                             break;
                         case ConditionalType.LikeRight:
-                            builder.AppendFormat(temp, type, item.FieldName.ToSqlFilter(), "LIKE", parameterName);
+                            builder.AppendFormat(temp, type, item.FieldName.ToSqlFilter(table, Database), "LIKE", parameterName);
                             parameters.Add(parameterName, "%" + item.FieldValue);
                             break;
                         case ConditionalType.NoEqual:
-                            builder.AppendFormat(temp, type, item.FieldName.ToSqlFilter(), "<>", parameterName);
+                            builder.AppendFormat(temp, type, item.FieldName.ToSqlFilter(table, Database), "<>", parameterName);
                             parameters.Add(parameterName, item.FieldValue);
                             break;
                         case ConditionalType.IsNullOrEmpty:
-                            builder.AppendFormat("{0} ({1}) OR ({2}) ", type, item.FieldName.ToSqlFilter() + " IS NULL ", item.FieldName.ToSqlFilter() + " = '' ");
+                            builder.AppendFormat("{0} ({1}) OR ({2}) ", type, item.FieldName.ToSqlFilter(table, Database) + " IS NULL ", item.FieldName.ToSqlFilter(table, Database) + " = '' ");
                             parameters.Add(parameterName, item.FieldValue);
                             break;
                         case ConditionalType.IsNot:
                             if (item.FieldValue == null)
                             {
-                                builder.AppendFormat(temp, type, item.FieldName.ToSqlFilter(), " IS NOT ", "NULL");
+                                builder.AppendFormat(temp, type, item.FieldName.ToSqlFilter(table, Database), " IS NOT ", "NULL");
                             }
                             else
                             {
-                                builder.AppendFormat(temp, type, item.FieldName.ToSqlFilter(), "<>", parameterName);
+                                builder.AppendFormat(temp, type, item.FieldName.ToSqlFilter(table, Database), "<>", parameterName);
                                 parameters.Add(parameterName, item.FieldValue);
                             }
                             break;
                         case ConditionalType.Regex:
-                            string regexStr =Database.SqlDialectProvider.ConvertRegexStr(item.FieldName.ToSqlFilter(), item.FieldValue);
+                            string regexStr =Database.SqlDialectProvider.ConvertRegexStr(item.FieldName.ToSqlFilter(table, Database), item.FieldValue);
                             builder.AppendFormat(temp, type, regexStr, "", "");
 
                             break;
@@ -476,7 +536,7 @@ public SqlBuilder AddParameters(dynamic parameters)
                             }
                             List<IConditionalModel> conModels = new List<IConditionalModel>();
                             conModels.Add(con.Value);
-                            var childSqlInfo = ConditionalModelToSql( Database, conModels, 1000 * (1 + index) + models.IndexOf(item));
+                            var childSqlInfo = ConditionalModelToSql( Database,table ,  conModels, 1000 * (1 + index) + models.IndexOf(item));
                             if (!isFirst)
                             {
 
@@ -698,6 +758,162 @@ public SqlBuilder AddParameters(dynamic parameters)
             conditions.Add(c);
 
         }
+
+        //private static object GetFieldValue(ConditionalModel item)
+        //{
+        //    if (item.FieldValueConvertFunc != null)
+        //        return item.FieldValueConvertFunc(item.FieldValue);
+        //    else
+        //        return item.FieldValue;
+        //}
+        //public KeyValuePair<string, DynamicParameters> ConditionalModelToSql(IDatabase Database)
+        //{
+        //    var models = this.conditions;
+        //    var ParameterPrefix = Database.SqlGenerator.Configuration.Dialect.ParameterPrefix.ToString();
+        //    DynamicParameters parameters = new DynamicParameters();
+        //    if (models == null || models.Count == 0) return new KeyValuePair<string, DynamicParameters>();
+        //    StringBuilder builder = new StringBuilder();
+
+        //    foreach (var model in models)
+        //    {
+        //        if (model is ConditionalModel)
+        //        {
+        //            var item = model as ConditionalModel;
+        //            var index = models.IndexOf(item) + beginIndex;
+        //            var type = index == 0 ? "" : "AND";
+        //            if (beginIndex > 0)
+        //            {
+        //                type = null;
+        //            }
+        //            string temp = " {0} {1} {2} {3} ";
+        //            string parameterName = string.Format("{0}P{2}_{1}", ParameterPrefix, item.FieldName, index);
+        //            if (parameterName.Contains("."))
+        //            {
+        //                parameterName = parameterName.Replace(".", "_");
+        //            }
+        //            switch (item.ConditionalType)
+        //            {
+        //                case ConditionalType.Equal:
+        //                    builder.AppendFormat(temp, type, item.FieldName.ToSqlFilter(), "=", parameterName);
+        //                    parameters.Add(parameterName, GetFieldValue(item));
+        //                    break;
+        //                case ConditionalType.Like:
+        //                    builder.AppendFormat(temp, type, item.FieldName.ToSqlFilter(), "LIKE", parameterName);
+        //                    parameters.Add(parameterName, "%" + item.FieldValue + "%");
+        //                    break;
+        //                case ConditionalType.GreaterThan:
+        //                    builder.AppendFormat(temp, type, item.FieldName.ToSqlFilter(), ">", parameterName);
+        //                    parameters.Add(parameterName, GetFieldValue(item));
+        //                    break;
+        //                case ConditionalType.GreaterThanOrEqual:
+        //                    builder.AppendFormat(temp, type, item.FieldName.ToSqlFilter(), ">=", parameterName);
+        //                    parameters.Add(parameterName, GetFieldValue(item));
+        //                    break;
+        //                case ConditionalType.LessThan:
+        //                    builder.AppendFormat(temp, type, item.FieldName.ToSqlFilter(), "<", parameterName);
+        //                    parameters.Add(parameterName, GetFieldValue(item));
+        //                    break;
+        //                case ConditionalType.LessThanOrEqual:
+        //                    builder.AppendFormat(temp, type, item.FieldName.ToSqlFilter(), "<=", parameterName);
+        //                    parameters.Add(parameterName, GetFieldValue(item));
+        //                    break;
+        //                case ConditionalType.In:
+        //                    if (item.FieldValue == null) item.FieldValue = string.Empty;
+        //                    var inValue1 = ("(" + item.FieldValue.Split(',').ToJoinSqlInVals() + ")");
+        //                    builder.AppendFormat(temp, type, item.FieldName.ToSqlFilter(), "IN", inValue1);
+        //                    parameters.Add(parameterName, item.FieldValue);
+        //                    break;
+        //                case ConditionalType.NotIn:
+        //                    if (item.FieldValue == null) item.FieldValue = string.Empty;
+        //                    var inValue2 = ("(" + item.FieldValue.Split(',').ToJoinSqlInVals() + ")");
+        //                    builder.AppendFormat(temp, type, item.FieldName.ToSqlFilter(), "NOT IN", inValue2);
+        //                    parameters.Add(parameterName, item.FieldValue);
+        //                    break;
+        //                case ConditionalType.LikeLeft:
+        //                    builder.AppendFormat(temp, type, item.FieldName.ToSqlFilter(), "LIKE", parameterName);
+        //                    parameters.Add(parameterName, item.FieldValue + "%");
+        //                    break;
+        //                case ConditionalType.NoLike:
+        //                    builder.AppendFormat(temp, type, item.FieldName.ToSqlFilter(), " NOT LIKE", parameterName);
+        //                    parameters.Add(parameterName, item.FieldValue + "%");
+        //                    break;
+        //                case ConditionalType.LikeRight:
+        //                    builder.AppendFormat(temp, type, item.FieldName.ToSqlFilter(), "LIKE", parameterName);
+        //                    parameters.Add(parameterName, "%" + item.FieldValue);
+        //                    break;
+        //                case ConditionalType.NoEqual:
+        //                    builder.AppendFormat(temp, type, item.FieldName.ToSqlFilter(), "<>", parameterName);
+        //                    parameters.Add(parameterName, item.FieldValue);
+        //                    break;
+        //                case ConditionalType.IsNullOrEmpty:
+        //                    builder.AppendFormat("{0} ({1}) OR ({2}) ", type, item.FieldName.ToSqlFilter() + " IS NULL ", item.FieldName.ToSqlFilter() + " = '' ");
+        //                    parameters.Add(parameterName, item.FieldValue);
+        //                    break;
+        //                case ConditionalType.IsNot:
+        //                    if (item.FieldValue == null)
+        //                    {
+        //                        builder.AppendFormat(temp, type, item.FieldName.ToSqlFilter(), " IS NOT ", "NULL");
+        //                    }
+        //                    else
+        //                    {
+        //                        builder.AppendFormat(temp, type, item.FieldName.ToSqlFilter(), "<>", parameterName);
+        //                        parameters.Add(parameterName, item.FieldValue);
+        //                    }
+        //                    break;
+        //                case ConditionalType.Regex:
+        //                    string regexStr = Database.SqlDialectProvider.ConvertRegexStr(item.FieldName.ToSqlFilter(), item.FieldValue);
+        //                    builder.AppendFormat(temp, type, regexStr, "", "");
+
+        //                    break;
+        //                default:
+        //                    break;
+        //            }
+        //        }
+        //        else
+        //        {
+        //            var item = model as ConditionalCollections;
+        //            if (item != null && item.ConditionalList != null)
+        //            {
+        //                foreach (var con in item.ConditionalList)
+        //                {
+        //                    var index = item.ConditionalList.IndexOf(con);
+        //                    var isFirst = index == 0;
+        //                    var isLast = index == (item.ConditionalList.Count - 1);
+        //                    if (models.IndexOf(item) == 0 && index == 0 && beginIndex == 0)
+        //                    {
+        //                        builder.AppendFormat(" ( ");
+
+        //                    }
+        //                    else if (isFirst)
+        //                    {
+        //                        builder.AppendFormat(" {0} ( ", con.Key.ToString().ToUpper());
+        //                    }
+        //                    List<IConditionalModel> conModels = new List<IConditionalModel>();
+        //                    conModels.Add(con.Value);
+        //                    var childSqlInfo = this.ConditionalModelToSql(Database, conModels, 1000 * (1 + index) + models.IndexOf(item));
+        //                    if (!isFirst)
+        //                    {
+
+        //                        builder.AppendFormat(" {0} ", con.Key.ToString().ToUpper());
+        //                    }
+        //                    builder.Append(childSqlInfo.Key);
+        //                    parameters.AddDynamicParams(childSqlInfo.Value);
+
+        //                    if (isLast)
+        //                    {
+        //                        builder.Append(" ) ");
+        //                    }
+        //                    else
+        //                    {
+
+        //                    }
+        //                }
+        //            }
+        //        }
+        //    }
+        //    return new KeyValuePair<string, DynamicParameters>(builder.ToString(), parameters);
+        //}
+
     }
     public class ConditionalModel : IConditionalModel
     {
@@ -972,23 +1188,23 @@ public SqlBuilder AddParameters(dynamic parameters)
     }
 
 
-    internal static class DbExtensions
+    public static class DbExtensions
     {
-        public static string ToJoinSqlInVals<T>(this T[] array)
+        public static string ToJoinSqlInVals<T>(this T[] array, string table, IDatabase Database)
         {
             if (array == null || array.Length == 0)
             {
-                return ToSqlValue(string.Empty);
+                return ToSqlValue(string.Empty, table , Database);
             }
             else
             {
-                return string.Join(",", array.Where(c => c != null).Select(it => (it + "").ToSqlValue()));
+                return string.Join(",", array.Where(c => c != null).Select(it => (it + "").ToSqlValue(table, Database)));
             }
         }
 
-        public static string ToSqlValue(this string value)
+        public static string ToSqlValue(this string value, string table, IDatabase Database)
         {
-            return string.Format("'{0}'", value.ToSqlFilter());
+            return string.Format("'{0}'", value.ToSqlFilter(table, Database));
         }
 
         /// <summary>
@@ -996,13 +1212,25 @@ public SqlBuilder AddParameters(dynamic parameters)
         /// </summary>
         /// <param name="value"></param>
         /// <returns></returns>
-        public static string ToSqlFilter(this string value)
+        public static string ToSqlFilter(this string value, string table, IDatabase Database )
         {
             if (!value.IsNullOrEmpty())
             {
                 value = value.Replace("'", "''");
+               
             }
             return value;
+        }
+
+
+        public static string GetTableName(this string name, IDatabase Database)
+        {
+            return Database.SqlGenerator.GetTableName(name);
+        }
+
+        public static string GetColumnName(this string tableName, string name,  IDatabase Database, string alias = null)
+        {
+            return Database.SqlGenerator.Configuration.Dialect.GetColumnName(GetTableName(tableName, Database), name, alias);
         }
     }
 

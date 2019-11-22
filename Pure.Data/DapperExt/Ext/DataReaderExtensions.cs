@@ -13,8 +13,12 @@ namespace Pure.Data
     /// </summary>
     public static class DataReaderExtensions
     {
-        public static string FormatColumnName(this string str)
+        public static string FormatColumnName(this string str, IDatabase database)
         {
+            if (database!= null && database.Config !=null )
+            {
+                return NameConvertHelper.ConvertNameCase(database.Config.CodeGenClassNameMode, str);
+            }
             return str;//.ToUpper()
         }
 
@@ -72,7 +76,7 @@ namespace Pure.Data
         /// </summary>
         /// <param name="reader"></param>
         /// <returns></returns>
-        public static DataTable ToDataTableWithRowDelegate(this IDataReader reader, bool autoClose = true)
+        public static DataTable ToDataTableWithRowDelegate(this IDataReader reader, bool autoClose = true, IDatabase database = null)
         {
             try
             {
@@ -84,7 +88,7 @@ namespace Pure.Data
                         int intFieldCount = reader.FieldCount;
                         for (int intCounter = 0; intCounter < intFieldCount; ++intCounter)
                         {
-                            objDataTable.Columns.Add(reader.GetName(intCounter).FormatColumnName(), reader.GetFieldType(intCounter));
+                            objDataTable.Columns.Add(reader.GetName(intCounter).FormatColumnName(database), reader.GetFieldType(intCounter));
                         }
                         objDataTable.BeginLoadData();
                         object[] objValues = new object[intFieldCount];
@@ -106,7 +110,7 @@ namespace Pure.Data
                     int intFieldCount = reader.FieldCount;
                     for (int intCounter = 0; intCounter < intFieldCount; ++intCounter)
                     {
-                        objDataTable.Columns.Add(reader.GetName(intCounter).FormatColumnName(), reader.GetFieldType(intCounter));
+                        objDataTable.Columns.Add(reader.GetName(intCounter).FormatColumnName(database), reader.GetFieldType(intCounter));
                     }
                     objDataTable.BeginLoadData();
                     object[] objValues = new object[intFieldCount];
@@ -214,7 +218,7 @@ namespace Pure.Data
             }
 
         }
-        public static T ToModel<T>(this IDataReader dr, bool autoClose = true)
+        public static T ToModel<T>(this IDataReader dr, bool autoClose = true, IDatabase database = null)
         {
             try
             {
@@ -222,7 +226,7 @@ namespace Pure.Data
                 var type = typeof(T);
                 if (type == typeof(object) || type == typeof(Object) || type == typeof(ExpandoObject))
                 {
-                    return ToExpandoObject(dr, autoClose);
+                    return ToExpandoObject(dr, autoClose, database);
                 }
 
                 if (autoClose)
@@ -327,14 +331,14 @@ namespace Pure.Data
 
 
 
-        public static List<T> ToList<T>(this IDataReader dr, bool autoClose = true)
+        public static List<T> ToList<T>(this IDataReader dr, bool autoClose = true, IDatabase database = null)
         {
             try
             {
                 var type = typeof(T);
                 if (type == typeof(object) || type == typeof(Object) || type == typeof(ExpandoObject))
                 {
-                    return ToExpandoObjects(dr, autoClose) as List<T>;
+                    return ToExpandoObjects(dr, autoClose, database) as List<T>;
                 }
 
 
@@ -441,7 +445,7 @@ namespace Pure.Data
 
         }
 
-        public static IDictionary<string, object> ToDictionary(this IDataReader @this, bool autoClose = true)
+        public static IDictionary<string, object> ToDictionary(this IDataReader @this, bool autoClose = true, IDatabase database = null)
         {
             IDictionary<string, object> expandoDict = new Dictionary<string, object>();
             try
@@ -460,7 +464,7 @@ namespace Pure.Data
 
                             Enumerable.Range(0, @this.FieldCount)
                                .ToList()
-                               .ForEach(x => expandoDict.Add(columnNames[x].Value.FormatColumnName(), @this[x]));
+                               .ForEach(x => expandoDict.Add(columnNames[x].Value.FormatColumnName(database), @this[x]));
 
                             break;
                         }
@@ -482,7 +486,7 @@ namespace Pure.Data
 
                         Enumerable.Range(0, @this.FieldCount)
                            .ToList()
-                           .ForEach(x => expandoDict.Add(columnNames[x].Value.FormatColumnName(), @this[x]));
+                           .ForEach(x => expandoDict.Add(columnNames[x].Value.FormatColumnName(database), @this[x]));
 
                         break;
                     }
@@ -507,7 +511,7 @@ namespace Pure.Data
         /// </summary>
         /// <param name="this">The @this to act on.</param>
         /// <returns>@this as a dynamic.</returns>
-        public static dynamic ToExpandoObject(this IDataReader @this, bool autoClose = true)
+        public static dynamic ToExpandoObject(this IDataReader @this, bool autoClose = true, IDatabase database = null)
         {
             dynamic entity = new ExpandoObject();
             try
@@ -527,7 +531,7 @@ namespace Pure.Data
 
                             Enumerable.Range(0, @this.FieldCount)
                                .ToList()
-                               .ForEach(x => expandoDict.Add(columnNames[x].Value.FormatColumnName(), @this[x]));
+                               .ForEach(x => expandoDict.Add(columnNames[x].Value.FormatColumnName(database), @this[x]));
 
                             break;
                         }
@@ -550,7 +554,7 @@ namespace Pure.Data
 
                         Enumerable.Range(0, @this.FieldCount)
                            .ToList()
-                           .ForEach(x => expandoDict.Add(columnNames[x].Value.FormatColumnName(), @this[x]));
+                           .ForEach(x => expandoDict.Add(columnNames[x].Value.FormatColumnName(database), @this[x]));
 
                         break;
                     }
@@ -575,7 +579,7 @@ namespace Pure.Data
         /// </summary>
         /// <param name="this">The @this to act on.</param>
         /// <returns>@this as an IEnumerable&lt;dynamic&gt;</returns>
-        public static IEnumerable<dynamic> ToExpandoObjects(this IDataReader @this, bool autoClose = true)
+        public static IEnumerable<dynamic> ToExpandoObjects(this IDataReader @this, bool autoClose = true, IDatabase database = null)
         {
             try
             {
@@ -597,7 +601,7 @@ namespace Pure.Data
 
                             Enumerable.Range(0, @this.FieldCount)
                                 .ToList()
-                                .ForEach(x => expandoDict.Add(columnNames[x].Value.FormatColumnName(), @this[x]));
+                                .ForEach(x => expandoDict.Add(columnNames[x].Value.FormatColumnName(database), @this[x]));
 
                             list.Add(entity);
                         }
@@ -621,7 +625,7 @@ namespace Pure.Data
 
                         Enumerable.Range(0, @this.FieldCount)
                             .ToList()
-                            .ForEach(x => expandoDict.Add(columnNames[x].Value.FormatColumnName(), @this[x]));
+                            .ForEach(x => expandoDict.Add(columnNames[x].Value.FormatColumnName(database), @this[x]));
 
                         list.Add(entity);
                     }

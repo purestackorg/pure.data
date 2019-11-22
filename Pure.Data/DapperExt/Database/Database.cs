@@ -660,7 +660,7 @@ namespace Pure.Data
                 var result = ExecuteReader(sql, param, transaction, commandTimeout, commandType);
                 if (result != null)
                 {
-                    List<T> data = result.ToList<T>(true);
+                    List<T> data = result.ToList<T>(true, this);
 
                     return data;
                 }
@@ -718,7 +718,7 @@ namespace Pure.Data
                 if (result != null)
                 {
 
-                    T data = result.ToModel<T>(true);
+                    T data = result.ToModel<T>(true, this);
 
                     return data;
                 }
@@ -803,7 +803,7 @@ namespace Pure.Data
                 var result = ExecuteReader(sql, param, transaction, commandTimeout, commandType);
                 if (result != null)
                 {
-                    DataTable data = result.ToDataTableWithRowDelegate(true);
+                    DataTable data = result.ToDataTableWithRowDelegate(true, this);
 
                     return data;
                 }
@@ -888,7 +888,7 @@ namespace Pure.Data
                 var result = ExecuteReader(sql, param, transaction, commandTimeout, commandType);
                 if (result != null)
                 {
-                    var data = result.ToDictionary(true);
+                    var data = result.ToDictionary(true, this);
 
                     return data;
                 }
@@ -915,7 +915,7 @@ namespace Pure.Data
                 var result = ExecuteReader(sql, param, transaction, commandTimeout, commandType);
                 if (result != null)
                 {
-                    dynamic data = result.ToExpandoObject(true);
+                    dynamic data = result.ToExpandoObject(true, this);
 
                     return data;
                 }
@@ -943,7 +943,7 @@ namespace Pure.Data
                 var result = ExecuteReader(sql, param, transaction, commandTimeout, commandType);
                 if (result != null)
                 {
-                    IEnumerable<dynamic> data = result.ToExpandoObjects(true);
+                    IEnumerable<dynamic> data = result.ToExpandoObjects(true, this);
 
                     return data;
                 }
@@ -2269,6 +2269,27 @@ namespace Pure.Data
             string sql = SqlGenerator.SqlCustomGenerator.Count(tableName, conditions, out realParameters);
 
             return this.ExecuteScalar<long>(sql, realParameters);
+        }
+
+
+        public int Update(string tableName, IDictionary<string, object> parameters, IPredicate conditions)
+        {
+            if (!OnUpdatingInternal(new UpdateContext(new { tableName = tableName, parameters = parameters, conditions = conditions })))
+                return 0;
+            IDictionary<string, object> realParameters = new Dictionary<string, object>();
+            string sql = SqlGenerator.SqlCustomGenerator.Update(tableName, parameters, conditions, out realParameters);
+
+            return this.Execute(sql, realParameters);
+        }
+
+        public int Delete(string tableName, IPredicate conditions)
+        {
+            if (!OnDeletingInternal(new DeleteContext(new { tableName = tableName, conditions = conditions })))
+                return 0;
+            IDictionary<string, object> realParameters = new Dictionary<string, object>();
+            string sql = SqlGenerator.SqlCustomGenerator.Delete(tableName, conditions, out realParameters);
+
+            return this.Execute(sql, realParameters);
         }
         #endregion
 

@@ -1425,7 +1425,7 @@ namespace FluentExpressionSQL
                 var result = ExecuteReader();
                 if (result != null)
                 {
-                    List<T> data = result.ToList<T>(true);
+                    List<T> data = result.ToList<T>(true, Database);
 
                     return data;
                 }
@@ -1495,7 +1495,7 @@ namespace FluentExpressionSQL
                 if (result != null)
                 {
 
-                    T data = result.ToModel<T>(true);
+                    T data = result.ToModel<T>(true, Database);
 
                     return data;
                 }
@@ -1689,7 +1689,7 @@ namespace FluentExpressionSQL
                 var result = ExecuteReader();
                 if (result != null)
                 {
-                    dynamic data = result.ToExpandoObject(true);
+                    dynamic data = result.ToExpandoObject(true, Database);
 
                     return data;
                 }
@@ -1722,7 +1722,7 @@ namespace FluentExpressionSQL
                 var result = ExecuteReader();
                 if (result != null)
                 {
-                    IEnumerable<dynamic> data = result.ToExpandoObjects(true);
+                    IEnumerable<dynamic> data = result.ToExpandoObjects(true, Database);
 
                     return data;
                 }
@@ -1832,7 +1832,7 @@ namespace FluentExpressionSQL
                 var result = await ExecuteReaderAsync();
                 if (result != null)
                 {
-                    List<T> data = result.ToList<T>(true);
+                    List<T> data = result.ToList<T>(true, Database);
 
                     return data;
                 }
@@ -1902,7 +1902,7 @@ namespace FluentExpressionSQL
                 if (result != null)
                 {
 
-                    T data = result.ToModel<T>(true);
+                    T data = result.ToModel<T>(true, Database);
 
                     return data;
                 }
@@ -2004,7 +2004,7 @@ namespace FluentExpressionSQL
                 var result = await ExecuteReaderAsync();
                 if (result != null)
                 {
-                    DataTable data = result.ToDataTableWithRowDelegate(true);
+                    DataTable data = result.ToDataTableWithRowDelegate(true, Database);
 
                     return data;
                 }
@@ -2104,7 +2104,7 @@ namespace FluentExpressionSQL
                 var result = await ExecuteReaderAsync();
                 if (result != null)
                 {
-                    dynamic data = result.ToExpandoObject(true);
+                    dynamic data = result.ToExpandoObject(true, Database);
 
                     return data;
                 }
@@ -2137,7 +2137,7 @@ namespace FluentExpressionSQL
                 var result = await ExecuteReaderAsync();
                 if (result != null)
                 {
-                    IEnumerable<dynamic> data = result.ToExpandoObjects(true);
+                    IEnumerable<dynamic> data = result.ToExpandoObjects(true, Database);
 
                     return data;
                 }

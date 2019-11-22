@@ -91,7 +91,7 @@ namespace Pure.Data
                 for (int i = 0; i < dt.Columns.Count; i++)
                 {
                     string key = dt.Columns[i].ColumnName;
-                    ht[key.FormatColumnName()] = dr[key];
+                    ht[key.FormatColumnName(null)] = dr[key];
                 }
             }
             return ht;

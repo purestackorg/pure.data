@@ -94,7 +94,7 @@ namespace Pure.Data
                 var result = await ExecuteReaderAsync(db, sql, param, transaction, commandTimeout, commandType);
                 if (result != null)
                 {
-                    List<T> data = result.ToList<T>(true);
+                    List<T> data = result.ToList<T>(true, db);
 
                     return data;
                 }
@@ -150,7 +150,7 @@ namespace Pure.Data
                 if (result != null)
                 {
 
-                    T data = result.ToModel<T>(true);
+                    T data = result.ToModel<T>(true, db);
 
                     return data;
                 }
@@ -233,7 +233,7 @@ namespace Pure.Data
                 var result = await ExecuteReaderAsync(db, sql, param, transaction, commandTimeout, commandType);
                 if (result != null)
                 {
-                    DataTable data = result.ToDataTableWithRowDelegate(true);
+                    DataTable data = result.ToDataTableWithRowDelegate(true, db);
 
                     return data;
                 }
@@ -314,7 +314,7 @@ namespace Pure.Data
                 var result = await ExecuteReaderAsync(db, sql, param, transaction, commandTimeout, commandType);
                 if (result != null)
                 {
-                    dynamic data = result.ToExpandoObject(true);
+                    dynamic data = result.ToExpandoObject(true, db);
 
                     return data;
                 }
@@ -341,7 +341,7 @@ namespace Pure.Data
                 var result = await ExecuteReaderAsync(db, sql, param, transaction, commandTimeout, commandType);
                 if (result != null)
                 {
-                    IEnumerable<dynamic> data = result.ToExpandoObjects(true);
+                    IEnumerable<dynamic> data = result.ToExpandoObjects(true, db);
 
                     return data;
                 }
@@ -441,8 +441,26 @@ namespace Pure.Data
 
             return await db.ExecuteScalarAsync<long>(sql, realParameters);
         }
-   
-#endregion
+        public static async Task<int> UpdateAsync(this IDatabase db, string tableName, IDictionary<string, object> parameters, IPredicate conditions)
+        {
+            //if (!OnUpdatingInternal(new UpdateContext(new { tableName = tableName, parameters = parameters, conditions = conditions })))
+            //    return 0;
+            IDictionary<string, object> realParameters = new Dictionary<string, object>();
+            string sql = db.SqlGenerator.SqlCustomGenerator.Update(tableName, parameters, conditions, out realParameters);
+
+            return await db.ExecuteAsync(sql, realParameters);
+        }
+
+        public static async Task<int> DeleteAsync(this IDatabase db, string tableName, IPredicate conditions)
+        {
+            //if (!OnDeletingInternal(new DeleteContext(new { tableName = tableName, conditions = conditions })))
+            //    return 0;
+            IDictionary<string, object> realParameters = new Dictionary<string, object>();
+            string sql = db.SqlGenerator.SqlCustomGenerator.Delete(tableName, conditions, out realParameters);
+
+            return await db.ExecuteAsync(sql, realParameters);
+        }
+        #endregion
 
 
 

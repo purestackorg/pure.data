@@ -973,7 +973,7 @@ namespace Pure.Data.SqlMap
                     var result = ExecuteReader(transaction, commandTimeout, commandType);
                     if (result != null)
                     {
-                        T data = result.ToModel<T>(true);
+                        T data = result.ToModel<T>(true, database);
                         return data;
                     }
                     else
@@ -1206,7 +1206,7 @@ namespace Pure.Data.SqlMap
                     var result = ExecuteReader(transaction, commandTimeout, commandType);
                     if (result != null)
                     {
-                        dynamic data = result.ToExpandoObject(true);
+                        dynamic data = result.ToExpandoObject(true, database);
                         return data;
                     }
                     else
@@ -1249,7 +1249,7 @@ namespace Pure.Data.SqlMap
                     var result = ExecuteReader(transaction, commandTimeout, commandType);
                     if (result != null)
                     {
-                        IEnumerable<dynamic> data = result.ToExpandoObjects(true);
+                        IEnumerable<dynamic> data = result.ToExpandoObjects(true, database);
                         return data;
                     }
                     else
@@ -1552,7 +1552,7 @@ namespace Pure.Data.SqlMap
                     var result = await ExecuteReaderAsync(transaction, commandTimeout, commandType);
                     if (result != null)
                     {
-                        T data = result.ToModel<T>(true);
+                        T data = result.ToModel<T>(true, database);
                         return data;
                     }
                     else
@@ -1673,7 +1673,7 @@ namespace Pure.Data.SqlMap
                     var result = await ExecuteReaderAsync(transaction, commandTimeout, commandType);
                     if (result != null)
                     {
-                        DataTable data = result.ToDataTableWithRowDelegate(true);
+                        DataTable data = result.ToDataTableWithRowDelegate(true, database);
                          
                         return data;
                     }
@@ -1790,7 +1790,7 @@ namespace Pure.Data.SqlMap
                     var result = await ExecuteReaderAsync(transaction, commandTimeout, commandType);
                     if (result != null)
                     {
-                        dynamic data = result.ToExpandoObject(true);
+                        dynamic data = result.ToExpandoObject(true, database);
                         return data;
                     }
                     else
@@ -1833,7 +1833,7 @@ namespace Pure.Data.SqlMap
                     var result = await ExecuteReaderAsync(transaction, commandTimeout, commandType);
                     if (result != null)
                     {
-                        IEnumerable<dynamic> data = result.ToExpandoObjects(true);
+                        IEnumerable<dynamic> data = result.ToExpandoObjects(true, database);
                         return data;
                     }
                     else
