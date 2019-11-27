@@ -1,5 +1,6 @@
-﻿using Dapper; 
+﻿ 
 using Oracle.ManagedDataAccess.Client;
+using Pure.Data;
 using System.Collections.Generic;
 using System.Data;
 

@@ -118,7 +118,7 @@ namespace Pure.Data
             {
                 return string.Empty;
             }
-            return string.Join(", ", mapper.Properties.Select(p => string.Format("{0}", sqlProvider.FormatValue(p.PropertyInfo.GetValue(obj), p.PropertyInfo.PropertyType))).ToArray());
+            return string.Join(", ", mapper.Properties.Select(p => string.Format("{0}", sqlProvider.FormatValue(p.PropertyInfo.GetValue(obj), true, p.PropertyInfo.PropertyType))).ToArray());
         }
 
 

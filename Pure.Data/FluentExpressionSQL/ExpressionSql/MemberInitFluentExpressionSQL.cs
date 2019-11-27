@@ -55,7 +55,7 @@ namespace FluentExpressionSQL
             {
                 m = item.Key;
                 sqlPack += m.Name + " =";
-                value = item.Value.GetValueOfExpression(sqlPack);
+                value = item.Value.GetValueOfExpression(sqlPack, false);
                 sqlPack.AddDbParameter(value);
                 sqlPack += ",";
             }
@@ -79,7 +79,7 @@ namespace FluentExpressionSQL
                 columns.Append(m.Name);
                 columns.Append(",");
 
-                value = item.Value.GetValueOfExpression(sqlPack);
+                value = item.Value.GetValueOfExpression(sqlPack, false);
                 sqlPack.AddDbParameter(value);
                 sqlPack += ",";
 

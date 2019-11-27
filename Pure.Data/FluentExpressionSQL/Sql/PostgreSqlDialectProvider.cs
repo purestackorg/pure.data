@@ -183,7 +183,7 @@ namespace FluentExpressionSQL.Sql
         }
 
 
-        public override object FormatValue(object v, Type type = null)
+        public override object FormatValue(object v, bool needFormat, Type type = null)
         {
             //if (v is String)
             //{
@@ -194,10 +194,12 @@ namespace FluentExpressionSQL.Sql
             {
                 if (type != null)
                 {
-                    return FormatValue(type.GetDefaultValue());
+                    return FormatValue(type.GetDefaultValue(), needFormat);
                 }
                 return v;
             }
+
+          
             if (v is DateTime)
             {
                 string result = ConvertDateTime(v);
@@ -206,8 +208,15 @@ namespace FluentExpressionSQL.Sql
             }
             else if (v is String || v is Guid)
             {
-                return "'" + v + "'";
-
+              
+                if (needFormat == true)
+                {
+                    if (v != null && (v is string || v is String))
+                    {
+                        v = ReplaceSQLInjectChar(v.ToString());
+                    }
+                    return "'" + v + "'";
+                }
             }
             else if (v is bool || v is Boolean)
             {

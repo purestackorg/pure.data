@@ -108,6 +108,31 @@ namespace Pure.Data.Test
             var expresion = PredicateExpressions.True<UserInfo>();
             expresion = expresion.And(p => p.HasDelete == true && true && p.Name.ToLower() == info.Name.ToLower() && true);
             // expresion = expresion.And(p =>  p.Id == info.Id && p.Name.ToLower() == info.Name.ToLower());
+
+            Printf(
+             ExpressionSqlBuilder.Select<UserInfo>(u => u.Name).
+                       Where(u => SqlFuncs.In(u.Name, new string[] { "a", "b" })),
+             "查询单表，带where in条件，写法三"
+         );
+
+            Printf(
+            ExpressionSqlBuilder.Select<UserInfo>().Where(p => p.HasDelete == true),
+            "bool测试"
+       );
+
+            Printf(
+            ExpressionSqlBuilder.Select<UserInfo>().Where(p =>   p.Name  == "ggg )"),
+            "SQL注入检查"
+       );
+            List<string> listNames = new List<string>() { "'li ')", "huang", "gao"};
+
+            Printf(
+         ExpressionSqlBuilder.Select<UserInfo>().Where(p =>   listNames.Contains(p.Name)),
+         "数组in测试"
+    );
+
+
+
             Printf(
             ExpressionSqlBuilder.Select<UserInfo>().Where(expresion),
             "true传入测试1=1"
@@ -450,13 +475,13 @@ namespace Pure.Data.Test
             Printf(
                        ExpressionSqlBuilder.Select<UserInfo>(p => new
                        {
-                           AddYearsVAR = startTime.AddYears(1),//DATEADD(YEAR,1,@P_0)
+                           AddYearsVAR = p.DTCreate.AddYears(1),//DATEADD(YEAR,1,@P_0)
                            AddYears = p.DTCreate.AddYears(1),//DATEADD(YEAR,1,@P_0)
-                           AddMonths = startTime.AddMonths(1),//DATEADD(MONTH,1,@P_0)
-                           AddDays = startTime.AddDays(1),//DATEADD(DAY,1,@P_0)
-                           AddHours = startTime.AddHours(1),//DATEADD(HOUR,1,@P_0)
-                           AddMinutes = startTime.AddMinutes(2),//DATEADD(MINUTE,2,@P_0)
-                           AddSeconds = startTime.AddSeconds(120),//DATEADD(SECOND,120,@P_0)
+                           AddMonths = p.DTCreate.AddMonths(1),//DATEADD(MONTH,1,@P_0)
+                           AddDays = p.DTCreate.AddDays(1),//DATEADD(DAY,1,@P_0)
+                           AddHours = p.DTCreate.AddHours(1),//DATEADD(HOUR,1,@P_0)
+                           AddMinutes = p.DTCreate.AddMinutes(2),//DATEADD(MINUTE,2,@P_0)
+                           AddSeconds = p.DTCreate.AddSeconds(120),//DATEADD(SECOND,120,@P_0)
                            //AddMilliseconds = startTime.AddMilliseconds(20000),//DATEADD(MILLISECOND,20000,@P_0)
                        }).Where(p => p.DTCreate.AddYears(1) > DateTime.Now),
                        "Add DateTime函数"
@@ -981,13 +1006,17 @@ namespace Pure.Data.Test
                 }
             }
             //Console.WriteLine(expression2Sql.RawString); 
+            Print("-------------------参数----------------------------");
             foreach (KeyValuePair<string, object> item in expression2Sql.DbParams)
             {
                 Print(comment + item.ToString() + " --- " + item.Value.GetType());
             }
 
             Print("-------------------SQL----------------------------");
+           
+            Print(expression2Sql.RawString);
 
+            Print("-------------------RawSQL----------------------------");
             Print(expression2Sql.ToSqlString());
             Console.WriteLine();
             Console.WriteLine();

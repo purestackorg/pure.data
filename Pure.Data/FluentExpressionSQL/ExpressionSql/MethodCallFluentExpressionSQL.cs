@@ -32,7 +32,7 @@ namespace FluentExpressionSQL
         /// <param name="expression"></param>
         /// <param name="sqlPack"></param>
         /// <returns></returns>
-        public static string GetMethodResult(MethodCallExpression expression, SqlPack sqlPack)
+        public static string GetMethodResult(MethodCallExpression expression, SqlPack sqlPack, bool needFormat)
         {
 
             string result = "";
@@ -43,7 +43,7 @@ namespace FluentExpressionSQL
             {
                 //默认执行方法
                 
-                var str = sqlPack.SqlDialectProvider.FormatValue(methodValue);
+                var str = sqlPack.SqlDialectProvider.FormatValue(methodValue, needFormat);
                 return str !=null ?str.ToString() :"";
 
             }
@@ -83,9 +83,8 @@ namespace FluentExpressionSQL
                 if (expression.Member.MemberType == MemberTypes.Field) //局部变量
                 {
                     var value = expression.Expression.GetValueOfExpression(sqlPack);
-
                     var memberInfoValue = expression.Member.GetPropertyOrFieldValue(value);
-                    result = sqlPack.SqlDialectProvider.FormatValue(memberInfoValue);
+                    result = sqlPack.SqlDialectProvider.FormatValue(memberInfoValue, true);
 
                 }
                 else
@@ -122,7 +121,7 @@ namespace FluentExpressionSQL
                     if (constantExp != null)
                     {
                        
-                        result= MethodCallFluentExpressionSQL.GetMethodResult(constantExp, sqlPack);
+                        result= MethodCallFluentExpressionSQL.GetMethodResult(constantExp, sqlPack, true);
                     }
                 }
 
@@ -946,12 +945,10 @@ namespace FluentExpressionSQL
             {
                 //默认执行方法
 
-                var str = sqlPack.SqlDialectProvider.FormatValue(methodValue);
+                var str = sqlPack.SqlDialectProvider.FormatValue(methodValue, true);
                 AddSelectField(sqlPack, str !=null ? str.ToString() :"");
                 sqlPack.CurrentDbFunctionResult = null;
- 
-                sqlPack.CurrentDbFunctionResult = null;
-
+   
                 return sqlPack;
             }
 
@@ -996,8 +993,14 @@ namespace FluentExpressionSQL
             if ( expression.TryGetValueOfMethodCallExpression(out methodValue))
             {
                 //默认执行方法
+                var value = methodValue;// sqlPack.SqlDialectProvider.FormatValue(methodValue);
+                value = value.SqlVerifyFragment2();
+                sqlPack.AddDbParameter(value);
 
-                sqlPack += " " + sqlPack.SqlDialectProvider.FormatValue(methodValue);
+                //sqlPack += " " + sqlPack.SqlDialectProvider.FormatValue(methodValue);
+
+
+
                 sqlPack.CurrentDbFunctionResult = null;
 
                 return sqlPack;
@@ -1043,8 +1046,11 @@ namespace FluentExpressionSQL
             if (expression.TryGetValueOfMethodCallExpression(out methodValue))
             {
                 //默认执行方法
+                var value = methodValue;// sqlPack.SqlDialectProvider.FormatValue(methodValue);
+                value = value.SqlVerifyFragment2();
+                sqlPack.AddDbParameter(value);
 
-                sqlPack += " " + sqlPack.SqlDialectProvider.FormatValue(methodValue);
+                //sqlPack += " " + sqlPack.SqlDialectProvider.FormatValue(methodValue);
                 sqlPack.CurrentDbFunctionResult = null;
 
                 return sqlPack;
@@ -1064,6 +1070,7 @@ namespace FluentExpressionSQL
             if (_Methods.TryGetValue(key.Name, out action))
             {
                 action(expression, sqlPack);
+
                 sqlPack += " " + sqlPack.CurrentDbFunctionResult;
                 sqlPack.CurrentDbFunctionResult = null;
 

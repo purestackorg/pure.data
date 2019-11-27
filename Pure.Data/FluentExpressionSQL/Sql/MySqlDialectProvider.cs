@@ -1,4 +1,5 @@
-﻿using System;
+﻿
+using System;
 using System.Collections.Generic;
 using System.Reflection;
 using System.Text;
@@ -145,7 +146,7 @@ namespace FluentExpressionSQL.Sql
         }
 
 
-        public override object FormatValue(object v, Type type = null)
+        public override object FormatValue(object v,bool needFormat, Type type = null)
         {
             //if (v is String)
             //{
@@ -161,16 +162,27 @@ namespace FluentExpressionSQL.Sql
             {
                 if (type != null)
                 {
-                    return FormatValue(type.GetDefaultValue());
+                    return FormatValue(type.GetDefaultValue(), needFormat);
                 }
                 return v;
             }
 
+            
+
             if (v is DateTime || v is String || v is Guid)
             {
-                return "'" + v + "'";
-                //return  v  ;
-               
+                if (needFormat == true)
+                {
+                    if (needFormat == true && v != null && (v is string || v is String))
+                    {
+                        v = ReplaceSQLInjectChar(v.ToString());
+                    }
+
+                    return "'" + v + "'";
+                    //return  v  ;
+
+                }
+
             }
             else if (v is bool || v is Boolean)
             {

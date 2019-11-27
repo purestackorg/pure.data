@@ -4,13 +4,49 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Text;
-
+using System.Text.RegularExpressions;
 
 namespace Pure.Data
 {
     /// <summary>字符串助手类</summary>
     public static class StringHelper
     {
+        public static string ReplaceSQLInjectChar(string str)
+        {
+            if (str == String.Empty)
+                return String.Empty;
+            str = str.Replace("'", "");
+            str = str.Replace(";", "");
+            str = str.Replace(",", "");
+            str = str.Replace("?", "");
+            str = str.Replace("<", "");
+            str = str.Replace(">", "");
+            str = str.Replace("(", "");
+            str = str.Replace(")", "");
+            str = str.Replace("@", "");
+            str = str.Replace("=", "");
+            str = str.Replace("+", "");
+            str = str.Replace("*", "");
+            str = str.Replace("&", "");
+            str = str.Replace("#", "");
+            str = str.Replace("%", "");
+            str = str.Replace("$", "");
+            str = str.Replace("\"", "");
+
+            //删除与数据库相关的词
+            str = Regex.Replace(str, "delete from", "", RegexOptions.IgnoreCase);
+            str = Regex.Replace(str, "drop table", "", RegexOptions.IgnoreCase);
+            str = Regex.Replace(str, "truncate", "", RegexOptions.IgnoreCase);
+            str = Regex.Replace(str, "xp_cmdshell", "", RegexOptions.IgnoreCase);
+            str = Regex.Replace(str, "exec master", "", RegexOptions.IgnoreCase);
+            str = Regex.Replace(str, "net localgroup administrators", "", RegexOptions.IgnoreCase);
+            str = Regex.Replace(str, "net user", "", RegexOptions.IgnoreCase);
+            str = Regex.Replace(str, "-", "", RegexOptions.IgnoreCase);
+            str = Regex.Replace(str, "truncate", "", RegexOptions.IgnoreCase);
+            return str;
+        }
+
+
         #region 字符串扩展
         /// <summary>忽略大小写的字符串相等比较，判断是否以任意一个待比较字符串相等</summary>
         /// <param name="value">字符串</param>

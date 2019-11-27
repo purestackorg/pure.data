@@ -24,29 +24,29 @@ namespace FluentExpressionSQL
                 return _Instance;
             }
         }
-        private object ConvertToData(ConstantExpression expression, SqlPack sqlPack)
-        {
-            object value = expression.GetValueOfExpression(sqlPack);
-            //var dto = sqlPack.GetExtDto(expression);
-            //if (dto != null)
-            //{
-            //    switch (dto.ActionType)
-            //    {
-            //        case SqlActionType.Like:
-            //            value = "%" + value + "%";
-            //            break;
-            //        case SqlActionType.LikeLeft:
-            //            value = "%" + value;
-            //            break;
-            //        case SqlActionType.LikeRight:
-            //            value = value + "%";
-            //            break;
-            //        default:
-            //            break;
-            //    }
-            //}
-            return value;
-        }
+        //private object ConvertToData(ConstantExpression expression, SqlPack sqlPack)
+        //{
+        //    object value = expression.GetValueOfExpression(sqlPack);
+        //    //var dto = sqlPack.GetExtDto(expression);
+        //    //if (dto != null)
+        //    //{
+        //    //    switch (dto.ActionType)
+        //    //    {
+        //    //        case SqlActionType.Like:
+        //    //            value = "%" + value + "%";
+        //    //            break;
+        //    //        case SqlActionType.LikeLeft:
+        //    //            value = "%" + value;
+        //    //            break;
+        //    //        case SqlActionType.LikeRight:
+        //    //            value = value + "%";
+        //    //            break;
+        //    //        default:
+        //    //            break;
+        //    //    }
+        //    //}
+        //    return value;
+        //}
 
         protected override SqlPack Join(ConstantExpression expression, SqlPack sqlPack)
         {
@@ -73,7 +73,8 @@ namespace FluentExpressionSQL
         public const string FalseLiteral = "(1=0)";
         protected override SqlPack Where(ConstantExpression expression, SqlPack sqlPack)
 		{
-            object value = ConvertToData(expression, sqlPack);//expression.Value
+            //object value =  ConvertToData(expression, sqlPack);//expression.Value
+            object value = expression.GetValueOfExpression(sqlPack, false);
 
             //if (sqlPack.WhereConditionIndex ==1 && expression.Type == typeof(bool)) //只有第一次where才会拼接 1=1 或者1=0
             //{
@@ -82,23 +83,45 @@ namespace FluentExpressionSQL
             //    return sqlPack;
 
             //}
-             
+            value = value.SqlVerifyFragment2();
+
             sqlPack.AddDbParameter(value);
 			return sqlPack;
 		}
 
 		protected override SqlPack In(ConstantExpression expression, SqlPack sqlPack)
 		{
-            object value = expression.GetValueOfExpression(sqlPack);
-			if (expression.Type.Name == "String")
-			{
-                sqlPack.Sql.AppendFormat("'{0}',", value);
-			}
-			else
-			{
-                sqlPack.Sql.AppendFormat("{0},", value);
-			}
-			return sqlPack;
-		}
+            //sqlPack += " (";
+
+
+            object value = expression.GetValueOfExpression(sqlPack, false);
+            value = value.SqlVerifyFragment2();
+            sqlPack.AddDbParameter(value);
+
+
+            //sqlPack += ")";
+
+
+            //if (expression.Type == ResolveConstants.TypeOfString || expression.Type.Name == "String")
+            //{
+            //    sqlPack.Sql.AppendFormat("'{0}',", value);
+            //}
+            //else
+            //{
+            //    sqlPack.Sql.AppendFormat("{0},", value);
+            //}
+            return sqlPack;
+
+            //         object value = expression.GetValueOfExpression(sqlPack);
+            //if (expression.Type == ResolveConstants.TypeOfString || expression.Type.Name == "String")
+            //{
+            //             sqlPack.Sql.AppendFormat("'{0}',", value);
+            //}
+            //else
+            //{
+            //             sqlPack.Sql.AppendFormat("{0},", value);
+            //}
+            //return sqlPack;
+        }
 	}
 }

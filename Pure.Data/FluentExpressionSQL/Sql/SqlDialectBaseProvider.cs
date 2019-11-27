@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Pure.Data;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
@@ -31,9 +32,12 @@ namespace FluentExpressionSQL.Sql
 
         DateTimeDto ConvertDateTime(MemberInfo member, object value);
         string ConvertSqlValue(object castObject, Type type);
-        object FormatValue(object v, Type type = null);
+        object FormatValue(object v, bool needFormat, Type type = null);
         string ConvertDbFunction(DbFunctionType functionType, params object[] parameters);
         string DoCaseWhen(List<CaseThenExpressionPair> listCase);
+
+
+        string ReplaceSQLInjectChar(string str);
     }
 
     public abstract class SqlDialectBaseProvider : ISqlDialectProvider
@@ -159,13 +163,18 @@ namespace FluentExpressionSQL.Sql
             return IsQuoted(value) ? value.Substring(1, value.Length - 2) : value;
         }
 
+        public virtual string ReplaceSQLInjectChar(string str)
+        {
+            return str;
+            //return StringHelper.ReplaceSQLInjectChar(str);
+        }
 
         #endregion
-     
+
         #region Ext
         public abstract DateTimeDto ConvertDateTime(MemberInfo member, object value);
         public abstract string ConvertSqlValue(object castObject, Type type);
-        public abstract object FormatValue(object v, Type type = null);
+        public abstract object FormatValue(object v, bool needFormat, Type type = null);
         public abstract string ConvertDbFunction(DbFunctionType functionType, params object[] parameters);
         public abstract string DoCaseWhen(List<CaseThenExpressionPair> listCase);
 

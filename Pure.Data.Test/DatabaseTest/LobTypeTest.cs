@@ -7,7 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Reflection;
-using Dapper;
+using Pure.Data;
 using System.Data;
 using Oracle.ManagedDataAccess.Client;
 using Oracle.ManagedDataAccess.Types;

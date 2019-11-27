@@ -20,7 +20,7 @@ namespace Pure.Data.Test
             Console.WriteLine("Hello World!");
             //AutoMigratorTest.Test();
 
-            // TestExpression2SQL.Test();
+            TestExpression2SQL.Test();
             //TransactionTest.Test();
             //PredicatesTest.Test();
             // CRUDTest.Test();
@@ -42,7 +42,7 @@ namespace Pure.Data.Test
             //ValidationTest.Test();
             //  BackupAndGenTest.Test();
 
-            PoolingTest.Test();
+            //PoolingTest.Test();
         }
     }
 }

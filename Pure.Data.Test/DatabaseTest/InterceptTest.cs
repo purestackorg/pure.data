@@ -47,6 +47,18 @@ namespace Pure.Data.Test
             string str = string.Format(database.DatabaseName + " was OnComplete!" + database.Connection.GetHashCode());
             database.LogHelper.Warning(str);
         }
+
+        public void OnRollbackTransaction(IDatabase database)
+        {
+            string str = string.Format(database.DatabaseName + " was OnRollback!" + database.Connection.GetHashCode());
+            database.LogHelper.Warning(str);
+        }
+
+        public void OnCommitTransaction(IDatabase database)
+        {
+            string str = string.Format(database.DatabaseName + " was OnCommit!" + database.Connection.GetHashCode());
+            database.LogHelper.Warning(str);
+        }
     }
 
     public class InterceptTest

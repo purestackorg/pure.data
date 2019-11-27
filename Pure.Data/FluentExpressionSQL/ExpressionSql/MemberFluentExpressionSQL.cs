@@ -3,6 +3,7 @@ using System;
 using System.Collections;
 using System.Linq.Expressions;
 using System.Reflection;
+using System.Text;
 
 namespace FluentExpressionSQL
 {
@@ -46,9 +47,9 @@ namespace FluentExpressionSQL
         {
             if (expression.Expression !=null && expression.Expression is ConstantExpression)
             {
-                 object value = expression.GetValueOfExpression( sqlPack);//expression.Value
-            sqlPack.AddDbParameter(value);
-            return sqlPack;
+                 object value = expression.GetValueOfExpression(sqlPack, false);//expression.Value
+                sqlPack.AddDbParameter(value);
+                return sqlPack;
             }
 
             string tableName = GetTableNameByExpression(expression, sqlPack);
@@ -68,7 +69,7 @@ namespace FluentExpressionSQL
             //datetime.now
             if (expression.Member.DeclaringType == ResolveConstants.TypeOfDateTime)//日期转换
             {
-                var value = expression.GetValueOfExpression(sqlPack);
+                var value = expression.GetValueOfExpression(sqlPack, false);
                 object valueDatetime = sqlPack.SqlDialectProvider.ConvertDateTime(expression.Member, value);
                 sqlPack.AddDbParameter(valueDatetime);
                 return sqlPack;
@@ -92,12 +93,13 @@ namespace FluentExpressionSQL
 
                 return sqlPack;
             }
-            else if (expression.Member.MemberType == MemberTypes.Property)
+            else if (expression.Member.MemberType == MemberTypes.Property || expression.Member.MemberType == MemberTypes.Field)
             {
                 object val = null;
-                if (   expression.TryGetValueOfMemberExpressionWithFormat(sqlPack, out val))//如果能获取值就能直接引用变量的值,如 where(p=>p.Id > info.Id)
+                if (expression.TryGetValueOfMemberExpressionWithFormat(sqlPack, out val, false))//如果能获取值就能直接引用变量的值,如 where(p=>p.Id > info.Id)
                 {
-                    
+                    val = val.SqlVerifyFragment2();
+
                     sqlPack.AddDbParameter(val);
 
                     return sqlPack;
@@ -120,7 +122,7 @@ namespace FluentExpressionSQL
 
             }
             
-            sqlPack.AddDbParameter(expression.GetValueOfExpression(sqlPack));
+            sqlPack.AddDbParameter(expression.GetValueOfExpression(sqlPack, false));
             return sqlPack;
 
         }
@@ -135,21 +137,36 @@ namespace FluentExpressionSQL
 
                 if (val != null)
                 {
+                    //sqlPack += "(";
+                    //sqlPack.AddDbParameter(val);
+                    //sqlPack += ")";
+
+                   
+
                     string itemJoinStr = "";
                     IEnumerable array = val as IEnumerable;
+
+                    var sb = new StringBuilder();
+                     
                     foreach (var item in array)
                     {
-                        //if (field.FieldType.Name == "String[]")
-                        if (item.GetType() == typeof(String) || item.GetType() == typeof(string))
-                        {
-                            itemJoinStr += string.Format(",'{0}'", item);
-                        }
-                        else
-                        {
-                            itemJoinStr += string.Format(",{0}", item);
-                        }
-                    }
 
+                        //sb.AppendFormat(",{0}", sqlPack.SqlDialectProvider.FormatValue(item, true));
+                        object o = item.SqlVerifyFragment2();
+                        sb.AppendFormat(",{0}", sqlPack.SqlDialectProvider.FormatValue(o, true));
+                          
+                        ////if (field.FieldType.Name == "String[]")
+                        //if (item.GetType() == typeof(String) || item.GetType() == typeof(string))
+                        //{
+                        //    sqlPack.SqlDialectProvider.FormatValue(item, true);
+                        //    itemJoinStr += string.Format(",'{0}'", item);
+                        //}
+                        //else
+                        //{
+                        //    itemJoinStr += string.Format(",{0}", item);
+                        //}
+                    }
+                    itemJoinStr = sb.ToString();
                     if (itemJoinStr.Length > 0)
                     {
                         itemJoinStr = itemJoinStr.Remove(0, 1);

@@ -184,8 +184,13 @@ namespace FluentExpressionSQL
                 }
                 else if (value is string || value is Guid)
                 {
-                    //result = string.Format("'{0}'", value);
-                    result = string.Format("{0}", value);
+                    //if (value != null && (value is string || value is String))
+                    //{
+                    //    value = _sqlPack.SqlDialectProvider.ReplaceSQLInjectChar(value.ToString());
+                    //}
+
+                    result = string.Format("'{0}'", value);
+                    //result = string.Format("{0}", value);
 
                 }
                 else if (value is DateTime)
@@ -233,7 +238,7 @@ namespace FluentExpressionSQL
                 var filterParam = filterParams[i];
                 //var sqlParams = filterParam as SqlInValues;
                 //格式化
-                filterParam = sqlpack.SqlDialectProvider.FormatValue(filterParam);
+                filterParam = sqlpack.SqlDialectProvider.FormatValue(filterParam, true);
                 string paraName = sqlpack.AddDbParameterWithoutPickSql(filterParam);
                 if (filterParam != null && paraName != "")
                 {

@@ -29,7 +29,7 @@ namespace FluentExpressionSQL
             List<object> args = new List<object>();
 			foreach (Expression expressionItem in expression.Expressions)
 			{
-                args.Add(expressionItem.GetValueOfExpression(sqlPack));
+                args.Add(expressionItem.GetValueOfExpression(sqlPack, false));
 				//FluentExpressionSQLProvider.In(expressionItem, sqlPack);
 			}
             sqlPack.AddDbParameter(args);

@@ -31,7 +31,7 @@ namespace FluentExpressionSQL
                 MemberInfo m = expression.Members[i];
                 //ConstantExpression c = expression.Arguments[i] as ConstantExpression;
                 sqlPack += m.Name + " =";
-                object value = expression.Arguments[i].GetValueOfExpression(sqlPack);
+                object value = expression.Arguments[i].GetValueOfExpression(sqlPack, false);
                 sqlPack.AddDbParameter(value);
                 sqlPack += ",";
             }
@@ -53,7 +53,7 @@ namespace FluentExpressionSQL
                 columns.Append(m.Name);
                 columns.Append(",");
 
-                object value = expression.Arguments[i].GetValueOfExpression(sqlPack);
+                object value = expression.Arguments[i].GetValueOfExpression(sqlPack, false);
                 sqlPack.AddDbParameter(value);
                 sqlPack += ",";
             }
@@ -136,7 +136,7 @@ namespace FluentExpressionSQL
 
                             var memberInfoType = memberValueExp.Member.GetPropertyOrFieldType();
                             var memberInfoValue = memberValueExp.Member.GetPropertyOrFieldValue(value);
-                            memberInfoValue = sqlPack.SqlDialectProvider.FormatValue(memberInfoValue);//format
+                            memberInfoValue = sqlPack.SqlDialectProvider.FormatValue(memberInfoValue, true);//format
                             if (memberInfoType == ResolveConstants.TypeOfDateTime)
                             {
                                 colStr = sqlPack.SqlDialectProvider.ConvertSqlValue(memberInfoValue, memberInfoType);

@@ -49,7 +49,7 @@ namespace FluentExpressionSQL
         /// <summary>
         /// 是否存在Where条件,且是否启用新的子查询
         /// </summary>
-        public bool EnableNewSubQuery { get {return ExpressionSqlBuilder.ExistSubQuery(); } }
+        public bool EnableNewSubQuery { get { return ExpressionSqlBuilder.ExistSubQuery(); } }
         public Expression CurrentWhereExpression = null;
         public string CurrentColAlias = null;
         public string CurrentDbFunctionResult = null;
@@ -60,19 +60,19 @@ namespace FluentExpressionSQL
         /// <summary>
         /// where的索引数
         /// </summary>
-       // public int WhereConditionIndex { get; set; }
+        // public int WhereConditionIndex { get; set; }
         ///// <summary>
         ///// 当前是左边还是右边Where
         ///// </summary>
         //public bool CurrentIsLeftWhereCondition { get; set; }
 
-    ///// <summary>
-    ///// Where中是否有参数名， 用于过滤where开头只取true值，缺少参数名报错 如where 1 and ...
-    ///// </summary>
-    //public bool HasParamName { get; set; }
+        ///// <summary>
+        ///// Where中是否有参数名， 用于过滤where开头只取true值，缺少参数名报错 如where 1 and ...
+        ///// </summary>
+        //public bool HasParamName { get; set; }
 
 
-    public int Length
+        public int Length
         {
             get
             {
@@ -90,23 +90,28 @@ namespace FluentExpressionSQL
 
 
         public Dictionary<string, object> DbParams { get; private set; }
-        public void SetNewPack(StringBuilder sb,  Dictionary<string, object> _DbParams )
+        public void SetNewPack(StringBuilder sb, Dictionary<string, object> _DbParams)
         {
-            Sql = sb; 
+            Sql = sb;
             DbParams = _DbParams;
         }
 
         private string _ParamNameKey = "param";
-        public string ParamNameKey { get { return _ParamNameKey; } set {
-            _ParamNameKey = value;
-        } }
+        public string ParamNameKey
+        {
+            get { return _ParamNameKey; }
+            set
+            {
+                _ParamNameKey = value;
+            }
+        }
 
         public string DbParamPrefix
         {
             get
             {
                 return SqlDialectProvider.ParameterPrefix.ToString();
-                
+
             }
         }
         /// <summary>
@@ -177,7 +182,7 @@ namespace FluentExpressionSQL
             CurrentWhereExpression = null;
             CurrentColAlias = null;
             CaseWhenStatement.Clear();
-            
+
         }
 
         private string GetDbParameterName()
@@ -201,24 +206,32 @@ namespace FluentExpressionSQL
             string paraName = "";
             //if (HasParamName == true)
             //{
-                if (parameterValue == null || parameterValue == DBNull.Value)
-                {
-                    this.Sql.Append(" null");
-                }
-                else
-                {
-                    string name = GetDbParameterName();// this.DbParamPrefix + "param" + this.DbParams.Count;
-                    paraName = name;
-                    this.DbParams.Add(name, parameterValue);
-                    this.Sql.Append(" " + name);
-                }
+            if (parameterValue == null || parameterValue == DBNull.Value)
+            {
+                this.Sql.Append(" null");
+            }
+            else
+            {
+                string name = GetDbParameterName();// this.DbParamPrefix + "param" + this.DbParams.Count;
+                paraName = name;
+
+
+                //if (parameterValue != null && (parameterValue is string || parameterValue is String))
+                //{
+                //    parameterValue = SqlDialectProvider.ReplaceSQLInjectChar(parameterValue.ToString());
+                //}
+
+
+                this.DbParams.Add(name, parameterValue);
+                this.Sql.Append(" " + name);
+            }
             //}
-             
-            
+
+
             return paraName;
         }
 
- 
+
 
         /// <summary>
         /// 自定义参数名
@@ -230,6 +243,10 @@ namespace FluentExpressionSQL
         {
             if (!this.DbParams.ContainsKey(name))
             {
+                //if (parameterValue != null && (parameterValue is string || parameterValue is String))
+                //{
+                //    parameterValue = SqlDialectProvider.ReplaceSQLInjectChar(parameterValue.ToString());
+                //}
                 this.DbParams.Add(name, parameterValue);
             }
             return name;
@@ -250,7 +267,10 @@ namespace FluentExpressionSQL
             }
             else
             {
-
+                //if (parameterValue != null && (parameterValue is string || parameterValue is String))
+                //{
+                //    parameterValue = SqlDialectProvider.ReplaceSQLInjectChar(parameterValue.ToString());
+                //}
                 this.DbParams.Add(name, parameterValue);
             }
             return paraName;
@@ -289,16 +309,16 @@ namespace FluentExpressionSQL
         }
         public void ReplaceTableAlias(string tableName, string newAlias)
         {
-            if (  this._dicTableName.Keys.Contains(tableName))
+            if (this._dicTableName.Keys.Contains(tableName))
             {
                 this._dicTableName[tableName] = newAlias;
-                
+
             }
             else
             {
                 this._dicTableName.Add(tableName, newAlias);
             }
-             
+
         }
         /// <summary>
         /// 获取表别名
@@ -378,7 +398,7 @@ namespace FluentExpressionSQL
                 return t.Name;
             }
         }
-       
+
 
     }
 }

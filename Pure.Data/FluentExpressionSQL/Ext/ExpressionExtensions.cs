@@ -152,10 +152,22 @@ namespace FluentExpressionSQL
 
         }
 
-        public static bool TryGetValueOfMemberExpressionWithFormat(this MemberExpression member, SqlPack sqlpack ,out object val)
+        public static bool TryGetValueOfMemberExpressionWithFormat(this MemberExpression member, SqlPack sqlpack ,out object val, bool needFormat)
         {
             try
             {
+
+                if (member != null && member.Member.MemberType == MemberTypes.Field) //局部变量
+                {
+                    var value = member.Expression.GetValueOfExpression(sqlpack, needFormat);
+
+                    var memberInfoValue = member.Member.GetPropertyOrFieldValue(value);
+                    val = sqlpack.SqlDialectProvider.FormatValue(memberInfoValue, needFormat);
+
+                    return true;
+
+                }
+
                 var objectMember = Expression.Convert(member, typeof(object));
                 var getterLambda = Expression.Lambda<Func<object>>(objectMember);
                 var getter = getterLambda.Compile();
@@ -170,7 +182,7 @@ namespace FluentExpressionSQL
                     var sb = new StringBuilder();
                     foreach (var item in val as IEnumerable)
                     {
-                        sb.AppendFormat("{0},", FormatValue(item, sqlpack));
+                        sb.AppendFormat("{0},", FormatValue(item, sqlpack, needFormat));
                     }
                     if (sb.Length == 0)
                     {
@@ -181,7 +193,7 @@ namespace FluentExpressionSQL
                 }
                 else
                 {
-                    val= FormatValue(val, sqlpack);
+                    val= FormatValue(val, sqlpack, needFormat);
                 }
 
                 return true;
@@ -197,7 +209,7 @@ namespace FluentExpressionSQL
 
          
 
-        private static object FormatValue(object value, SqlPack sqlpack)
+        private static object FormatValue(object value, SqlPack sqlpack, bool needFormat )
         {
             //if (value is string)
             //{
@@ -207,7 +219,9 @@ namespace FluentExpressionSQL
             //{
             //    return string.Format("'{0:yyyy-MM-dd HH:mm:ss}'", value);
             //}
-            return sqlpack.SqlDialectProvider.FormatValue(value);
+            
+            return sqlpack.SqlDialectProvider.FormatValue(value, needFormat);
+            
         }
         private static string ConvertExpressionTypeToString(ExpressionType nodeType, bool useIs = false)
         {
@@ -255,21 +269,7 @@ namespace FluentExpressionSQL
             }
         }
 
-        public static object GetValueWhenBoolToInt(this Expression body, SqlPack sqlpack)
-        {
-            
-            if (body is ConstantExpression)
-            {
-                var conExpValue = ((ConstantExpression)body).Value;
-                if (conExpValue is bool)
-                {
-                    return Convert.ToBoolean(conExpValue) ? 1 : 0;
-                }
-            }
-
-            return body.GetValueOfExpression(sqlpack);
-
-        }
+       
 
         public static bool IsAssignableToGenericType(Type givenType, Type genericType)
         {
@@ -315,6 +315,42 @@ namespace FluentExpressionSQL
 
             return false;
         }
+        public static object GetValueWhenBoolToInt(this Expression body, SqlPack sqlpack, bool needFormat = true)
+        {
+
+            if (body is ConstantExpression)
+            {
+                var conExpValue = ((ConstantExpression)body).Value;
+                if (conExpValue is bool)
+                {
+                    return Convert.ToBoolean(conExpValue) ? 1 : 0;
+                }
+            }
+
+            return body.GetValueOfExpression(sqlpack, needFormat);
+
+        }
+        public static int ConvertBoolToInt(this object v)
+        {
+            if (v == null)
+            {
+                return 0;
+            }
+            if (v is bool || v is Boolean)
+            {
+                bool bv = Convert.ToBoolean(v);
+                if (bv == true)
+                {
+                    return 1;
+                }
+                else
+                {
+                    return 0;
+                }
+            }
+
+            return 0;
+        }
 
         public static bool CanGetValue(this Expression body )
         {
@@ -330,79 +366,79 @@ namespace FluentExpressionSQL
 
             return false;
         }
-        public static object GetValueOfExpressionWithoutFormat(this Expression body )
-        {
-            if (body == null)
-            {
-                return string.Empty;
-            }
-            if (body is ConstantExpression)
-            {
-                return ((ConstantExpression)body).Value;
-            }
-            if (body is MemberExpression)
-            {
-                var member = ((MemberExpression)body);
+        //public static object GetValueOfExpressionWithoutFormat(this Expression body )
+        //{
+        //    if (body == null)
+        //    {
+        //        return string.Empty;
+        //    }
+        //    if (body is ConstantExpression)
+        //    {
+        //        return ((ConstantExpression)body).Value;
+        //    }
+        //    if (body is MemberExpression)
+        //    {
+        //        var member = ((MemberExpression)body);
                 
-                var value = GetValueOfMemberExpression(member);
-                Type typeOfValue = null;
-                if (value != null)
-                {
-                    typeOfValue = value.GetType();
-                }
+        //        var value = GetValueOfMemberExpression(member);
+        //        Type typeOfValue = null;
+        //        if (value != null)
+        //        {
+        //            typeOfValue = value.GetType();
+        //        }
 
-                return (value);
+        //        return (value);
 
-            }
-            if (body is UnaryExpression)
-            {
-                return GetValueOfExpressionWithoutFormat(((UnaryExpression)body).Operand);
-            }
-            if (body is NewExpression)
-            {
-                var args = ((NewExpression)body).Arguments;
-                //判断Select设置值  Select<UserInfo>(u => new {  DT3=new DateTime(2015,10,11) }).
-                if (args.Count > 0)
-                {
-                    return GetValueOfExpressionWithoutFormat(args[0]);
-                }
-                //foreach (var item in ((NewExpression)body).Arguments)
-                //{
-                //    GetValueOfExpression(item, sqlpack);
-                //}
-            }
-            //if (body is BinaryExpression)
-            //{
-            //    var binary = body as BinaryExpression;
-            //    if (binary.Right.GetValueOfExpressionWithoutFormat() == null && (binary.NodeType == ExpressionType.Equal || binary.NodeType == ExpressionType.NotEqual))
-            //    {
-            //        return string.Format("({0}{1}{2})", GetValueOfExpression(binary.Left, sqlpack),
-            //        ConvertExpressionTypeToString(binary.NodeType, true),
-            //        "NULL");
-            //    }
-            //    else
-            //    {
-            //        return string.Format("({0}{1}{2})", GetValueOfExpression(binary.Left, sqlpack),
-            //       ConvertExpressionTypeToString(binary.NodeType),
-            //       GetValueOfExpression(binary.Right, sqlpack));
-            //    }
+        //    }
+        //    if (body is UnaryExpression)
+        //    {
+        //        return GetValueOfExpressionWithoutFormat(((UnaryExpression)body).Operand);
+        //    }
+        //    if (body is NewExpression)
+        //    {
+        //        var args = ((NewExpression)body).Arguments;
+        //        //判断Select设置值  Select<UserInfo>(u => new {  DT3=new DateTime(2015,10,11) }).
+        //        if (args.Count > 0)
+        //        {
+        //            return GetValueOfExpressionWithoutFormat(args[0]);
+        //        }
+        //        //foreach (var item in ((NewExpression)body).Arguments)
+        //        //{
+        //        //    GetValueOfExpression(item, sqlpack);
+        //        //}
+        //    }
+        //    //if (body is BinaryExpression)
+        //    //{
+        //    //    var binary = body as BinaryExpression;
+        //    //    if (binary.Right.GetValueOfExpressionWithoutFormat() == null && (binary.NodeType == ExpressionType.Equal || binary.NodeType == ExpressionType.NotEqual))
+        //    //    {
+        //    //        return string.Format("({0}{1}{2})", GetValueOfExpression(binary.Left, sqlpack),
+        //    //        ConvertExpressionTypeToString(binary.NodeType, true),
+        //    //        "NULL");
+        //    //    }
+        //    //    else
+        //    //    {
+        //    //        return string.Format("({0}{1}{2})", GetValueOfExpression(binary.Left, sqlpack),
+        //    //       ConvertExpressionTypeToString(binary.NodeType),
+        //    //       GetValueOfExpression(binary.Right, sqlpack));
+        //    //    }
 
-            //}
-            //if (body is MethodCallExpression)
-            //{
-            //    var method = body as MethodCallExpression;
+        //    //}
+        //    //if (body is MethodCallExpression)
+        //    //{
+        //    //    var method = body as MethodCallExpression;
 
-            //    return MethodCallFluentExpressionSQL.GetMethodResult(method, sqlpack);
+        //    //    return MethodCallFluentExpressionSQL.GetMethodResult(method, sqlpack);
 
-            //}
-            if (body is LambdaExpression)
-            {
-                return GetValueOfExpressionWithoutFormat(((LambdaExpression)body).Body);
-            }
-            return "";
-        }
+        //    //}
+        //    if (body is LambdaExpression)
+        //    {
+        //        return GetValueOfExpressionWithoutFormat(((LambdaExpression)body).Body);
+        //    }
+        //    return "";
+        //}
 
-        public static object GetValueOfExpression(this Expression body, SqlPack sqlpack)
+        public static object GetValueOfExpression(this Expression body, SqlPack sqlpack, bool needFormat = true)
         {
             if (body == null)
             {
@@ -410,7 +446,7 @@ namespace FluentExpressionSQL
             }
             if (body is ConstantExpression)
             {
-                return FormatValue(((ConstantExpression)body).Value, sqlpack);
+                return FormatValue(((ConstantExpression)body).Value, sqlpack, needFormat);
             }
             if (body is MemberExpression)
             {
@@ -459,7 +495,7 @@ namespace FluentExpressionSQL
                     var sb = new StringBuilder();
                     foreach (var item in value as IEnumerable)
                     {
-                        sb.AppendFormat("{0},", FormatValue(item, sqlpack));
+                        sb.AppendFormat("{0},", FormatValue(item, sqlpack, needFormat));
                     }
                     if (sb.Length == 0)
                     {
@@ -469,12 +505,12 @@ namespace FluentExpressionSQL
                 }
                 else
                 {
-                    return FormatValue(value, sqlpack);
+                    return FormatValue(value, sqlpack, needFormat);
                 }
             }
             if (body is UnaryExpression)
             {
-                return GetValueOfExpression(((UnaryExpression)body).Operand, sqlpack);
+                return GetValueOfExpression(((UnaryExpression)body).Operand, sqlpack, needFormat);
             }
             if (body is NewExpression)
             {
@@ -482,7 +518,7 @@ namespace FluentExpressionSQL
                 //判断Select设置值  Select<UserInfo>(u => new {  DT3=new DateTime(2015,10,11) }).
                 if (args.Count > 0)
                 {
-                    return GetValueOfExpression(args[0], sqlpack);
+                    return GetValueOfExpression(args[0], sqlpack, needFormat);
                 }
                 //foreach (var item in ((NewExpression)body).Arguments)
                 //{
@@ -492,17 +528,17 @@ namespace FluentExpressionSQL
             if (body is BinaryExpression)
             {
                 var binary = body as BinaryExpression;
-                if (binary.Right.GetValueOfExpression(sqlpack) == null && (binary.NodeType == ExpressionType.Equal || binary.NodeType == ExpressionType.NotEqual))
+                if (binary.Right.GetValueOfExpression(sqlpack, needFormat) == null && (binary.NodeType == ExpressionType.Equal || binary.NodeType == ExpressionType.NotEqual))
                 {
-                    return string.Format("({0}{1}{2})", GetValueOfExpression(binary.Left, sqlpack),
+                    return string.Format("({0}{1}{2})", GetValueOfExpression(binary.Left, sqlpack, needFormat),
                     ConvertExpressionTypeToString(binary.NodeType, true),
                     "NULL");
                 }
                 else
                 {
-                    return string.Format("({0}{1}{2})", GetValueOfExpression(binary.Left, sqlpack),
+                    return string.Format("({0}{1}{2})", GetValueOfExpression(binary.Left, sqlpack, needFormat),
                    ConvertExpressionTypeToString(binary.NodeType),
-                   GetValueOfExpression(binary.Right, sqlpack));
+                   GetValueOfExpression(binary.Right, sqlpack, needFormat));
                 }
                
             }
@@ -510,14 +546,14 @@ namespace FluentExpressionSQL
             {
                 var method = body as MethodCallExpression;
 
-                return MethodCallFluentExpressionSQL.GetMethodResult(method, sqlpack);
+                return MethodCallFluentExpressionSQL.GetMethodResult(method, sqlpack, needFormat);
 
                 //return string.Format("({0} IN ({1}))", GetValueOfExpression(method.Arguments[0], sqlpack),
                 //    GetValueOfExpression(method.Object, sqlpack));
             }
             if (body is LambdaExpression)
             {
-                return GetValueOfExpression(((LambdaExpression)body).Body, sqlpack);
+                return GetValueOfExpression(((LambdaExpression)body).Body, sqlpack, needFormat);
             }
             return "";
         }
@@ -579,7 +615,7 @@ namespace FluentExpressionSQL
         /// <param name="expression"></param>
         /// <param name="sqlPack"></param>
         /// <returns></returns>
-         public static object GetValueOrColumnName(this Expression expression, SqlPack sqlPack)
+         public static object GetValueOrColumnName(this Expression expression, SqlPack sqlPack, bool needFormat = true)
          {
              if (expression == null)
              {
@@ -591,10 +627,10 @@ namespace FluentExpressionSQL
                  var memberExp = expression as MemberExpression;
                  if (memberExp != null && memberExp.Member.MemberType == MemberTypes.Field) //局部变量
                  {
-                     var value = memberExp.Expression.GetValueOfExpression(sqlPack);
+                     var value = memberExp.Expression.GetValueOfExpression(sqlPack, needFormat);
 
                      var memberInfoValue = memberExp.Member.GetPropertyOrFieldValue(value);
-                     result = sqlPack.SqlDialectProvider.FormatValue(memberInfoValue);
+                     result = sqlPack.SqlDialectProvider.FormatValue(memberInfoValue, needFormat);
 
                  }
                  else if (memberExp != null && memberExp.Member.MemberType == MemberTypes.Property) //属性值
@@ -603,7 +639,7 @@ namespace FluentExpressionSQL
                      if (memberExp.TryGetValueOfMemberExpression(out val))
                      {
                         
-                         result = sqlPack.SqlDialectProvider.FormatValue(val);
+                         result = sqlPack.SqlDialectProvider.FormatValue(val, needFormat);
                      }
                      else
                      {
@@ -618,7 +654,7 @@ namespace FluentExpressionSQL
              }
              else
              {
-                 result = expression.GetValueOfExpression(sqlPack);
+                 result = expression.GetValueOfExpression(sqlPack, needFormat);
              }
              return result;
          }
@@ -766,7 +802,19 @@ namespace FluentExpressionSQL
             "alter", "begin", "cast", "create", "cursor", "declare", "delete",
             "drop", "end", "exec", "execute", "fetch", "insert", "kill",
             "open", "select", "sys", "sysobjects", "syscolumns", "table", "update" };
+        public static object SqlVerifyFragment2(this object o)
+        {
+            if (o == null)
+            {
+                return o;
+            }
+            if (o is string || o is String)
+            {
+                return SqlVerifyFragment(o.ToString(), IllegalSqlFragmentTokens);
 
+            }
+            return o;
+        }
         public static string SqlVerifyFragment(this string sqlFragment)
         {
             return SqlVerifyFragment(sqlFragment, IllegalSqlFragmentTokens);

@@ -109,7 +109,7 @@ namespace Pure.Data
                     {
                         foreach (var p in ParameterDict)
                         {
-                            sql = sql.Replace(prefixPara + p.Key, Database.SqlDialectProvider.FormatValue(p.Value).ToString());
+                            sql = sql.Replace(prefixPara + p.Key, Database.SqlDialectProvider.FormatValue(p.Value, true).ToString());
                             //sql = sql.Replace(prefixPara + p.Key, FormatValue(p.Value, dbType));
                         }
                         
@@ -183,7 +183,7 @@ namespace Pure.Data
                 {
                     foreach (var p in ParameterDict)
                     {
-                        sql = sql.Replace(prefixPara + p.Key, Database.SqlDialectProvider.FormatValue(p.Value).ToString());
+                        sql = sql.Replace(prefixPara + p.Key, Database.SqlDialectProvider.FormatValue(p.Value, true).ToString());
                         //sql = sql.Replace(prefixPara + p.Key, FormatValue(p.Value, dbType));
                     }
 

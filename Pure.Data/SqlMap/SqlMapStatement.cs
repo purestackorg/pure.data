@@ -216,7 +216,7 @@ namespace Pure.Data.SqlMap
                         string itemText = "";
                         foreach (var itemEnu in list)
                         {
-                            var itemVal = SqlDialect.FormatValue(itemEnu);
+                            var itemVal = SqlDialect.FormatValue(itemEnu, true);
                             if (itemVal == null)
                             {
                                 itemText = "null";
@@ -264,7 +264,7 @@ namespace Pure.Data.SqlMap
                     {
                         if (str.Contains(prefix + item.Key + parameterSuffix) || str.Contains(ParameterPrefixInject + item.Key + parameterSuffix))
                         {
-                            tmp = SqlDialect.FormatValue(item.Value); //item.Value;// SqlDialect.FormatValue(item.Value);
+                            tmp = SqlDialect.FormatValue(item.Value, true); //item.Value;// SqlDialect.FormatValue(item.Value);
                             str = str.Replace(prefix + item.Key + parameterSuffix, tmp != null && tmp.ToString() != "" ? tmp.ToString() : "null");
                             str = str.Replace(ParameterPrefixInject + item.Key + parameterSuffix, tmp != null && tmp.ToString() != "" ? tmp.ToString() : "null");
 

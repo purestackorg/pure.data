@@ -1,4 +1,4 @@
-﻿using Dapper;
+﻿using Pure.Data;
 using Oracle.ManagedDataAccess.Client;
 using Oracle.ManagedDataAccess.Types;
 using System.Data;
