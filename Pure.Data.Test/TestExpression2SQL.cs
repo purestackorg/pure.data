@@ -64,8 +64,8 @@ namespace Pure.Data.Test
 
 
             //通过静态属性DatabaseType或者静态方法Init均可配置数据库类型
-            ExpressionSqlBuilder.DatabaseType = ExpDbType.SQLServer;
-          //  ExpressionSqlBuilder.DatabaseType = ExpDbType.MySQL;
+            //ExpressionSqlBuilder.DatabaseType = ExpDbType.SQLServer;
+            ExpressionSqlBuilder.DatabaseType = ExpDbType.MySQL;
             //ExpressionSqlBuilder.DatabaseType = ExpDbType.Oracle;
             //ExpressionSqlBuilder.DatabaseType = ExpDbType.SQLite;
             //ExpressionSqlBuilder.DatabaseType = ExpDbType.PostgreSQL;
@@ -94,7 +94,7 @@ namespace Pure.Data.Test
 
             var testID = info.Id;
 
-            FluentExpressionSqlBuilder b = new FluentExpressionSqlBuilder(ExpDbType.SQLServer);
+            FluentExpressionSqlBuilder b = new FluentExpressionSqlBuilder(ExpDbType.MySQL);
             //DbMocker.NewDataBase().FluentSqlBuilder.Select<UserInfo>((p) => new { p })
             //  .Where(p => p.Id > 30)
             //  .OrderBy(p => p.DTCreate)

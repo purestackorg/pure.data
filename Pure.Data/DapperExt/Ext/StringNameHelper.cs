@@ -9,6 +9,27 @@ namespace Pure.Data
     /// </summary>
     public static class StringNameHelper
     {
+        #region 字符串中多个连续空格转为一个空格
+        /// <summary>  
+        /// 字符串中多个连续空格转为一个空格  
+        /// </summary>  
+        /// <param name="str">待处理的字符串</param>  
+        /// <returns>合并空格后的字符串</returns>  
+        public static string MergeSpace(this string str)
+        {
+            if (str != string.Empty &&
+                str != null &&
+                str.Length > 0
+                )
+            {
+                str = new System.Text.RegularExpressions.Regex("[\\s]+").Replace(str, " ");
+            }
+            return str;
+        }
+
+
+        #endregion  
+
         public static string BreakUpCamelCase(this string s)
         {
             var patterns = new[]

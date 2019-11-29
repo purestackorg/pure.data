@@ -42,7 +42,7 @@ namespace Pure.Data.Test
             //ValidationTest.Test();
             //  BackupAndGenTest.Test();
 
-            //PoolingTest.Test();
+            PoolingTest.Test();
         }
     }
 }

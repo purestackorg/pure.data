@@ -78,7 +78,7 @@ namespace Pure.Data
                 }
                 
                 database.LogHelper.Debug("Elapsed:" + database.Watch.ElapsedMilliseconds +" ms");
-                database.Watch.Reset();
+                //database.Watch.Reset();
 
             }
         }

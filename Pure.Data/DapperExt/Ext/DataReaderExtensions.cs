@@ -5,6 +5,7 @@ using System.Data;
 using System.Dynamic;
 using System.Linq;
 using System.Reflection;
+using System.Text;
 
 namespace Pure.Data
 {
@@ -22,12 +23,49 @@ namespace Pure.Data
             return str;//.ToUpper()
         }
 
-        /// <summary>
-        ///  将IDataReader转换为DataTable
-        /// </summary>
-        /// <param name="reader"></param>
-        /// <returns></returns>
-        public static DataTable ToDataTable(this IDataReader reader, bool autoClose = true)
+        public static string ToDbParamsString(this IDataParameterCollection Parameters) {
+            if ( Parameters != null &&  Parameters.Count > 0)
+            {
+                StringBuilder sb = new StringBuilder();
+                //sb.Append("Output Parameters:");
+
+                foreach (IDataParameter p in  Parameters)
+                {
+                    sb.Append(p.ParameterName);
+                    sb.Append("=");
+                    sb.Append(p.Value);
+                    sb.Append("; ");
+                }
+                return sb.ToString();
+            }
+            return "";
+        }
+
+        public static Dictionary<string, object> ToDbParamsDict(this IDataParameterCollection Parameters)
+        {
+            Dictionary<string, object> ps = new Dictionary<string, object>();
+            if (Parameters != null && Parameters.Count > 0)
+            {
+
+                
+                if (Parameters != null &&  Parameters.Count > 0)
+                {
+                    StringBuilder sb = new StringBuilder();
+                    foreach (IDataParameter p in Parameters)
+                    {
+                        ps.Add(p.ParameterName, p.Value);
+                    }
+                }
+            }
+            return ps;
+        }
+
+/// <summary>
+///  将IDataReader转换为DataTable
+/// </summary>
+/// <param name="reader"></param>
+/// <returns></returns>
+public static DataTable ToDataTable(this IDataReader reader, bool autoClose = true)
         {
             try
             {

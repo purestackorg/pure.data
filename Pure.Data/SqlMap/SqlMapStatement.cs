@@ -17,26 +17,7 @@ namespace Pure.Data.SqlMap
     public class SqlMapStatement
     {
         IDatabase database = null;
-        #region 字符串中多个连续空格转为一个空格
-        /// <summary>  
-        /// 字符串中多个连续空格转为一个空格  
-        /// </summary>  
-        /// <param name="str">待处理的字符串</param>  
-        /// <returns>合并空格后的字符串</returns>  
-        public static string MergeSpace(string str)
-        {
-            if (str != string.Empty &&
-                str != null &&
-                str.Length > 0
-                )
-            {
-                str = new System.Text.RegularExpressions.Regex("[\\s]+").Replace(str, " ");
-            }
-            return str;
-        }
-
-
-        #endregion  
+       
         private void Init(IDatabase db)
         {
             database = db;
@@ -62,7 +43,7 @@ namespace Pure.Data.SqlMap
                         }
                         if (database.Config.FormatSql == true)
                         {
-                            _Sql = MergeSpace(_Sql);
+                            _Sql = _Sql.MergeSpace();
 
                         }
                     }
@@ -89,7 +70,7 @@ namespace Pure.Data.SqlMap
                         _SqlWithoutOrderBy = Statement.BuildSql(Context).Trim();
                         if (database.Config.FormatSql == true)
                         {
-                            _SqlWithoutOrderBy = MergeSpace(_SqlWithoutOrderBy);
+                            _SqlWithoutOrderBy = _SqlWithoutOrderBy.MergeSpace();
                         }
 
                     }
@@ -512,7 +493,7 @@ namespace Pure.Data.SqlMap
             sql = Statement.BuildSql(Context).Trim();
             if (formatSql == true)
             {
-                sql = MergeSpace(sql);
+                sql = sql.MergeSpace();
             }
 
             if (!string.IsNullOrEmpty(Context.OrderByText))
@@ -521,7 +502,7 @@ namespace Pure.Data.SqlMap
             }
             if (formatSql == true)
             {
-                sql = MergeSpace(sql);
+                sql = sql.MergeSpace();
 
             }
 
