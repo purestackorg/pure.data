@@ -58,6 +58,7 @@ namespace Pure.Data
 
                 if (!database.Watch.IsRunning)
                 {
+                    database.Watch.Reset();
                     database.Watch.Start();
                 }
             }
