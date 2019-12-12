@@ -73,13 +73,13 @@ namespace Pure.Data
             //{
             //    policyConfig(policy);
             //}
-#if NET45
-            currentDatabaseLocal = new ThreadLocal<PooledDatabase>();
+//#if NET45
+//            currentDatabaseLocal = new ThreadLocal<PooledDatabase>();
 
-#else
-            currentDatabaseLocal = new AsyncLocal<PooledDatabase>();
+//#else
+//            currentDatabaseLocal = new AsyncLocal<PooledDatabase>();
 
-#endif
+//#endif
 
             int maximumRetained = policy.MaxPoolSize;
 
@@ -171,13 +171,13 @@ namespace Pure.Data
             {
                 maximumRetained = Environment.ProcessorCount * 2;
             }
-#if NET45 
-        currentDatabaseLocal = new ThreadLocal<PooledDatabase>();
+//#if NET45 
+//        currentDatabaseLocal = new ThreadLocal<PooledDatabase>();
 
-#else
-        currentDatabaseLocal = new AsyncLocal<PooledDatabase>();
+//#else
+//        currentDatabaseLocal = new AsyncLocal<PooledDatabase>();
 
-#endif
+//#endif
 
 
         Pool = new ObjectPool<PooledDatabase>(maximumRetained, () =>
@@ -188,37 +188,42 @@ namespace Pure.Data
             }
             , evictSetting, null);
         }
-#if NET45 
-        private static ThreadLocal<PooledDatabase> currentDatabaseLocal = null;
+//#if NET45 
+//        private static ThreadLocal<PooledDatabase> currentDatabaseLocal = null;
 
-#else
-               private static AsyncLocal<PooledDatabase> currentDatabaseLocal = null;
+//#else
+//               private static AsyncLocal<PooledDatabase> currentDatabaseLocal = null;
 
-#endif
+//#endif
         public PooledDatabase GetPooledDatabase()
         {
             //PooledDatabase obj = Pool.GetObject();
             ////obj.SetConnectionAlive(true);
             //return obj;
 
-            if (currentDatabaseLocal.Value == null)
-            {
+            PooledDatabase obj = Pool.GetObject();
+            obj?.EnsureConnectionNotNull();
 
-                PooledDatabase obj = Pool.GetObject();
-                currentDatabaseLocal.Value = obj;
+            return obj;
 
-                if (currentDatabaseLocal.Value == null)
-                {
-                    throw new PureDataException("DatabasePool GetPooledDatabase has been null!", null);
-                }
-            }
+            //if (currentDatabaseLocal.Value == null)
+            //{
 
-            if (currentDatabaseLocal.Value != null)
-            {
-                currentDatabaseLocal.Value.EnsureConnectionNotNull();
-            }
+            //    PooledDatabase obj = Pool.GetObject();
+            //    currentDatabaseLocal.Value = obj;
 
-            return currentDatabaseLocal.Value;
+            //    if (currentDatabaseLocal.Value == null)
+            //    {
+            //        throw new PureDataException("DatabasePool GetPooledDatabase has been null!", null);
+            //    }
+            //}
+
+            //if (currentDatabaseLocal.Value != null)
+            //{
+            //    currentDatabaseLocal.Value.EnsureConnectionNotNull();
+            //}
+
+            //return currentDatabaseLocal.Value;
         }
 
 

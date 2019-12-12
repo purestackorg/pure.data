@@ -380,6 +380,13 @@ namespace Pure.Data.Pooling
                     continue;
                 }
 
+                //不是可用的则等待20ms
+                if (pooledObject.PooledObjectInfo.State != PooledObjectState.Available)
+                {
+                    Thread.Sleep(20);
+                    continue;
+                }
+
                 // Change the state of the pooled object, marking it as reserved. We will mark it as
                 // available as soon as the object will return to the pool.
                 pooledObject.PooledObjectInfo.State = PooledObjectState.Reserved;

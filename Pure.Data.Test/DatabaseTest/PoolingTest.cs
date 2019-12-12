@@ -13,7 +13,7 @@ using Pure.Data.Pooling;
 
 namespace Pure.Data.Test
 {
-    public class PoolingTest
+    public class PoolingTest:IDisposable
     {
 
         public static void Test()
@@ -23,7 +23,7 @@ namespace Pure.Data.Test
             string title = "PoolingTest";
             Console.Title = title;
 
-            CodeTimer.Time(title, 30, () =>
+            CodeTimer.Time(title, 5, () =>
             {
                 //TestGetAndReturn();
                 //TestRun();
@@ -33,16 +33,26 @@ namespace Pure.Data.Test
             });
 
 
-            string info = "--------------- databaseWrapperPool --------------- \r\n" +databaseWrapperPool.Pool.ShowStatisticsInfo();
-            info += "\r\n";
-            info += "\r\n";
-            Log(info, null, MessageType.Debug);
+            new Thread(() =>
+            {
 
-             info = "--------------- databasePool --------------- \r\n" +databasePool.Pool.ShowStatisticsInfo();
-            info += "\r\n";
-            info += "\r\n";
+                Thread.Sleep((20000));
 
-            Log(info, null, MessageType.Debug);
+                string info = "--------------- databaseWrapperPool --------------- \r\n" + databaseWrapperPool.Pool.ShowStatisticsInfo();
+                info += "\r\n";
+                info += "\r\n";
+                Log(info, null, MessageType.Debug);
+
+                info = "--------------- databasePool --------------- \r\n" + databasePool.Pool.ShowStatisticsInfo();
+                info += "\r\n";
+                info += "\r\n";
+
+                Log(info, null, MessageType.Debug);
+
+            }).Start();
+
+
+          
             Console.Read();
 
 
@@ -256,29 +266,96 @@ namespace Pure.Data.Test
             //var olist = db11.GetAll<UserInfo>();
 
 
-            var pdb = databasePool.GetPooledDatabase();
-            pdb.RunInAction(() =>
+
+
+            var random = new Random();
+            //var pdb = databasePool.GetPooledDatabase();
+        
+            for (var a = 0; a < 10; a++)
             {
-                pdb.SetConnectionAlive(true);
-                var userinfo9 = pdb.Get<UserInfo>(9);
-                var userinfo = new UserInfo() { Id = 9, Name = "zss", Age = 20, HasDelete = false, StatusCode = 1 };
-                pdb.Insert<UserInfo>(userinfo);
-                userinfo.Role = RoleType.管理员;
-                userinfo.DTCreate = DateTime.Now;
+                new Thread(() =>
+                {
 
-                //pdb.Update(userinfo);
+                    Thread.Sleep(random.Next(100));
 
-                var oo2 = pdb.FirstOrDefault<UserInfo>(p => p.Name == "zss");
-                //var oo4 = pdb.Query<UserInfo>(p => p.Name == "zss");
+                    for (var b = 0; b < 5; b++)
+                    {
 
-                //pdb.Delete<UserInfo>(p => p.Name == "zss");
+                        using (var db = databasePool.GetPooledDatabase())
+                        {
+                       
+                            Log("GetCurrentDatabase:" + db.GetHashCode().ToString(), null);
+                            db.Get<UserInfo>(1);
+                            var id =   db.ExecuteScalar<int>("select 1 from TB_USER");
+                            db.UpdateBySQL("update TB_USER set Name ='2333'  where id=" + id, null);
 
-                //oo2 = pdb.FirstOrDefault<UserInfo>(p => p.Name == "zss");
+                            db.FirstOrDefault<UserInfo>(p=>p.Id == 123);
 
-                //pdb.CommitTransaction();
-                pdb.SetConnectionAlive(true);
+                            db.ExecuteList<UserInfo>("select * from TB_USER");
+                            Thread.Sleep(random.Next(50));
 
-            }); 
+                            db.ExecuteExpandoObjects("select * from TB_USER");
+
+                            Log("ReturnDatabase:" + db.GetHashCode().ToString(), null);
+                        }
+
+                    }
+
+                    for (var b = 0; b < 5; b++)
+                    {
+
+                        Task task = new Task(async ()=> {
+                            using (var db = databasePool.GetPooledDatabase())
+                            {
+                                Log("GetCurrentDatabase:" + db.GetHashCode().ToString(), null);
+                                await db.GetAsync<UserInfo>(1);
+                                var id = db.ExecuteScalar<int>("select 1 from TB_USER");
+                                db.UpdateBySQL("update TB_USER set Name ='2333'  where id=" + id, null);
+
+                                db.FirstOrDefault<UserInfo>(p => p.Id == 123);
+
+                                await db.ExecuteListAsync<UserInfo>("select * from TB_USER");
+                                Thread.Sleep(random.Next(50));
+
+                                await db.ExecuteExpandoObjectsAsync("select * from TB_USER");
+
+                                Log("ReturnDatabase:" + db.GetHashCode().ToString(), null);
+                            }
+                        });
+                        task.Start();
+
+
+
+                    }
+
+                    Log("filish thread:" + a.ToString(), null);
+
+
+                }).Start();
+            }
+
+            //pdb.RunInAction(() =>
+            //{
+            //    pdb.SetConnectionAlive(true);
+            //    var userinfo9 = pdb.Get<UserInfo>(9);
+            //    var userinfo = new UserInfo() { Id = 9, Name = "zss", Age = 20, HasDelete = false, StatusCode = 1 };
+            //    pdb.Insert<UserInfo>(userinfo);
+            //    userinfo.Role = RoleType.管理员;
+            //    userinfo.DTCreate = DateTime.Now;
+
+            //    //pdb.Update(userinfo);
+
+            //    var oo2 = pdb.FirstOrDefault<UserInfo>(p => p.Name == "zss");
+            //    //var oo4 = pdb.Query<UserInfo>(p => p.Name == "zss");
+
+            //    //pdb.Delete<UserInfo>(p => p.Name == "zss");
+
+            //    //oo2 = pdb.FirstOrDefault<UserInfo>(p => p.Name == "zss");
+
+            //    //pdb.CommitTransaction();
+            //    pdb.SetConnectionAlive(true);
+
+            //}); 
 
             //using (var pdb = databasePool.GetPooledDatabase())
             //{
@@ -525,7 +602,18 @@ namespace Pure.Data.Test
 
         }
 
+        public void Dispose()
+        {
+            if (databasePool != null)
+            {
+                databasePool.Dispose();
+            }
 
+            if (databaseWrapperPool != null)
+            {
+                databaseWrapperPool.Dispose();
+            }
+        }
     }
 
 

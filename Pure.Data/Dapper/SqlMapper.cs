@@ -1341,7 +1341,7 @@ this IDbConnection cnn, string sql, object param = null, IDbTransaction transact
                 IDatabase database = command.Database;// DatabaseConfigPool.Get(key);
                 if (database != null && database.Config.EnableIntercept)
                 {
-                    
+
                     foreach (var interceptor in database.Config.Interceptors.OfType<IConnectionInterceptor>())
                     {
                         cnn = interceptor.OnConnectionOpened(database, cnn);
@@ -1391,7 +1391,7 @@ this IDbConnection cnn, string sql, object param = null, IDbTransaction transact
             //   // command.Database.OnConnectionClosingWithIntercept();
             //}
 
-             
+
             IDatabase database = command.Database;
             if (database != null)
             {
@@ -1400,7 +1400,7 @@ this IDbConnection cnn, string sql, object param = null, IDbTransaction transact
                 //    return;
                 //}
 
-           
+
 
 
                 //close reader 
@@ -1429,7 +1429,7 @@ this IDbConnection cnn, string sql, object param = null, IDbTransaction transact
             {
                 if (withClose == true)
                 {
-                    reader.Close(); 
+                    reader.Close();
                 }
                 reader.Dispose();
                 if (setNull == true)
@@ -1439,9 +1439,9 @@ this IDbConnection cnn, string sql, object param = null, IDbTransaction transact
 
             }
         }
-        private static void CloseDbCommand(IDbCommand cmd, CommandDefinition command, bool disposeCommand = true )
+        private static void CloseDbCommand(IDbCommand cmd, CommandDefinition command, bool disposeCommand = true)
         {
-            
+
             //IDatabase database = command.Database;
             //if (database != null)
             //{
@@ -1450,10 +1450,10 @@ this IDbConnection cnn, string sql, object param = null, IDbTransaction transact
             //    //    return;
             //    //}
 
-                
+
 
             //    //close   
-                if (cmd != null && disposeCommand) cmd.Dispose();
+            if (cmd != null && disposeCommand) cmd.Dispose();
 
             //}
         }
@@ -1553,7 +1553,7 @@ this IDbConnection cnn, string sql, object param = null, IDbTransaction transact
             if (multiExec != null)
             {
 #if ASYNC
-                if((command.Flags & CommandFlags.Pipelined) != 0)
+                if ((command.Flags & CommandFlags.Pipelined) != 0)
                 {
                     // this includes all the code for concurrent/overlapped query
                     return ExecuteMultiImplAsync(cnn, command, multiExec).Result;
@@ -1821,13 +1821,17 @@ this IDbConnection cnn, string sql, object param = null, IDbTransaction transact
             bool wasClosed = cnn.State == ConnectionState.Closed;
             try
             {
-                //if (wasClosed) cnn.Open();
-                OpenConnection(cnn, command);
-                cmd = command.SetupCommand(cnn, info.ParamReader);
+                lock (cnn)
+                {
+                    //if (wasClosed) cnn.Open();
+                    OpenConnection(cnn, command);
+                    cmd = command.SetupCommand(cnn, info.ParamReader);
 
-                DoPreExecute(cnn, cmd, command);
-                reader = cmd.ExecuteReader(wasClosed ? CommandBehavior.CloseConnection | CommandBehavior.SequentialAccess : CommandBehavior.SequentialAccess);
-                DoPostExecute(cnn, cmd, command);
+                    DoPreExecute(cnn, cmd, command);
+                    reader = cmd.ExecuteReader(wasClosed ? CommandBehavior.CloseConnection | CommandBehavior.SequentialAccess : CommandBehavior.SequentialAccess);
+                    DoPostExecute(cnn, cmd, command);
+                }
+
 
                 var result = new GridReader(cmd, reader, identity, command.Parameters as DynamicParameters, command.AddToCache);
                 cmd = null; // now owned by result
@@ -1868,100 +1872,110 @@ this IDbConnection cnn, string sql, object param = null, IDbTransaction transact
 
             }
         }
-        //private static object olockQueryImpl = new object();
+       private static object olockQueryImpl = new object();
         private static IEnumerable<T> QueryImpl<T>(this IDbConnection cnn, CommandDefinition command, Type effectiveType)
         {
+
             //lock (cnn)
             //{
-                object param = command.Parameters;
-                var identity = new Identity(command.CommandText, command.CommandType, cnn, effectiveType, param == null ? null : param.GetType(), null);
-                var info = GetCacheInfo(identity, param, command.AddToCache);
+            object param = command.Parameters;
+            var identity = new Identity(command.CommandText, command.CommandType, cnn, effectiveType, param == null ? null : param.GetType(), null);
+            var info = GetCacheInfo(identity, param, command.AddToCache);
 
-                IDbCommand cmd = null;
-                IDataReader reader = null;
+            IDbCommand cmd = null;
+            IDataReader reader = null;
 
-                bool wasClosed = cnn.State == ConnectionState.Closed;
-                try
+            bool wasClosed = cnn.State == ConnectionState.Closed;
+            try
+            {
+
+
+
+                lock (cnn)
                 {
                     cmd = command.SetupCommand(cnn, info.ParamReader);
                     try
                     {
-                     
-                        //if (wasClosed) cnn.Open();
-                        OpenConnection(cnn, command);
-                        DoPreExecute(cnn, cmd, command);
-                        reader = cmd.ExecuteReader(wasClosed ? CommandBehavior.CloseConnection | CommandBehavior.SequentialAccess : CommandBehavior.SequentialAccess);
-                        DoPostExecute(cnn, cmd, command);
-                    
-                    
+                        lock (olockQueryImpl)
+                        {
+                            //if (wasClosed) cnn.Open();
+                            OpenConnection(cnn, command);
+                            DoPreExecute(cnn, cmd, command);
+                            reader = cmd.ExecuteReader(wasClosed ? CommandBehavior.CloseConnection | CommandBehavior.SequentialAccess : CommandBehavior.SequentialAccess);
+                            DoPostExecute(cnn, cmd, command);
+                        }
+                      
                     }
                     catch (Exception x)
                     {
                         OnExceptionInternal(cnn, x, command);
                     }
-
-                    //wasClosed = false; // *if* the connection was closed and we got this far, then we now have a reader
-                    // with the CloseConnection flag, so the reader will deal with the connection; we
-                    // still need something in the "finally" to ensure that broken SQL still results
-                    // in the connection closing itself
-                    var tuple = info.Deserializer;
-                    int hash = GetColumnHash(reader);
-                    if (tuple.Func == null || tuple.Hash != hash)
-                    {
-                        if (reader.FieldCount == 0) //https://code.google.com/p/dapper-dot-net/issues/detail?id=57
-                            yield break;
-                        tuple = info.Deserializer = new DeserializerState(hash, GetDeserializer(effectiveType, reader, 0, -1, false));
-                        if (command.AddToCache) SetQueryCache(identity, info);
-                    }
-
-                    var func = tuple.Func;
-                    var convertToType = Nullable.GetUnderlyingType(effectiveType) ?? effectiveType;
-                    while (reader.Read())
-                    {
-                        object val = func(reader);
-                        if (val == null || val is T)
-                        {
-                            yield return (T)val;
-                        }
-                        else
-                        {
-                            yield return (T)Convert.ChangeType(val, convertToType, CultureInfo.InvariantCulture);
-                        }
-                    }
-                    while (reader.NextResult()) { }
-                    // happy path; close the reader cleanly - no
-                    // need for "Cancel" etc
-                    //reader.Dispose();
-                    //reader = null;
-                    CloseDataReader(reader, command, false, true);
-
-                    command.OnCompleted();
                 }
-                finally
+
+                 
+
+                //wasClosed = false; // *if* the connection was closed and we got this far, then we now have a reader
+                // with the CloseConnection flag, so the reader will deal with the connection; we
+                // still need something in the "finally" to ensure that broken SQL still results
+                // in the connection closing itself
+                var tuple = info.Deserializer;
+                int hash = GetColumnHash(reader);
+                if (tuple.Func == null || tuple.Hash != hash)
                 {
-                    if (reader != null)
+                    if (reader.FieldCount == 0) //https://code.google.com/p/dapper-dot-net/issues/detail?id=57
+                        yield break;
+                    tuple = info.Deserializer = new DeserializerState(hash, GetDeserializer(effectiveType, reader, 0, -1, false));
+                    if (command.AddToCache) SetQueryCache(identity, info);
+                }
+
+                var func = tuple.Func;
+                var convertToType = Nullable.GetUnderlyingType(effectiveType) ?? effectiveType;
+                while (reader.Read())
+                {
+                    object val = func(reader);
+                    if (val == null || val is T)
                     {
-                        if (!reader.IsClosed) try { cmd.Cancel(); }
-                            catch { /* don't spoil the existing exception */ }
-                        //reader.Dispose();
-                        CloseDataReader(reader, command, false, false);
-                    }
-                    //if (wasClosed) cnn.Close();
-                    if (TransactionIsOk(command.Transaction))
-                    {
-                        //不能关闭链接，否则导致事务失败
+                        yield return (T)val;
                     }
                     else
                     {
-                        CloseConnection(cnn, command, wasClosed);
+                        yield return (T)Convert.ChangeType(val, convertToType, CultureInfo.InvariantCulture);
                     }
+                }
+                while (reader.NextResult()) { }
+                // happy path; close the reader cleanly - no
+                // need for "Cancel" etc
+                //reader.Dispose();
+                //reader = null;
+                CloseDataReader(reader, command, false, true);
+
+                command.OnCompleted();
+            }
+            finally
+            {
+                if (reader != null)
+                {
+                    if (!reader.IsClosed) try { cmd.Cancel(); }
+                        catch { /* don't spoil the existing exception */ }
+                    //reader.Dispose();
+                    CloseDataReader(reader, command, false, false);
+                }
+                //if (wasClosed) cnn.Close();
+                if (TransactionIsOk(command.Transaction))
+                {
+                    //不能关闭链接，否则导致事务失败
+                }
+                else
+                {
+                    CloseConnection(cnn, command, wasClosed);
+                }
 
 
-                    //if (cmd != null) cmd.Dispose();
-                        CloseDbCommand(cmd, command);
+                //if (cmd != null) cmd.Dispose();
+                CloseDbCommand(cmd, command);
             }
             //}
-           
+
         }
 
         /// <summary>
@@ -2177,12 +2191,16 @@ this IDbConnection cnn, string sql, Func<TFirst, TSecond, TThird, TFourth, TRetu
                     ownedCommand = command.SetupCommand(cnn, cinfo.ParamReader);
                     try
                     {
-                        //if (wasClosed) cnn.Open();
-                        OpenConnection(cnn, command);
-                        DoPreExecute(cnn, ownedCommand, command);
-                        ownedReader = ownedCommand.ExecuteReader(wasClosed ? CommandBehavior.CloseConnection | CommandBehavior.SequentialAccess : CommandBehavior.SequentialAccess);
-                        DoPostExecute(cnn, ownedCommand, command);
-                        reader = ownedReader;
+                        lock (cnn)
+                        {
+                            //if (wasClosed) cnn.Open();
+                            OpenConnection(cnn, command);
+                            DoPreExecute(cnn, ownedCommand, command);
+                            ownedReader = ownedCommand.ExecuteReader(wasClosed ? CommandBehavior.CloseConnection | CommandBehavior.SequentialAccess : CommandBehavior.SequentialAccess);
+                            DoPostExecute(cnn, ownedCommand, command);
+                            reader = ownedReader;
+                        }
+
                     }
                     catch (Exception x)
                     {
@@ -2270,14 +2288,18 @@ this IDbConnection cnn, string sql, Func<TFirst, TSecond, TThird, TFourth, TRetu
                     ownedCommand = command.SetupCommand(cnn, cinfo.ParamReader);
                     try
                     {
-                        //if (wasClosed) cnn.Open();
-                        OpenConnection(cnn, command);
-                        DoPreExecute(cnn, ownedCommand, command);
+                        lock (cnn)
+                        {
+                            //if (wasClosed) cnn.Open();
+                            OpenConnection(cnn, command);
+                            DoPreExecute(cnn, ownedCommand, command);
 
-                        ownedReader = ownedCommand.ExecuteReader();
-                        DoPostExecute(cnn, ownedCommand, command);
+                            ownedReader = ownedCommand.ExecuteReader();
+                            DoPostExecute(cnn, ownedCommand, command);
 
-                        reader = ownedReader;
+                            reader = ownedReader;
+                        }
+
                     }
                     catch (Exception x)
                     {
@@ -3819,7 +3841,7 @@ this IDbConnection cnn, string sql, Func<TFirst, TSecond, TThird, TFourth, TRetu
                 }
 
                 CloseDbCommand(cmd, command);
-               // if (cmd != null) cmd.Dispose();
+                // if (cmd != null) cmd.Dispose();
             }
         }
 
@@ -3879,17 +3901,24 @@ this IDbConnection cnn, string sql, Func<TFirst, TSecond, TThird, TFourth, TRetu
             try
             {
                 cmd = command.SetupCommand(cnn, paramReader);
-                //if (wasClosed) cnn.Open();
-                OpenConnection(cnn, command);
-                if (wasClosed) commandBehavior |= CommandBehavior.CloseConnection;
-                DoPreExecute(cnn, cmd, command);
-                var reader = cmd.ExecuteReader(commandBehavior);
-                DoPostExecute(cnn, cmd, command);
+                lock (cnn)
+                {
+                    //if (wasClosed) cnn.Open();
+                    OpenConnection(cnn, command);
+                    if (wasClosed) commandBehavior |= CommandBehavior.CloseConnection;
+                    DoPreExecute(cnn, cmd, command);
+                    var reader = cmd.ExecuteReader(commandBehavior);
+                    DoPostExecute(cnn, cmd, command);
 
-                wasClosed = false; // don't dispose before giving it to them!
-                disposeCommand = false;
-                // note: command.FireOutputCallbacks(); would be useless here; parameters come at the **end** of the TDS stream
-                return reader;
+                    wasClosed = false; // don't dispose before giving it to them!
+                    disposeCommand = false;
+                    // note: command.FireOutputCallbacks(); would be useless here; parameters come at the **end** of the TDS stream
+                    return reader;
+
+                }
+
+
+
             }
             catch (Exception x)
             {
@@ -5580,7 +5609,7 @@ string name, object value = null, DbType? dbType = null, ParameterDirection? dir
         }
     }
 #if !DNXCORE50
-    sealed class DataTableHandler :  SqlMapper.ITypeHandler
+    sealed class DataTableHandler : SqlMapper.ITypeHandler
     {
         public object Parse(Type destinationType, object value)
         {
@@ -6444,7 +6473,7 @@ string name, object value = null, DbType? dbType = null, ParameterDirection? dir
             if (reader != null) reader.Dispose();
             reader = null;
 
-            
+
             if (cmd != null) cmd.Dispose();
             cmd = null;
         }

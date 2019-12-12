@@ -186,7 +186,8 @@ namespace Pure.Data
         //    }
         //}
         #endregion
-
+ 
+        static readonly AsyncLock _AsyncLock = new AsyncLock();
         /// <summary>
         /// Execute a query asynchronously using .NET 4.5 Task.
         /// </summary>
@@ -252,11 +253,19 @@ namespace Pure.Data
                 {
                     try
                     {
-                        //if (wasClosed) await ((DbConnection)cnn).OpenAsync(cancel).ConfigureAwait(false);
-                        await OpenConnectionAsync(cnn, command);
-                        DoPreExecute(cnn, cmd, command);
-                        reader = await cmd.ExecuteReaderAsync(wasClosed ? CommandBehavior.CloseConnection | CommandBehavior.SequentialAccess : CommandBehavior.SequentialAccess, cancel).ConfigureAwait(false);
-                        DoPostExecute(cnn, cmd, command);
+                        
+
+                        using (await _AsyncLock)
+                        {
+                            //if (wasClosed) await ((DbConnection)cnn).OpenAsync(cancel).ConfigureAwait(false);
+                            await OpenConnectionAsync(cnn, command);
+                            DoPreExecute(cnn, cmd, command);
+                            reader = await cmd.ExecuteReaderAsync(wasClosed ? CommandBehavior.CloseConnection | CommandBehavior.SequentialAccess : CommandBehavior.SequentialAccess, cancel).ConfigureAwait(false);
+                            DoPostExecute(cnn, cmd, command);
+                        }
+                    
+                         
+                      
                     }
                     catch (Exception x)
                     {
@@ -697,23 +706,27 @@ namespace Pure.Data
             IEnumerable<TReturn> result = null;
             try
             {
-                //if (wasClosed) await ((DbConnection)cnn).OpenAsync(command.CancellationToken).ConfigureAwait(false);
-                await OpenConnectionAsync(cnn, command);
-
-                using (var cmd = (DbCommand)command.SetupCommand(cnn, info.ParamReader))
+                using (await _AsyncLock)
                 {
-                    DoPreExecute(cnn, cmd, command);
-                    using (var reader = await cmd.ExecuteReaderAsync(wasClosed ? CommandBehavior.CloseConnection | CommandBehavior.SequentialAccess : CommandBehavior.SequentialAccess, command.CancellationToken).ConfigureAwait(false))
+                    //if (wasClosed) await ((DbConnection)cnn).OpenAsync(command.CancellationToken).ConfigureAwait(false);
+                    await OpenConnectionAsync(cnn, command);
+
+                    using (var cmd = (DbCommand)command.SetupCommand(cnn, info.ParamReader))
                     {
-                        DoPostExecute(cnn, cmd, command);
+                        DoPreExecute(cnn, cmd, command);
+                        using (var reader = await cmd.ExecuteReaderAsync(wasClosed ? CommandBehavior.CloseConnection | CommandBehavior.SequentialAccess : CommandBehavior.SequentialAccess, command.CancellationToken).ConfigureAwait(false))
+                        {
+                            DoPostExecute(cnn, cmd, command);
 
-                        if (!command.Buffered) wasClosed = false; // handing back open reader; rely on command-behavior
-                        var results = MultiMapImpl<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TReturn>(null, CommandDefinition.ForCallback(command.Parameters), map, splitOn, reader, identity, true);
-                        result = command.Buffered ? results.ToList() : results;
-                        return result;
+                            if (!command.Buffered) wasClosed = false; // handing back open reader; rely on command-behavior
+                            var results = MultiMapImpl<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TReturn>(null, CommandDefinition.ForCallback(command.Parameters), map, splitOn, reader, identity, true);
+                            result = command.Buffered ? results.ToList() : results;
+                            return result;
+                        }
+
                     }
-
                 }
+                
                 
             }
             catch (Exception x)
@@ -771,23 +784,26 @@ namespace Pure.Data
             IEnumerable<TReturn> result = null;
             try
             {
-
-                //if (wasClosed) await ((DbConnection)cnn).OpenAsync().ConfigureAwait(false);
-                await OpenConnectionAsync(cnn, command);
-
-                using (var cmd = (DbCommand)command.SetupCommand(cnn, info.ParamReader))
+                using (await _AsyncLock)
                 {
-                    DoPreExecute(cnn, cmd, command);
+                    //if (wasClosed) await ((DbConnection)cnn).OpenAsync().ConfigureAwait(false);
+                    await OpenConnectionAsync(cnn, command);
 
-                    using (var reader = await cmd.ExecuteReaderAsync(command.CancellationToken).ConfigureAwait(false))
+                    using (var cmd = (DbCommand)command.SetupCommand(cnn, info.ParamReader))
                     {
-                        DoPostExecute(cnn, cmd, command);
+                        DoPreExecute(cnn, cmd, command);
 
-                        var results = MultiMapImpl<TReturn>(null, default(CommandDefinition), types, map, splitOn, reader, identity, true);
-                        result= command.Buffered ? results.ToList() : results;
-                        return result;
+                        using (var reader = await cmd.ExecuteReaderAsync(command.CancellationToken).ConfigureAwait(false))
+                        {
+                            DoPostExecute(cnn, cmd, command);
+
+                            var results = MultiMapImpl<TReturn>(null, default(CommandDefinition), types, map, splitOn, reader, identity, true);
+                            result = command.Buffered ? results.ToList() : results;
+                            return result;
+                        }
                     }
                 }
+               
                
             }
             catch (Exception x)
@@ -957,20 +973,24 @@ this IDbConnection cnn, string sql, object param, IDbTransaction transaction, in
             bool wasClosed = cnn.State == ConnectionState.Closed;
             try
             {
-                //if (wasClosed) await ((DbConnection)cnn).OpenAsync(command.CancellationToken).ConfigureAwait(false);
-                await OpenConnectionAsync(cnn, command);
+                using (await _AsyncLock)
+                {
+                    //if (wasClosed) await ((DbConnection)cnn).OpenAsync(command.CancellationToken).ConfigureAwait(false);
+                    await OpenConnectionAsync(cnn, command);
 
-                cmd = (DbCommand)command.SetupCommand(cnn, info.ParamReader);
-                DoPreExecute(cnn, cmd, command);
-                reader = await cmd.ExecuteReaderAsync(wasClosed ? CommandBehavior.CloseConnection | CommandBehavior.SequentialAccess : CommandBehavior.SequentialAccess, command.CancellationToken).ConfigureAwait(false);
-                DoPostExecute(cnn, cmd, command);
+                    cmd = (DbCommand)command.SetupCommand(cnn, info.ParamReader);
+                    DoPreExecute(cnn, cmd, command);
+                    reader = await cmd.ExecuteReaderAsync(wasClosed ? CommandBehavior.CloseConnection | CommandBehavior.SequentialAccess : CommandBehavior.SequentialAccess, command.CancellationToken).ConfigureAwait(false);
+                    DoPostExecute(cnn, cmd, command);
 
-                var result = new GridReader(cmd, reader, identity, command.Parameters as DynamicParameters, command.AddToCache, command.CancellationToken);
-                wasClosed = false; // *if* the connection was closed and we got this far, then we now have a reader
-                // with the CloseConnection flag, so the reader will deal with the connection; we
-                // still need something in the "finally" to ensure that broken SQL still results
-                // in the connection closing itself
-                return result;
+                    var result = new GridReader(cmd, reader, identity, command.Parameters as DynamicParameters, command.AddToCache, command.CancellationToken);
+                    wasClosed = false; // *if* the connection was closed and we got this far, then we now have a reader
+                                       // with the CloseConnection flag, so the reader will deal with the connection; we
+                                       // still need something in the "finally" to ensure that broken SQL still results
+                                       // in the connection closing itself
+                    return result;
+                }
+             
             }
             catch (Exception x)
             {
@@ -1055,16 +1075,21 @@ this IDbConnection cnn, string sql, dynamic param = null, IDbTransaction transac
             bool disposeCommand = true;
             try
             {
-                cmd = (DbCommand)command.SetupCommand(cnn, paramReader);
-                //if (wasClosed) await ((DbConnection)cnn).OpenAsync(command.CancellationToken).ConfigureAwait(false);
-                await OpenConnectionAsync(cnn, command);
-                DoPreExecute(cnn, cmd, command);
-                var reader = await cmd.ExecuteReaderAsync(wasClosed ? CommandBehavior.CloseConnection | CommandBehavior.SequentialAccess : CommandBehavior.SequentialAccess, command.CancellationToken).ConfigureAwait(false);
-                DoPostExecute(cnn, cmd, command);
 
-                wasClosed = false;
-                disposeCommand = false;
-                return reader;
+                using (await _AsyncLock)
+                {
+                    cmd = (DbCommand)command.SetupCommand(cnn, paramReader);
+                    //if (wasClosed) await ((DbConnection)cnn).OpenAsync(command.CancellationToken).ConfigureAwait(false);
+                    await OpenConnectionAsync(cnn, command);
+                    DoPreExecute(cnn, cmd, command);
+                    var reader = await cmd.ExecuteReaderAsync(wasClosed ? CommandBehavior.CloseConnection | CommandBehavior.SequentialAccess : CommandBehavior.SequentialAccess, command.CancellationToken).ConfigureAwait(false);
+                    DoPostExecute(cnn, cmd, command);
+
+                    wasClosed = false;
+                    disposeCommand = false;
+                    return reader;
+                }
+               
             }
             catch (Exception x)
             {
