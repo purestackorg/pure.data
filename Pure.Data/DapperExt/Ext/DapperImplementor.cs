@@ -64,7 +64,7 @@ namespace Pure.Data
             IClassMapper classMap = SqlGenerator.Configuration.GetMap<T>();
             IPredicate predicate = GetIdPredicate(classMap, id);
 
-            T result = GetList<T>(connection, classMap, predicate, null, transaction, commandTimeout, true).FirstOrDefault();
+            T result = Get<T>(connection, classMap, predicate, null, transaction, commandTimeout, true); // GetList<T>(connection, classMap, predicate, null, transaction, commandTimeout, true).FirstOrDefault();
             return result;
         }
 
@@ -715,7 +715,36 @@ namespace Pure.Data
 			
         }
 
+        protected T Get<T>(IDbConnection connection, IClassMapper classMap, IPredicate predicate, IList<ISort> sort, IDbTransaction transaction, int? commandTimeout, bool buffered) where T : class
+        {
+            try
+            {
 
+                Dictionary<string, object> parameters = new Dictionary<string, object>();
+                string sql = SqlGenerator.Select(classMap, predicate, sort, parameters);
+                DynamicParameters dynamicParameters = new DynamicParameters();
+                foreach (var parameter in parameters)
+                {
+                    dynamicParameters.Add(parameter.Key, parameter.Value);
+                }
+
+                return connection.QueryFirstOrDefault<T>(sql, dynamicParameters, transaction, commandTimeout, CommandType.Text, Database);
+            }
+            catch (Exception ex)
+            {
+
+                throw new PureDataException("DapperImplementor", ex);
+            }
+            finally
+            {
+                if (Database != null)
+                {
+                    Database.Close();
+                }
+            }
+
+
+        }
 
 
 

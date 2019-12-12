@@ -36,6 +36,7 @@ namespace Pure.Data
         IDictionary<string, object> ExecuteDictionary(string sql, object param = null, IDbTransaction transaction = null, int? commandTimeout = null, CommandType? commandType = null);
         dynamic ExecuteExpandoObject(string sql, object param = null, IDbTransaction transaction = null, int? commandTimeout = null, CommandType? commandType = null);
         IEnumerable<dynamic> ExecuteExpandoObjects(string sql, object param = null, IDbTransaction transaction = null, int? commandTimeout = null, CommandType? commandType = null);
+        T SqlQueryFirstOrDefault<T>(string sql, object param = null, IDbTransaction transaction = null, int? commandTimeout = null, CommandType? commandType = null);
         IEnumerable<T> SqlQuery<T>(string sql, object param = null, IDbTransaction transaction = null, bool buffer = true, int? commandTimeout = null, CommandType? commandType = null);
 
         bool HasActiveTransaction { get; }

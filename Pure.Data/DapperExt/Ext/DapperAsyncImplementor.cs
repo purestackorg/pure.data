@@ -555,7 +555,8 @@ namespace Pure.Data
             
                 IClassMapper classMap = SqlGenerator.Configuration.GetMap<T>();
                 IPredicate predicate = GetIdPredicate(classMap, id);
-                return (await GetListAsync<T>(connection, classMap, predicate, null, transaction, commandTimeout)).FirstOrDefault();
+                //return (await GetListAsync<T>(connection, classMap, predicate, null, transaction, commandTimeout)).FirstOrDefault();
+            return (await GetAsync<T>(connection, classMap, predicate, null, transaction, commandTimeout)) ;
            
         }
 
@@ -745,7 +746,35 @@ namespace Pure.Data
                 }
             }
         }
+        protected async Task<T> GetAsync<T>(IDbConnection connection, IClassMapper classMap, IPredicate predicate, IList<ISort> sort, IDbTransaction transaction, int? commandTimeout) where T : class
+        {
+            try
+            {
 
+                Dictionary<string, object> parameters = new Dictionary<string, object>();
+                string sql = SqlGenerator.Select(classMap, predicate, sort, parameters);
+                DynamicParameters dynamicParameters = new DynamicParameters();
+                foreach (var parameter in parameters)
+                {
+                    dynamicParameters.Add(parameter.Key, parameter.Value);
+                }
+
+                //return await connection.QueryAsync<T>(sql, dynamicParameters, transaction, commandTimeout, CommandType.Text, Database);
+                return await connection.QueryFirstOrDefaultAsync<T>(sql, dynamicParameters, transaction, commandTimeout, CommandType.Text, Database);
+
+            }
+            catch (Exception ex)
+            {
+                throw new PureDataException("DapperImplementorAsync", ex);
+            }
+            finally
+            {
+                if (Database != null)
+                {
+                    Database.Close();
+                }
+            }
+        }
         /// <summary>
         /// The asynchronous counterpart to <see cref="IDapperImplementor.GetPage{T}"/>.
         /// </summary>

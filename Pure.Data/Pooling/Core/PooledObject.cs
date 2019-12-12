@@ -61,7 +61,7 @@ namespace Pure.Data.Pooling
                 {
                     OnResetState(this);
 
-                    this.PooledObjectInfo.LastOperateTime = DateTime.UtcNow;
+                    this.PooledObjectInfo.LastOperateTime = DateTime.Now;
                 }
                 catch (Exception ex)
                 {

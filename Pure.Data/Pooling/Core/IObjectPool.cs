@@ -367,6 +367,7 @@ namespace Pure.Data.Pooling
                 }
                 else
                 {
+                    
                     // This should not happen normally, but could be happening when there is stress
                     // on the pool. No available objects in pool, create a new one and return it to
                     // the caller.
@@ -380,12 +381,12 @@ namespace Pure.Data.Pooling
                     continue;
                 }
 
-                //不是可用的则等待20ms
-                if (pooledObject.PooledObjectInfo.State != PooledObjectState.Available)
-                {
-                    Thread.Sleep(20);
-                    continue;
-                }
+                ////不是可用的则等待20ms
+                //if (pooledObject.PooledObjectInfo.State != PooledObjectState.Available)
+                //{
+                //    Thread.Sleep(20);
+                //    continue;
+                //}
 
                 // Change the state of the pooled object, marking it as reserved. We will mark it as
                 // available as soon as the object will return to the pool.
@@ -658,7 +659,7 @@ namespace Pure.Data.Pooling
             newObject.PooledObjectInfo.Id = Interlocked.Increment(ref _lastPooledObjectId);
             newObject.PooledObjectInfo.State = PooledObjectState.Available;
             newObject.PooledObjectInfo.Handle = this;
-            newObject.PooledObjectInfo.LastOperateTime = DateTime.UtcNow;
+            newObject.PooledObjectInfo.LastOperateTime = DateTime.Now;
 
             CreatedObjects.TryEnqueue(newObject);//加入创建的队列
 

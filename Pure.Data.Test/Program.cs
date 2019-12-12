@@ -30,7 +30,7 @@ namespace Pure.Data.Test
             //InterceptTest.Test();
             //FluentExpressionSqlBuilderTest.Test();
             //ClassMapTest.Test();
-            // PerformanceTest.Test();
+             PerformanceTest.Test();
             //DDDTest.Test();
             //DIContainerAndSqlQueryTest.Test();
             //SqlMapTest.Test();
@@ -42,7 +42,7 @@ namespace Pure.Data.Test
             //ValidationTest.Test();
             //  BackupAndGenTest.Test();
 
-            PoolingTest.Test();
+            //PoolingTest.Test();
         }
     }
 }

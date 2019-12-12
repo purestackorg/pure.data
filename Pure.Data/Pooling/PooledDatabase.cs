@@ -911,17 +911,22 @@ namespace Pure.Data
 
             try
             {
-
-                var result = ExecuteReader(sql, param, transaction, commandTimeout, commandType);
-                if (result != null)
+                if (transaction == null)
                 {
-
-                    T data = result.ToModel<T>(true, this);
-
-                    return data;
+                    transaction = Transaction;
                 }
-                else
-                    return default(T);
+                return Connection.QueryFirstOrDefault<T>(sql, param, transaction, commandTimeout, commandType, this);
+
+                //var result = ExecuteReader(sql, param, transaction, commandTimeout, commandType);
+                //if (result != null)
+                //{
+
+                //    T data = result.ToModel<T>(true, this);
+
+                //    return data;
+                //}
+                //else
+                //    return default(T);
             }
             catch (Exception ex)
             {
@@ -1162,6 +1167,28 @@ namespace Pure.Data
         #endregion
 
         #region Query
+        public T SqlQueryFirstOrDefault<T>(string sql, object param = null, IDbTransaction transaction = null, int? commandTimeout = null, CommandType? commandType = null)
+        {
+
+            try
+            {
+
+                if (transaction == null)
+                {
+                    transaction = Transaction;
+                }
+                return Connection.QueryFirstOrDefault<T>(sql, param, transaction, commandTimeout, commandType, this);
+            }
+            catch (Exception ex)
+            {
+                throw new PureDataException("SqlQueryFirstOrDefault", ex);
+
+            }
+            finally
+            {
+                Close();
+            }
+        }
         public IEnumerable<T> SqlQuery<T>(string sql, object param = null, IDbTransaction transaction = null, bool buffer = true, int? commandTimeout = null, CommandType? commandType = null)
         {
 
@@ -2049,7 +2076,11 @@ namespace Pure.Data
 
         public TEntity FirstOrDefault<TEntity>(Expression<Func<TEntity, bool>> condition) where TEntity : class
         {
-            return Query<TEntity>(condition).FirstOrDefault();
+            EnsureAddClassToTableMap<TEntity>();
+            string sql = FluentSqlBuilder.Select<TEntity>().Where(condition).ToSqlString();
+
+            return this.SqlQueryFirstOrDefault<TEntity>(sql);
+            //return Query<TEntity>(condition).FirstOrDefault();
         }
         public IEnumerable<TEntity> Query<TEntity>(Expression<Func<TEntity, bool>> condition) where TEntity : class
         {

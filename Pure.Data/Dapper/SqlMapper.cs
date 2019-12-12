@@ -288,6 +288,72 @@ namespace Pure.Data
             /// Specifies the default Command Timeout for all Queries
             /// </summary>
             public static int? CommandTimeout { get; set; }
+
+
+            // disable single result by default; prevents errors AFTER the select being detected properly
+            private const CommandBehavior DefaultAllowedCommandBehaviors = ~CommandBehavior.SingleResult;
+            internal static CommandBehavior AllowedCommandBehaviors { get; private set; } = DefaultAllowedCommandBehaviors;
+            private static void SetAllowedCommandBehaviors(CommandBehavior behavior, bool enabled)
+            {
+                if (enabled) AllowedCommandBehaviors |= behavior;
+                else AllowedCommandBehaviors &= ~behavior;
+            }
+            /// <summary>
+            /// Gets or sets whether Dapper should use the CommandBehavior.SingleResult optimization
+            /// </summary>
+            /// <remarks>Note that a consequence of enabling this option is that errors that happen <b>after</b> the first select may not be reported</remarks>
+            public static bool UseSingleResultOptimization
+            {
+                get { return (AllowedCommandBehaviors & CommandBehavior.SingleResult) != 0; }
+                set { SetAllowedCommandBehaviors(CommandBehavior.SingleResult, value); }
+            }
+            /// <summary>
+            /// Gets or sets whether Dapper should use the CommandBehavior.SingleRow optimization
+            /// </summary>
+            /// <remarks>Note that on some DB providers this optimization can have adverse performance impact</remarks>
+            public static bool UseSingleRowOptimization
+            {
+                get { return (AllowedCommandBehaviors & CommandBehavior.SingleRow) != 0; }
+                set { SetAllowedCommandBehaviors(CommandBehavior.SingleRow, value); }
+            }
+
+            internal static bool DisableCommandBehaviorOptimizations(CommandBehavior behavior, Exception ex)
+            {
+                if (AllowedCommandBehaviors == DefaultAllowedCommandBehaviors
+                    && (behavior & (CommandBehavior.SingleResult | CommandBehavior.SingleRow)) != 0)
+                {
+                    if (ex.Message.Contains(nameof(CommandBehavior.SingleResult))
+                        || ex.Message.Contains(nameof(CommandBehavior.SingleRow)))
+                    { // some providers just just allow these, so: try again without them and stop issuing them
+                        SetAllowedCommandBehaviors(CommandBehavior.SingleResult | CommandBehavior.SingleRow, false);
+                        return true;
+                    }
+                }
+                return false;
+            }
+
+            /// <summary>
+            /// Indicates whether nulls in data are silently ignored (default) vs actively applied and assigned to members
+            /// </summary>
+            public static bool ApplyNullValues { get; set; }
+
+            /// <summary>
+            /// Should list expansions be padded with null-valued parameters, to prevent query-plan saturation? For example,
+            /// an 'in @foo' expansion with 7, 8 or 9 values will be sent as a list of 10 values, with 3, 2 or 1 of them null.
+            /// The padding size is relative to the size of the list; "next 10" under 150, "next 50" under 500,
+            /// "next 100" under 1500, etc.
+            /// </summary>
+            /// <remarks>
+            /// Caution: this should be treated with care if your DB provider (or the specific configuration) allows for null
+            /// equality (aka "ansi nulls off"), as this may change the intent of your query; as such, this is disabled by 
+            /// default and must be enabled.
+            /// </remarks>
+            public static bool PadListExpansions { get; set; }
+            /// <summary>
+            /// If set (non-negative), when performing in-list expansions of integer types ("where id in @ids", etc), switch to a string_split based
+            /// operation if there are more than this many elements. Note that this feautre requires SQL Server 2016 / compatibility level 130 (or above).
+            /// </summary>
+            public static int InListStringSplitCount { get; set; } = -1;
         }
 
         /// <summary>
@@ -1788,6 +1854,439 @@ this IDbConnection cnn, Type type, string sql, object param = null, IDbTransacti
         }
 
 
+        #region QuerySingleOrDefault
+        [Flags]
+        internal enum Row
+        {
+            First = 0,
+            FirstOrDefault = 1, //  & FirstOrDefault != 0: allow zero rows
+            Single = 2, // & Single != 0: demand at least one row
+            SingleOrDefault = 3
+        }
+        /// <summary>
+        /// Return a dynamic object with properties matching the columns.
+        /// </summary>
+        /// <param name="cnn">The connection to query on.</param>
+        /// <param name="sql">The SQL to execute for the query.</param>
+        /// <param name="param">The parameters to pass, if any.</param>
+        /// <param name="transaction">The transaction to use, if any.</param>
+        /// <param name="commandTimeout">The command timeout (in seconds).</param>
+        /// <param name="commandType">The type of command to execute.</param>
+        /// <remarks>Note: the row can be accessed via "dynamic", or by casting to an IDictionary&lt;string,object&gt;</remarks>
+        public static dynamic QueryFirst(this IDbConnection cnn, string sql, object param = null, IDbTransaction transaction = null, int? commandTimeout = null, CommandType? commandType = null, IDatabase database = null) =>
+            QueryFirst<DapperRow>(cnn, sql, param as object, transaction, commandTimeout, commandType, database);
+
+        /// <summary>
+        /// Return a dynamic object with properties matching the columns.
+        /// </summary>
+        /// <param name="cnn">The connection to query on.</param>
+        /// <param name="sql">The SQL to execute for the query.</param>
+        /// <param name="param">The parameters to pass, if any.</param>
+        /// <param name="transaction">The transaction to use, if any.</param>
+        /// <param name="commandTimeout">The command timeout (in seconds).</param>
+        /// <param name="commandType">The type of command to execute.</param>
+        /// <remarks>Note: the row can be accessed via "dynamic", or by casting to an IDictionary&lt;string,object&gt;</remarks>
+        public static dynamic QueryFirstOrDefault(this IDbConnection cnn, string sql, object param = null, IDbTransaction transaction = null, int? commandTimeout = null, CommandType? commandType = null, IDatabase database = null) =>
+            QueryFirstOrDefault<DapperRow>(cnn, sql, param as object, transaction, commandTimeout, commandType, database);
+
+        /// <summary>
+        /// Return a dynamic object with properties matching the columns.
+        /// </summary>
+        /// <param name="cnn">The connection to query on.</param>
+        /// <param name="sql">The SQL to execute for the query.</param>
+        /// <param name="param">The parameters to pass, if any.</param>
+        /// <param name="transaction">The transaction to use, if any.</param>
+        /// <param name="commandTimeout">The command timeout (in seconds).</param>
+        /// <param name="commandType">The type of command to execute.</param>
+        /// <remarks>Note: the row can be accessed via "dynamic", or by casting to an IDictionary&lt;string,object&gt;</remarks>
+        public static dynamic QuerySingle(this IDbConnection cnn, string sql, object param = null, IDbTransaction transaction = null, int? commandTimeout = null, CommandType? commandType = null, IDatabase database = null) =>
+            QuerySingle<DapperRow>(cnn, sql, param as object, transaction, commandTimeout, commandType, database);
+
+        /// <summary>
+        /// Return a dynamic object with properties matching the columns.
+        /// </summary>
+        /// <param name="cnn">The connection to query on.</param>
+        /// <param name="sql">The SQL to execute for the query.</param>
+        /// <param name="param">The parameters to pass, if any.</param>
+        /// <param name="transaction">The transaction to use, if any.</param>
+        /// <param name="commandTimeout">The command timeout (in seconds).</param>
+        /// <param name="commandType">The type of command to execute.</param>
+        /// <remarks>Note: the row can be accessed via "dynamic", or by casting to an IDictionary&lt;string,object&gt;</remarks>
+        public static dynamic QuerySingleOrDefault(this IDbConnection cnn, string sql, object param = null, IDbTransaction transaction = null, int? commandTimeout = null, CommandType? commandType = null, IDatabase database = null) =>
+            QuerySingleOrDefault<DapperRow>(cnn, sql, param as object, transaction, commandTimeout, commandType, database);
+        /// <summary>
+        /// Executes a single-row query, returning the data typed as <typeparamref name="T"/>.
+        /// </summary>
+        /// <typeparam name="T">The type of result to return.</typeparam>
+        /// <param name="cnn">The connection to query on.</param>
+        /// <param name="sql">The SQL to execute for the query.</param>
+        /// <param name="param">The parameters to pass, if any.</param>
+        /// <param name="transaction">The transaction to use, if any.</param>
+        /// <param name="commandTimeout">The command timeout (in seconds).</param>
+        /// <param name="commandType">The type of command to execute.</param>
+        /// <returns>
+        /// A sequence of data of the supplied type; if a basic type (int, string, etc) is queried then the data from the first column in assumed, otherwise an instance is
+        /// created per row, and a direct column-name===member-name mapping is assumed (case insensitive).
+        /// </returns>
+        public static T QueryFirst<T>(this IDbConnection cnn, string sql, object param = null, IDbTransaction transaction = null, int? commandTimeout = null, CommandType? commandType = null, IDatabase database = null)
+        {
+            var command = new CommandDefinition(sql, param, transaction, commandTimeout, commandType, CommandFlags.None, database);
+            return QueryRowImpl<T>(cnn, Row.First, ref command, typeof(T));
+        }
+
+        /// <summary>
+        /// Executes a single-row query, returning the data typed as <typeparamref name="T"/>.
+        /// </summary>
+        /// <typeparam name="T">The type of result to return.</typeparam>
+        /// <param name="cnn">The connection to query on.</param>
+        /// <param name="sql">The SQL to execute for the query.</param>
+        /// <param name="param">The parameters to pass, if any.</param>
+        /// <param name="transaction">The transaction to use, if any.</param>
+        /// <param name="commandTimeout">The command timeout (in seconds).</param>
+        /// <param name="commandType">The type of command to execute.</param>
+        /// <returns>
+        /// A sequence of data of the supplied type; if a basic type (int, string, etc) is queried then the data from the first column in assumed, otherwise an instance is
+        /// created per row, and a direct column-name===member-name mapping is assumed (case insensitive).
+        /// </returns>
+        public static T QueryFirstOrDefault<T>(this IDbConnection cnn, string sql, object param = null, IDbTransaction transaction = null, int? commandTimeout = null, CommandType? commandType = null, IDatabase database = null)
+        {
+            var command = new CommandDefinition(sql, param, transaction, commandTimeout, commandType, CommandFlags.None, database);
+            return QueryRowImpl<T>(cnn, Row.FirstOrDefault, ref command, typeof(T));
+        }
+
+        /// <summary>
+        /// Executes a single-row query, returning the data typed as <typeparamref name="T"/>.
+        /// </summary>
+        /// <typeparam name="T">The type of result to return.</typeparam>
+        /// <param name="cnn">The connection to query on.</param>
+        /// <param name="sql">The SQL to execute for the query.</param>
+        /// <param name="param">The parameters to pass, if any.</param>
+        /// <param name="transaction">The transaction to use, if any.</param>
+        /// <param name="commandTimeout">The command timeout (in seconds).</param>
+        /// <param name="commandType">The type of command to execute.</param>
+        /// <returns>
+        /// A sequence of data of the supplied type; if a basic type (int, string, etc) is queried then the data from the first column in assumed, otherwise an instance is
+        /// created per row, and a direct column-name===member-name mapping is assumed (case insensitive).
+        /// </returns>
+        public static T QuerySingle<T>(this IDbConnection cnn, string sql, object param = null, IDbTransaction transaction = null, int? commandTimeout = null, CommandType? commandType = null, IDatabase database = null)
+        {
+            var command = new CommandDefinition(sql, param, transaction, commandTimeout, commandType, CommandFlags.None, database);
+            return QueryRowImpl<T>(cnn, Row.Single, ref command, typeof(T));
+        }
+
+        /// <summary>
+        /// Executes a single-row query, returning the data typed as <typeparamref name="T"/>.
+        /// </summary>
+        /// <typeparam name="T">The type of result to return.</typeparam>
+        /// <param name="cnn">The connection to query on.</param>
+        /// <param name="sql">The SQL to execute for the query.</param>
+        /// <param name="param">The parameters to pass, if any.</param>
+        /// <param name="transaction">The transaction to use, if any.</param>
+        /// <param name="commandTimeout">The command timeout (in seconds).</param>
+        /// <param name="commandType">The type of command to execute.</param>
+        /// <returns>
+        /// A sequence of data of the supplied type; if a basic type (int, string, etc) is queried then the data from the first column in assumed, otherwise an instance is
+        /// created per row, and a direct column-name===member-name mapping is assumed (case insensitive).
+        /// </returns>
+        public static T QuerySingleOrDefault<T>(this IDbConnection cnn, string sql, object param = null, IDbTransaction transaction = null, int? commandTimeout = null, CommandType? commandType = null, IDatabase database = null)
+        {
+            var command = new CommandDefinition(sql, param, transaction, commandTimeout, commandType, CommandFlags.None, database);
+            return QueryRowImpl<T>(cnn, Row.SingleOrDefault, ref command, typeof(T));
+        }
+        /// <summary>
+        /// Executes a single-row query, returning the data typed as <paramref name="type"/>.
+        /// </summary>
+        /// <param name="cnn">The connection to query on.</param>
+        /// <param name="type">The type to return.</param>
+        /// <param name="sql">The SQL to execute for the query.</param>
+        /// <param name="param">The parameters to pass, if any.</param>
+        /// <param name="transaction">The transaction to use, if any.</param>
+        /// <param name="commandTimeout">The command timeout (in seconds).</param>
+        /// <param name="commandType">The type of command to execute.</param>
+        /// <exception cref="ArgumentNullException"><paramref name="type"/> is <c>null</c>.</exception>
+        /// <returns>
+        /// A sequence of data of the supplied type; if a basic type (int, string, etc) is queried then the data from the first column in assumed, otherwise an instance is
+        /// created per row, and a direct column-name===member-name mapping is assumed (case insensitive).
+        /// </returns>
+        public static object QueryFirst(this IDbConnection cnn, Type type, string sql, object param = null, IDbTransaction transaction = null, int? commandTimeout = null, CommandType? commandType = null, IDatabase database = null)
+        {
+            if (type == null) throw new ArgumentNullException(nameof(type));
+            var command = new CommandDefinition(sql, param, transaction, commandTimeout, commandType, CommandFlags.None, database);
+            return QueryRowImpl<object>(cnn, Row.First, ref command, type);
+        }
+
+        /// <summary>
+        /// Executes a single-row query, returning the data typed as <paramref name="type"/>.
+        /// </summary>
+        /// <param name="cnn">The connection to query on.</param>
+        /// <param name="type">The type to return.</param>
+        /// <param name="sql">The SQL to execute for the query.</param>
+        /// <param name="param">The parameters to pass, if any.</param>
+        /// <param name="transaction">The transaction to use, if any.</param>
+        /// <param name="commandTimeout">The command timeout (in seconds).</param>
+        /// <param name="commandType">The type of command to execute.</param>
+        /// <exception cref="ArgumentNullException"><paramref name="type"/> is <c>null</c>.</exception>
+        /// <returns>
+        /// A sequence of data of the supplied type; if a basic type (int, string, etc) is queried then the data from the first column in assumed, otherwise an instance is
+        /// created per row, and a direct column-name===member-name mapping is assumed (case insensitive).
+        /// </returns>
+        public static object QueryFirstOrDefault(this IDbConnection cnn, Type type, string sql, object param = null, IDbTransaction transaction = null, int? commandTimeout = null, CommandType? commandType = null, IDatabase database = null)
+        {
+            if (type == null) throw new ArgumentNullException(nameof(type));
+            var command = new CommandDefinition(sql, param, transaction, commandTimeout, commandType, CommandFlags.None, database);
+            return QueryRowImpl<object>(cnn, Row.FirstOrDefault, ref command, type);
+        }
+
+        /// <summary>
+        /// Executes a single-row query, returning the data typed as <paramref name="type"/>.
+        /// </summary>
+        /// <param name="cnn">The connection to query on.</param>
+        /// <param name="type">The type to return.</param>
+        /// <param name="sql">The SQL to execute for the query.</param>
+        /// <param name="param">The parameters to pass, if any.</param>
+        /// <param name="transaction">The transaction to use, if any.</param>
+        /// <param name="commandTimeout">The command timeout (in seconds).</param>
+        /// <param name="commandType">The type of command to execute.</param>
+        /// <exception cref="ArgumentNullException"><paramref name="type"/> is <c>null</c>.</exception>
+        /// <returns>
+        /// A sequence of data of the supplied type; if a basic type (int, string, etc) is queried then the data from the first column in assumed, otherwise an instance is
+        /// created per row, and a direct column-name===member-name mapping is assumed (case insensitive).
+        /// </returns>
+        public static object QuerySingle(this IDbConnection cnn, Type type, string sql, object param = null, IDbTransaction transaction = null, int? commandTimeout = null, CommandType? commandType = null, IDatabase database = null)
+        {
+            if (type == null) throw new ArgumentNullException(nameof(type));
+            var command = new CommandDefinition(sql, param, transaction, commandTimeout, commandType, CommandFlags.None, database);
+            return QueryRowImpl<object>(cnn, Row.Single, ref command, type);
+        }
+
+        /// <summary>
+        /// Executes a single-row query, returning the data typed as <paramref name="type"/>.
+        /// </summary>
+        /// <param name="cnn">The connection to query on.</param>
+        /// <param name="type">The type to return.</param>
+        /// <param name="sql">The SQL to execute for the query.</param>
+        /// <param name="param">The parameters to pass, if any.</param>
+        /// <param name="transaction">The transaction to use, if any.</param>
+        /// <param name="commandTimeout">The command timeout (in seconds).</param>
+        /// <param name="commandType">The type of command to execute.</param>
+        /// <exception cref="ArgumentNullException"><paramref name="type"/> is <c>null</c>.</exception>
+        /// <returns>
+        /// A sequence of data of the supplied type; if a basic type (int, string, etc) is queried then the data from the first column in assumed, otherwise an instance is
+        /// created per row, and a direct column-name===member-name mapping is assumed (case insensitive).
+        /// </returns>
+        public static object QuerySingleOrDefault(this IDbConnection cnn, Type type, string sql, object param = null, IDbTransaction transaction = null, int? commandTimeout = null, CommandType? commandType = null, IDatabase database = null)
+        {
+            if (type == null) throw new ArgumentNullException(nameof(type));
+            var command = new CommandDefinition(sql, param, transaction, commandTimeout, commandType, CommandFlags.None, database);
+            return QueryRowImpl<object>(cnn, Row.SingleOrDefault, ref command, type);
+        }
+
+        /// <summary>
+        /// Executes a query, returning the data typed as <typeparamref name="T"/>.
+        /// </summary>
+        /// <typeparam name="T">The type of results to return.</typeparam>
+        /// <param name="cnn">The connection to query on.</param>
+        /// <param name="command">The command used to query on this connection.</param>
+        /// <returns>
+        /// A single instance or null of the supplied type; if a basic type (int, string, etc) is queried then the data from the first column in assumed, otherwise an instance is
+        /// created per row, and a direct column-name===member-name mapping is assumed (case insensitive).
+        /// </returns>
+        public static T QueryFirst<T>(this IDbConnection cnn, CommandDefinition command) =>
+            QueryRowImpl<T>(cnn, Row.First, ref command, typeof(T));
+
+        /// <summary>
+        /// Executes a query, returning the data typed as <typeparamref name="T"/>.
+        /// </summary>
+        /// <typeparam name="T">The type of results to return.</typeparam>
+        /// <param name="cnn">The connection to query on.</param>
+        /// <param name="command">The command used to query on this connection.</param>
+        /// <returns>
+        /// A single or null instance of the supplied type; if a basic type (int, string, etc) is queried then the data from the first column in assumed, otherwise an instance is
+        /// created per row, and a direct column-name===member-name mapping is assumed (case insensitive).
+        /// </returns>
+        public static T QueryFirstOrDefault<T>(this IDbConnection cnn, CommandDefinition command) =>
+            QueryRowImpl<T>(cnn, Row.FirstOrDefault, ref command, typeof(T));
+
+        /// <summary>
+        /// Executes a query, returning the data typed as <typeparamref name="T"/>.
+        /// </summary>
+        /// <typeparam name="T">The type of results to return.</typeparam>
+        /// <param name="cnn">The connection to query on.</param>
+        /// <param name="command">The command used to query on this connection.</param>
+        /// <returns>
+        /// A single instance of the supplied type; if a basic type (int, string, etc) is queried then the data from the first column in assumed, otherwise an instance is
+        /// created per row, and a direct column-name===member-name mapping is assumed (case insensitive).
+        /// </returns>
+        public static T QuerySingle<T>(this IDbConnection cnn, CommandDefinition command) =>
+            QueryRowImpl<T>(cnn, Row.Single, ref command, typeof(T));
+
+        /// <summary>
+        /// Executes a query, returning the data typed as <typeparamref name="T"/>.
+        /// </summary>
+        /// <typeparam name="T">The type of results to return.</typeparam>
+        /// <param name="cnn">The connection to query on.</param>
+        /// <param name="command">The command used to query on this connection.</param>
+        /// <returns>
+        /// A single instance of the supplied type; if a basic type (int, string, etc) is queried then the data from the first column in assumed, otherwise an instance is
+        /// created per row, and a direct column-name===member-name mapping is assumed (case insensitive).
+        /// </returns>
+        public static T QuerySingleOrDefault<T>(this IDbConnection cnn, CommandDefinition command) =>
+            QueryRowImpl<T>(cnn, Row.SingleOrDefault, ref command, typeof(T));
+
+        private static T QueryRowImpl<T>(IDbConnection cnn, Row row, ref CommandDefinition command, Type effectiveType)
+        {
+            object param = command.Parameters;
+            //var identity = new Identity(command.CommandText, command.CommandType, cnn, effectiveType, param?.GetType()); 
+            var identity = new Identity(command.CommandText, command.CommandType, cnn, effectiveType, param == null ? null : param.GetType(), null);
+
+            var info = GetCacheInfo(identity, param, command.AddToCache);
+
+            IDbCommand cmd = null;
+            IDataReader reader = null;
+
+            bool wasClosed = cnn.State == ConnectionState.Closed;
+            try
+            {
+                lock (cnn)
+                {
+                    lock (olockQueryImpl)
+                    {
+                        cmd = command.SetupCommand(cnn, info.ParamReader);
+
+                        //if (wasClosed) cnn.Open();
+                         
+                        OpenConnection(cnn, command);
+                        DoPreExecute(cnn, cmd, command);
+                         
+                        reader = ExecuteReaderWithFlagsFallback(cmd, wasClosed, (row & Row.Single) != 0
+                  ? CommandBehavior.SequentialAccess | CommandBehavior.SingleResult // need to allow multiple rows, to check fail condition
+                  : CommandBehavior.SequentialAccess | CommandBehavior.SingleResult | CommandBehavior.SingleRow);
+
+
+                        DoPostExecute(cnn, cmd, command);
+                         
+                    }
+                    
+                }
+                T result = default(T);
+
+                //wasClosed = false; // *if* the connection was closed and we got this far, then we now have a reader
+                if (reader!= null)
+                {
+                    if (reader.Read() && reader.FieldCount != 0)
+                    {
+                        // with the CloseConnection flag, so the reader will deal with the connection; we
+                        // still need something in the "finally" to ensure that broken SQL still results
+                        // in the connection closing itself
+                        var tuple = info.Deserializer;
+                        int hash = GetColumnHash(reader);
+                        if (tuple.Func == null || tuple.Hash != hash)
+                        {
+                            tuple = info.Deserializer = new DeserializerState(hash, GetDeserializer(effectiveType, reader, 0, -1, false));
+                            if (command.AddToCache) SetQueryCache(identity, info);
+                        }
+
+                        var func = tuple.Func;
+                        object val = func(reader);
+                        if (val == null || val is T)
+                        {
+                            result = (T)val;
+                        }
+                        else
+                        {
+                            var convertToType = Nullable.GetUnderlyingType(effectiveType) ?? effectiveType;
+                            result = (T)Convert.ChangeType(val, convertToType, CultureInfo.InvariantCulture);
+                        }
+                        if ((row & Row.Single) != 0 && reader.Read()) ThrowMultipleRows(row);
+                        while (reader.Read()) { /* ignore subsequent rows */ }
+                    }
+                    else if ((row & Row.FirstOrDefault) == 0) // demanding a row, and don't have one
+                    {
+                        ThrowZeroRows(row);
+                    }
+                    while (reader.NextResult()) { /* ignore subsequent result sets */ }
+                    // happy path; close the reader cleanly - no
+                    // need for "Cancel" etc
+                    //reader.Dispose();
+                    //reader = null;
+
+                    CloseDataReader(reader, command, false, true);
+                }
+              
+
+
+                command.OnCompleted();
+                return result;
+            }
+            finally
+            {
+                if (reader != null)
+                {
+                    if (!reader.IsClosed)
+                    {
+                        try { cmd.Cancel(); }
+                        catch { /* don't spoil the existing exception */ }
+                    }
+                    //reader.Dispose();
+
+                    CloseDataReader(reader, command, false, false);
+                }
+                //if (wasClosed) cnn.Close();
+                if (TransactionIsOk(command.Transaction))
+                {
+                    //不能关闭链接，否则导致事务失败
+                }
+                else
+                {
+                    CloseConnection(cnn, command, wasClosed);
+                }
+                //cmd?.Dispose();
+                CloseDbCommand(cmd, command);
+            }
+        }
+        private static readonly int[] ErrTwoRows = new int[2], ErrZeroRows = new int[0];
+        private static void ThrowMultipleRows(Row row)
+        {
+            switch (row)
+            {  // get the standard exception from the runtime
+                case Row.Single: ErrTwoRows.Single(); break;
+                case Row.SingleOrDefault: ErrTwoRows.SingleOrDefault(); break;
+                default: throw new InvalidOperationException();
+            }
+        }
+
+        private static void ThrowZeroRows(Row row)
+        {
+            switch (row)
+            { // get the standard exception from the runtime
+                case Row.First: ErrZeroRows.First(); break;
+                case Row.Single: ErrZeroRows.Single(); break;
+                default: throw new InvalidOperationException();
+            }
+        }
+        private static IDataReader ExecuteReaderWithFlagsFallback(IDbCommand cmd, bool wasClosed, CommandBehavior behavior)
+        {
+            try
+            {
+                return cmd.ExecuteReader(GetBehavior(wasClosed, behavior));
+            }
+            catch (ArgumentException ex)
+            { // thanks, Sqlite!
+                if (Settings.DisableCommandBehaviorOptimizations(behavior, ex))
+                {
+                    // we can retry; this time it will have different flags
+                    return cmd.ExecuteReader(GetBehavior(wasClosed, behavior));
+                }
+                throw;
+            }
+        }
+        private static CommandBehavior GetBehavior(bool close, CommandBehavior @default)
+        {
+            return (close ? (@default | CommandBehavior.CloseConnection) : @default) & Settings.AllowedCommandBehaviors;
+        }
+        #endregion
+
+
 
         /// <summary>
         /// Execute a command that returns multiple result sets, and access each in turn
@@ -1912,42 +2411,45 @@ this IDbConnection cnn, string sql, object param = null, IDbTransaction transact
                     }
                 }
 
-                 
 
-                //wasClosed = false; // *if* the connection was closed and we got this far, then we now have a reader
-                // with the CloseConnection flag, so the reader will deal with the connection; we
-                // still need something in the "finally" to ensure that broken SQL still results
-                // in the connection closing itself
-                var tuple = info.Deserializer;
-                int hash = GetColumnHash(reader);
-                if (tuple.Func == null || tuple.Hash != hash)
+                if (reader!= null)
                 {
-                    if (reader.FieldCount == 0) //https://code.google.com/p/dapper-dot-net/issues/detail?id=57
-                        yield break;
-                    tuple = info.Deserializer = new DeserializerState(hash, GetDeserializer(effectiveType, reader, 0, -1, false));
-                    if (command.AddToCache) SetQueryCache(identity, info);
-                }
+                    //wasClosed = false; // *if* the connection was closed and we got this far, then we now have a reader
+                    // with the CloseConnection flag, so the reader will deal with the connection; we
+                    // still need something in the "finally" to ensure that broken SQL still results
+                    // in the connection closing itself
+                    var tuple = info.Deserializer;
+                    int hash = GetColumnHash(reader);
+                    if (tuple.Func == null || tuple.Hash != hash)
+                    {
+                        if (reader.FieldCount == 0) //https://code.google.com/p/dapper-dot-net/issues/detail?id=57
+                            yield break;
+                        tuple = info.Deserializer = new DeserializerState(hash, GetDeserializer(effectiveType, reader, 0, -1, false));
+                        if (command.AddToCache) SetQueryCache(identity, info);
+                    }
 
-                var func = tuple.Func;
-                var convertToType = Nullable.GetUnderlyingType(effectiveType) ?? effectiveType;
-                while (reader.Read())
-                {
-                    object val = func(reader);
-                    if (val == null || val is T)
+                    var func = tuple.Func;
+                    var convertToType = Nullable.GetUnderlyingType(effectiveType) ?? effectiveType;
+                    while (reader.Read())
                     {
-                        yield return (T)val;
+                        object val = func(reader);
+                        if (val == null || val is T)
+                        {
+                            yield return (T)val;
+                        }
+                        else
+                        {
+                            yield return (T)Convert.ChangeType(val, convertToType, CultureInfo.InvariantCulture);
+                        }
                     }
-                    else
-                    {
-                        yield return (T)Convert.ChangeType(val, convertToType, CultureInfo.InvariantCulture);
-                    }
+                    while (reader.NextResult()) { }
+                    // happy path; close the reader cleanly - no
+                    // need for "Cancel" etc
+                    //reader.Dispose();
+                    //reader = null;
+                    CloseDataReader(reader, command, false, true);
                 }
-                while (reader.NextResult()) { }
-                // happy path; close the reader cleanly - no
-                // need for "Cancel" etc
-                //reader.Dispose();
-                //reader = null;
-                CloseDataReader(reader, command, false, true);
+               
 
                 command.OnCompleted();
             }
@@ -2211,29 +2713,34 @@ this IDbConnection cnn, string sql, Func<TFirst, TSecond, TThird, TFourth, TRetu
                 DeserializerState deserializer = default(DeserializerState);
                 Func<IDataReader, object>[] otherDeserializers = null;
 
-                int hash = GetColumnHash(reader);
-                if ((deserializer = cinfo.Deserializer).Func == null || (otherDeserializers = cinfo.OtherDeserializers) == null || hash != deserializer.Hash)
+                if (reader!= null)
                 {
-                    var deserializers = GenerateDeserializers(new Type[] { typeof(TFirst), typeof(TSecond), typeof(TThird), typeof(TFourth), typeof(TFifth), typeof(TSixth), typeof(TSeventh) }, splitOn, reader);
-                    deserializer = cinfo.Deserializer = new DeserializerState(hash, deserializers[0]);
-                    otherDeserializers = cinfo.OtherDeserializers = deserializers.Skip(1).ToArray();
-                    if (command.AddToCache) SetQueryCache(identity, cinfo);
+
+                    int hash = GetColumnHash(reader);
+                    if ((deserializer = cinfo.Deserializer).Func == null || (otherDeserializers = cinfo.OtherDeserializers) == null || hash != deserializer.Hash)
+                    {
+                        var deserializers = GenerateDeserializers(new Type[] { typeof(TFirst), typeof(TSecond), typeof(TThird), typeof(TFourth), typeof(TFifth), typeof(TSixth), typeof(TSeventh) }, splitOn, reader);
+                        deserializer = cinfo.Deserializer = new DeserializerState(hash, deserializers[0]);
+                        otherDeserializers = cinfo.OtherDeserializers = deserializers.Skip(1).ToArray();
+                        if (command.AddToCache) SetQueryCache(identity, cinfo);
+                    }
+
+                    Func<IDataReader, TReturn> mapIt = GenerateMapper<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TReturn>(deserializer.Func, otherDeserializers, map);
+
+                    if (mapIt != null)
+                    {
+                        while (reader.Read())
+                        {
+                            yield return mapIt(reader);
+                        }
+                        if (finalize)
+                        {
+                            while (reader.NextResult()) { }
+                            command.OnCompleted();
+                        }
+                    }
                 }
 
-                Func<IDataReader, TReturn> mapIt = GenerateMapper<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TReturn>(deserializer.Func, otherDeserializers, map);
-
-                if (mapIt != null)
-                {
-                    while (reader.Read())
-                    {
-                        yield return mapIt(reader);
-                    }
-                    if (finalize)
-                    {
-                        while (reader.NextResult()) { }
-                        command.OnCompleted();
-                    }
-                }
             }
             finally
             {
@@ -2309,30 +2816,34 @@ this IDbConnection cnn, string sql, Func<TFirst, TSecond, TThird, TFourth, TRetu
                 }
                 DeserializerState deserializer = default(DeserializerState);
                 Func<IDataReader, object>[] otherDeserializers = null;
-
-                int hash = GetColumnHash(reader);
-                if ((deserializer = cinfo.Deserializer).Func == null || (otherDeserializers = cinfo.OtherDeserializers) == null || hash != deserializer.Hash)
+                if (reader!= null)
                 {
-                    var deserializers = GenerateDeserializers(types, splitOn, reader);
-                    deserializer = cinfo.Deserializer = new DeserializerState(hash, deserializers[0]);
-                    otherDeserializers = cinfo.OtherDeserializers = deserializers.Skip(1).ToArray();
-                    SetQueryCache(identity, cinfo);
+
+                    int hash = GetColumnHash(reader);
+                    if ((deserializer = cinfo.Deserializer).Func == null || (otherDeserializers = cinfo.OtherDeserializers) == null || hash != deserializer.Hash)
+                    {
+                        var deserializers = GenerateDeserializers(types, splitOn, reader);
+                        deserializer = cinfo.Deserializer = new DeserializerState(hash, deserializers[0]);
+                        otherDeserializers = cinfo.OtherDeserializers = deserializers.Skip(1).ToArray();
+                        SetQueryCache(identity, cinfo);
+                    }
+
+                    Func<IDataReader, TReturn> mapIt = GenerateMapper(types.Length, deserializer.Func, otherDeserializers, map);
+
+                    if (mapIt != null)
+                    {
+                        while (reader.Read())
+                        {
+                            yield return mapIt(reader);
+                        }
+                        if (finalize)
+                        {
+                            while (reader.NextResult()) { }
+                            command.OnCompleted();
+                        }
+                    }
                 }
 
-                Func<IDataReader, TReturn> mapIt = GenerateMapper(types.Length, deserializer.Func, otherDeserializers, map);
-
-                if (mapIt != null)
-                {
-                    while (reader.Read())
-                    {
-                        yield return mapIt(reader);
-                    }
-                    if (finalize)
-                    {
-                        while (reader.NextResult()) { }
-                        command.OnCompleted();
-                    }
-                }
             }
             finally
             {
@@ -3860,15 +4371,22 @@ this IDbConnection cnn, string sql, Func<TFirst, TSecond, TThird, TFourth, TRetu
             object result;
             try
             {
-                cmd = command.SetupCommand(cnn, paramReader);
-                //if (wasClosed) cnn.Open();
-                OpenConnection(cnn, command);
-                DoPreExecute(cnn, cmd, command);
+                lock (cnn)
+                {
+                    lock (olockQueryImpl)
+                    {
+                        cmd = command.SetupCommand(cnn, paramReader);
+                        //if (wasClosed) cnn.Open();
+                        OpenConnection(cnn, command);
+                        DoPreExecute(cnn, cmd, command);
 
-                result = cmd.ExecuteScalar();
-                DoPostExecute(cnn, cmd, command);
+                        result = cmd.ExecuteScalar();
+                        DoPostExecute(cnn, cmd, command);
 
-                command.OnCompleted();
+                        command.OnCompleted();
+                    }
+                }
+               
             }
             catch (Exception x)
             {

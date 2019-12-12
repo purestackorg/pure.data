@@ -23,7 +23,7 @@ namespace Pure.Data.Test
             string title = "PoolingTest";
             Console.Title = title;
 
-            CodeTimer.Time(title, 5, () =>
+            CodeTimer.Time(title, 2, () =>
             {
                 //TestGetAndReturn();
                 //TestRun();
@@ -36,14 +36,14 @@ namespace Pure.Data.Test
             new Thread(() =>
             {
 
-                Thread.Sleep((20000));
+                Thread.Sleep((10000));
+                string info = "";
+                //string info = "--------------- databaseWrapperPool --------------- \r\n" + databaseWrapperPool.ShowStatisticsInfo();
+                //info += "\r\n";
+                //info += "\r\n";
+                //Log(info, null, MessageType.Debug);
 
-                string info = "--------------- databaseWrapperPool --------------- \r\n" + databaseWrapperPool.Pool.ShowStatisticsInfo();
-                info += "\r\n";
-                info += "\r\n";
-                Log(info, null, MessageType.Debug);
-
-                info = "--------------- databasePool --------------- \r\n" + databasePool.Pool.ShowStatisticsInfo();
+                info = "--------------- databasePool --------------- \r\n" + databasePool.ShowStatisticsInfo();
                 info += "\r\n";
                 info += "\r\n";
 
@@ -219,39 +219,39 @@ namespace Pure.Data.Test
 
 
 
-        public static DatabaseWrapperPool databaseWrapperPool = new DatabaseWrapperPool(() => new Pooling.PooledObjectWrapper<IDatabase>(new Database("PureDataConfiguration.xml", Log,
-         config => {
+        //public static DatabaseWrapperPool databaseWrapperPool = new DatabaseWrapperPool(() => new Pooling.PooledObjectWrapper<IDatabase>(new Database("PureDataConfiguration.xml", Log,
+        // config => {
 
-         })) {
-            LogAction = Log,
-            OnValidateObject = (ctx) =>
-            {
-                if (ctx.Direction == Pooling.PooledObjectDirection.Inbound)
-                {
-                    return true;
-                }
-                else
-                {
-                    return true;
-                }
-            },
-            OnReleaseResources = (resource) => { Log("Release -> " + resource.GetHashCode() +" , connection: "+ resource.Connection.GetHashCode() +", status : "+resource.Connection.State, null, MessageType.Error);
+        // })) {
+        //    LogAction = Log,
+        //    OnValidateObject = (ctx) =>
+        //    {
+        //        if (ctx.Direction == Pooling.PooledObjectDirection.Inbound)
+        //        {
+        //            return true;
+        //        }
+        //        else
+        //        {
+        //            return true;
+        //        }
+        //    },
+        //    OnReleaseResources = (resource) => { Log("Release -> " + resource.GetHashCode() +" , connection: "+ resource.Connection.GetHashCode() +", status : "+resource.Connection.State, null, MessageType.Error);
              
-            },
-            OnResetState = (resource) => { Log("Reset -> " + resource.GetHashCode() + " , connection: " + resource.Connection.GetHashCode() + ", status : " + resource.Connection.State, null, MessageType.Info);
+        //    },
+        //    OnResetState = (resource) => { Log("Reset -> " + resource.GetHashCode() + " , connection: " + resource.Connection.GetHashCode() + ", status : " + resource.Connection.State, null, MessageType.Info);
                 
-            },
-            OnCreateResource = (resource) => { Log("Create -> "+ resource.GetHashCode() + " , connection: " + resource.Connection.GetHashCode() + ", status : " + resource.Connection.State, null, MessageType.Warning); },
-            OnEvictResource = (resource) => { Log("Evict -> " + resource.GetHashCode() + " , connection: " + resource.Connection.GetHashCode() + ", status : " + resource.Connection.State, null, MessageType.Error);
+        //    },
+        //    OnCreateResource = (resource) => { Log("Create -> "+ resource.GetHashCode() + " , connection: " + resource.Connection.GetHashCode() + ", status : " + resource.Connection.State, null, MessageType.Warning); },
+        //    OnEvictResource = (resource) => { Log("Evict -> " + resource.GetHashCode() + " , connection: " + resource.Connection.GetHashCode() + ", status : " + resource.Connection.State, null, MessageType.Error);
                  
-            },
-            OnGetResource = (resource) => { Log("Get -> " + resource.GetHashCode() + " , connection: " + resource.Connection.GetHashCode() + ", status : " + resource.Connection.State, null, MessageType.Info); },
-            OnReturnResource = (resource) => { Log("Return -> " + resource.GetHashCode() + " , connection: " + resource.Connection.GetHashCode() + ", status : " + resource.Connection.State, null, MessageType.Warning); },
+        //    },
+        //    OnGetResource = (resource) => { Log("Get -> " + resource.GetHashCode() + " , connection: " + resource.Connection.GetHashCode() + ", status : " + resource.Connection.State, null, MessageType.Info); },
+        //    OnReturnResource = (resource) => { Log("Return -> " + resource.GetHashCode() + " , connection: " + resource.Connection.GetHashCode() + ", status : " + resource.Connection.State, null, MessageType.Warning); },
 
 
-        }, Environment.ProcessorCount * 2
-            , new Pooling.EvictionSettings() { Enabled = true, Period =TimeSpan.FromMilliseconds(1000)}
-            );
+        //}, Environment.ProcessorCount * 2
+        //    , new Pooling.EvictionSettings() { Enabled = true, Period =TimeSpan.FromMilliseconds(1000)}
+        //    );
 
 
         public static void TestGetAndReturnPoolDatabase()
@@ -278,11 +278,11 @@ namespace Pure.Data.Test
 
                     Thread.Sleep(random.Next(100));
 
-                    for (var b = 0; b < 5; b++)
+                    for (var b = 0; b < 1; b++)
                     {
-
-                        using (var db = databasePool.GetPooledDatabase())
-                        {
+                        var db = databasePool.GetPooledDatabase();
+                        //using (var db = databasePool.GetPooledDatabase())
+                        //{
                        
                             Log("GetCurrentDatabase:" + db.GetHashCode().ToString(), null);
                             db.Get<UserInfo>(1);
@@ -297,7 +297,8 @@ namespace Pure.Data.Test
                             db.ExecuteExpandoObjects("select * from TB_USER");
 
                             Log("ReturnDatabase:" + db.GetHashCode().ToString(), null);
-                        }
+                        db.ReturnPooledDatabase(); 
+                        //}
 
                     }
 
@@ -305,8 +306,9 @@ namespace Pure.Data.Test
                     {
 
                         Task task = new Task(async ()=> {
-                            using (var db = databasePool.GetPooledDatabase())
-                            {
+                            var db = databasePool.GetPooledDatabase();
+                            //using (var db = databasePool.GetPooledDatabase())
+                            //{
                                 Log("GetCurrentDatabase:" + db.GetHashCode().ToString(), null);
                                 await db.GetAsync<UserInfo>(1);
                                 var id = db.ExecuteScalar<int>("select 1 from TB_USER");
@@ -320,7 +322,8 @@ namespace Pure.Data.Test
                                 await db.ExecuteExpandoObjectsAsync("select * from TB_USER");
 
                                 Log("ReturnDatabase:" + db.GetHashCode().ToString(), null);
-                            }
+                        db.ReturnPooledDatabase();
+                            //}
                         });
                         task.Start();
 
@@ -409,40 +412,21 @@ namespace Pure.Data.Test
         }
 
 
-        public static void TestGetAndReturn() {
+        //public static void TestGetAndReturn() {
 
-            var db = databaseWrapperPool.GetPooledDatabaseWrapper().InternalResource;
-            Log("GetCurrentDatabase:" + db.GetHashCode().ToString(), null);
-            databaseWrapperPool.ReturnPooledDatabase(db);
-            Log("ReturnDatabase:" + db.GetHashCode().ToString(), null);
+        //    var db = databaseWrapperPool.GetPooledDatabaseWrapper().InternalResource;
+        //    Log("GetCurrentDatabase:" + db.GetHashCode().ToString(), null);
+        //    databaseWrapperPool.ReturnPooledDatabase(db);
+        //    Log("ReturnDatabase:" + db.GetHashCode().ToString(), null);
 
-            db = databaseWrapperPool.GetPooledDatabaseWrapper().InternalResource;
-            Log("GetCurrentDatabase:" + db.GetHashCode().ToString(), null);
-            databaseWrapperPool.ReturnPooledDatabase(db);
-            Log("ReturnDatabase:" + db.GetHashCode().ToString(), null);
-
-            //for (var a = 0; a < 10; a++)
-            //{
-            //    new Thread(() =>
-            //    {
-
-            //        for (var b = 0; b < 10; b++)
-            //        {
-            //              db = pooldb.GetCurrentDatabase();
-            //            Log("GetCurrentDatabase:" + db.GetHashCode().ToString(), null);
-            //            pooldb.ReturnDatabase(db);
-            //            Log("ReturnDatabase:" + db.GetHashCode().ToString(), null);
-            //        }
-
-            //        Log("filish thread:" + a.ToString(), null);
+        //    db = databaseWrapperPool.GetPooledDatabaseWrapper().InternalResource;
+        //    Log("GetCurrentDatabase:" + db.GetHashCode().ToString(), null);
+        //    databaseWrapperPool.ReturnPooledDatabase(db);
+        //    Log("ReturnDatabase:" + db.GetHashCode().ToString(), null);
+ 
 
 
-            //    }).Start();
-            //}
-
-
-
-        }
+        //}
 
         private static void ExeTExt()
         {
@@ -609,10 +593,10 @@ namespace Pure.Data.Test
                 databasePool.Dispose();
             }
 
-            if (databaseWrapperPool != null)
-            {
-                databaseWrapperPool.Dispose();
-            }
+            //if (databaseWrapperPool != null)
+            //{
+            //    databaseWrapperPool.Dispose();
+            //}
         }
     }
 
