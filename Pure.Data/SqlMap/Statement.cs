@@ -590,7 +590,7 @@ namespace Pure.Data.SqlMap
         {
             get
             {
-                return string.Format("{0}.{1}", SqlMapInfo.Scope, Id);
+                return SqlMapManager.Instance.FormatSqlMapNameCase(string.Format("{0}.{1}", SqlMapInfo.Scope, Id)); //string.Format("{0}.{1}", SqlMapInfo.Scope, Id);
             }
         }
         public List<ITag> SqlTags { get; set; }
@@ -647,6 +647,8 @@ namespace Pure.Data.SqlMap
             {
                 throw new Exception(string.Format("Statement.Include tag's RefId can not be null!"));
             }
+
+            include.RefId =     SqlMapManager.Instance.FormatSqlMapNameCase(include.RefId);
 
             if (include.RefId == context.SqlId)
             {

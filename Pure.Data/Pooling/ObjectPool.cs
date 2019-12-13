@@ -77,7 +77,7 @@
 //            _firstItem = item;
 //            SetLastGetInfo(item);
 //            _wrapperMap.GetValue(item.Element, _ => item);
-            
+
 //            if (EnableEvent)
 //            {
 //                _policy.OnGetEvent(item);
@@ -103,7 +103,7 @@
 //                if (item != null && Interlocked.CompareExchange(ref items[i], null, item) == item)
 //                {
 //                    Diagnostics.IncrementPoolObjectHitCount();
-                  
+
 //                    return item;
 //                }
 //            }
@@ -115,7 +115,7 @@
 //        private void SetLastGetInfo(ObjectWrapper<T> obj)
 //        {
 //            //obj.LastGetThreadId = Thread.CurrentThread.ManagedThreadId;
-//            obj.LastGetTime = DateTime.Now;
+//            obj.LastGetTime = EvictionSettings.GetCurrentTime();//DateTime.Now;
 //        }
 //        private void SetLastReturnInfo(ObjectWrapper<T> obj)
 //        {
@@ -146,7 +146,7 @@
 //            {
 //                _policy.OnCreateEvent(obj);
 //            }
-        
+
 //            return obj;
 //        }
 
@@ -199,7 +199,7 @@
 //            }
 //            for (var i = 0; i < items.Length && Interlocked.CompareExchange(ref items[i], obj, null) != null; ++i)
 //            {
-               
+
 //                return;//优先填充为null的一个位置
 //            }
 //        }

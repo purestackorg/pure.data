@@ -44,7 +44,7 @@ namespace Pure.Data.SqlMap
                     sqlMap.Scope = xmlDoc.SelectSingleNode("//ns:SqlMap", xmlNsM)
                         .Attributes["Scope"].Value;
 
-                    //避免大小写 统一小写 20191115
+                    //避免大小写 统一 20191115
                     sqlMap.Scope = SqlMapManager.Instance.FormatSqlMapNameCase( sqlMap.Scope);
 
                     #region Init Caches

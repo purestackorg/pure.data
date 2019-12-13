@@ -18,7 +18,7 @@ namespace Pure.Data
         {
             if (database!= null && database.Config !=null )
             {
-                return NameConvertHelper.ConvertNameCase(database.Config.CodeGenClassNameMode, str);
+                return NameConvertHelper.ConvertNameCase(database.Config.CodeGenPropertyNameMode, str);
             }
             return str;//.ToUpper()
         }

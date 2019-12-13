@@ -111,15 +111,24 @@ namespace Pure.Data
                 db.OnReleaseResource = (pooledObj) =>
                 {
                     policy.OnReleaseResource?.Invoke(pooledObj);
+
+                    var resource = pooledObj as PooledDatabase;
+                    resource?.Close();
                 };
                 db.OnResetState = (pooledObj) =>
                 {
                     policy.OnResetState?.Invoke(pooledObj);
+
+                    var resource = pooledObj as PooledDatabase;
+                    resource?.Close();
                 };
 
                 db.OnEvictResource = (pooledObj) =>
                 {
                     policy.OnEvictResource?.Invoke(pooledObj);
+
+                    var resource = pooledObj as PooledDatabase;
+                    resource?.Close();
                 };
                 db.OnValidateObject = (pooledObj) =>
                 {
@@ -146,15 +155,21 @@ namespace Pure.Data
                 db.OnReleaseResource = (pooledObj) =>
                 {
                     policy.OnReleaseResource?.Invoke(pooledObj);
+                    var resource = pooledObj as PooledDatabase;
+                    resource?.Close();
                 };
                 db.OnResetState = (pooledObj) =>
                 {
                     policy.OnResetState?.Invoke(pooledObj);
+                    var resource = pooledObj as PooledDatabase;
+                    resource?.Close();
                 };
 
                 db.OnEvictResource = (pooledObj) =>
                 {
                     policy.OnEvictResource?.Invoke(pooledObj);
+                    var resource = pooledObj as PooledDatabase;
+                    resource?.Close();
                 };
                 db.OnValidateObject = (pooledObj) =>
                 {
@@ -292,7 +307,7 @@ namespace Pure.Data
             {
                 if (pooledObject != null)
                 {
-                    msg += "Conn:" + pooledObject.Connection.GetHashCode() + ", State:" + pooledObject.Connection.State + ", " + pooledObject.PooledObjectInfo.ToString() + "\r\n";
+                    msg += "Conn:" + pooledObject.Connection.GetHashCode() + ", ConnState:" + pooledObject.Connection.State + ", " + pooledObject.PooledObjectInfo.ToString() + "\r\n";
                 }
             }
 

@@ -61,7 +61,7 @@ namespace Pure.Data.Pooling
                 {
                     OnResetState(this);
 
-                    this.PooledObjectInfo.LastOperateTime = DateTime.Now;
+                    this.PooledObjectInfo.LastOperateTime = EvictionSettings.GetCurrentTime();//DateTime.Now;
                 }
                 catch (Exception ex)
                 {

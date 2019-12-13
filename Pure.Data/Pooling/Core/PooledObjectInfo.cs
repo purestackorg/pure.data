@@ -109,6 +109,6 @@ namespace Pure.Data.Pooling
         ///   Returns a string that represents the current object.
         /// </summary>
         /// <returns>A string that represents the current object.</returns>
-        public override string ToString() => $"{nameof(Id)}: {Id}, {nameof(LastOperateTime)}: {LastOperateTime}, {nameof(Payload)}: {Payload}";
+        public override string ToString() => $"{nameof(Id)}: {Id}, {nameof(LastOperateTime)}: {LastOperateTime}, {nameof(State)}: {State}, {nameof(Payload)}: {Payload}";
     }
 }

@@ -146,14 +146,28 @@ namespace Pure.Data
                 //{
                 if (_connection.State != ConnectionState.Closed)
                 {
-                    if (_transaction != null)
+
+                    try
                     {
-                        _transaction.Rollback();
-                        OnRollbackTransactionInternal();
+                        if (_transaction != null)
+                        {
+                            _transaction.Rollback();
+                            OnRollbackTransactionInternal();
+                        }
+                        //OnConnectionClosingInternal(Connection);
+                        OnConnectionClosingWithIntercept();
                     }
-                    //OnConnectionClosingInternal(Connection);
-                    OnConnectionClosingWithIntercept();
-                    _connection.Close();
+                    catch (Exception)
+                    {
+
+                        throw;
+                    }
+                    finally
+                    {
+                        _connection.Close();
+
+                    }
+                     
                 }
 
                 //if (IsPooled == false) //这个很关键，避免导致connection为null的错误
@@ -187,14 +201,27 @@ namespace Pure.Data
                 //{
                 if (_connection.State != ConnectionState.Closed)
                 {
-                    if (_transaction != null)
+
+                    try
                     {
-                        _transaction.Rollback();
-                        OnRollbackTransactionInternal();
+                        if (_transaction != null)
+                        {
+                            _transaction.Rollback();
+                            OnRollbackTransactionInternal();
+                        }
+                        //OnConnectionClosingInternal(Connection);
+                        OnConnectionClosingWithIntercept();
                     }
-                    //OnConnectionClosingInternal(Connection);
-                    OnConnectionClosingWithIntercept();
-                    _connection.Close();
+                    catch (Exception)
+                    {
+
+                        throw;
+                    }
+                    finally
+                    {
+                        _connection.Close();
+
+                    } 
                 }
 
                 _connection.Dispose();
@@ -214,36 +241,54 @@ namespace Pure.Data
         public void Close()
         {
 
-            if (Config.KeepConnectionAlive) return;
+            //if (Config.KeepConnectionAlive) return;
+            //if (_connection == null) return;
+
+            //if (HasActiveTransaction == false)
+            //{
+
+
+            //    if (_connection.State != ConnectionState.Closed)
+            //    {
+            //        if (_transaction != null)
+            //        {
+            //            _transaction.Rollback();
+            //            OnRollbackTransactionInternal();
+
+            //        }
+
+            //        OnConnectionClosingWithIntercept();
+            //        _connection.Close();
+
+            //    }
+
+            //}
+
             if (_connection == null) return;
-
-            if (HasActiveTransaction == false)
+            if (_connection.State != ConnectionState.Closed)
             {
-
-                //if (Config.EnableConnectionPool == true)
-                //{
-                //    Pooling.DbConnectionPoolProxy.Instance.ReturnObject(this, Connection);
-
-                //}
-                //else
-                //{
-                if (_connection.State != ConnectionState.Closed)
+                try
                 {
                     if (_transaction != null)
                     {
                         _transaction.Rollback();
                         OnRollbackTransactionInternal();
-
                     }
-                    // OnConnectionClosingInternal(Connection);
+                    //OnConnectionClosingInternal(Connection);
                     OnConnectionClosingWithIntercept();
+                }
+                catch (Exception)
+                {
+
+                    throw;
+                }
+                finally
+                {
                     _connection.Close();
 
-                }
-                // } 
+                } 
 
             }
-
         }
 
 

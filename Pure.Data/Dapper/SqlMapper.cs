@@ -264,7 +264,7 @@ namespace Pure.Data
     /// <summary>
     /// Dapper, a light weight object mapper for ADO.NET
     /// </summary>
-    static partial class SqlMapper
+    public static partial class SqlMapper
     {
         /// <summary>
         /// Permits specifying certain SqlMapper values globally.
@@ -359,7 +359,7 @@ namespace Pure.Data
         /// <summary>
         /// Implement this interface to pass an arbitrary db specific set of parameters to Dapper
         /// </summary>
-        public partial interface IDynamicParameters
+        public interface IDynamicParameters
         {
             /// <summary>
             /// Add all the parameters needed to the command just before it executes
@@ -383,7 +383,7 @@ namespace Pure.Data
         /// <summary>
         /// Extends IDynamicParameters with facilities for executing callbacks after commands have completed
         /// </summary>
-        public partial interface IParameterCallbacks : IDynamicParameters
+        public interface IParameterCallbacks : IDynamicParameters
         {
             /// <summary>
             /// Invoked when the command has executed
@@ -570,7 +570,7 @@ namespace Pure.Data
         /// and strictly append-only; you cannot change existing values. All key matches are on **REFERENCE**
         /// equality. The type is fully thread-safe.
         /// </summary>
-        internal partial class Link<TKey, TValue> where TKey : class
+        internal  class Link<TKey, TValue> where TKey : class
         {
             public static bool TryGet(Link<TKey, TValue> link, TKey key, out TValue value)
             {
@@ -614,7 +614,7 @@ namespace Pure.Data
             public TValue Value { get; private set; }
             public Link<TKey, TValue> Tail { get; private set; }
         }
-        partial class CacheInfo
+        public class CacheInfo
         {
             public DeserializerState Deserializer { get; set; }
             public Func<IDataReader, object>[] OtherDeserializers { get; set; }
@@ -636,7 +636,7 @@ namespace Pure.Data
                 return hash;
             }
         }
-        struct DeserializerState
+        public struct DeserializerState
         {
             public readonly int Hash;
             public readonly Func<IDataReader, object> Func;
@@ -1049,7 +1049,7 @@ namespace Pure.Data
         /// <summary>
         /// Identity of a cached query in Dapper, used for extensibility
         /// </summary>
-        public partial class Identity : IEquatable<Identity>
+        public  class Identity : IEquatable<Identity>
         {
             internal Identity ForGrid(Type primaryType, int gridIndex)
             {

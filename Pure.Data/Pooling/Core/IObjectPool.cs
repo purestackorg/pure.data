@@ -255,9 +255,10 @@ namespace Pure.Data.Pooling
 
             // Use specified timer or create a new one if missing.
             _evictionTimer = evictionTimer ?? new EvictionTimer();
-            StartEvictor(evictionSettings ?? EvictionSettings.Default);
+            _evictionSettings = evictionSettings ?? EvictionSettings.Default;
+            StartEvictor(_evictionSettings);
         }
-
+        EvictionSettings _evictionSettings = null;
         #endregion C'tor and Initialization code
 
         #region Public Properties
@@ -486,10 +487,17 @@ namespace Pure.Data.Pooling
                     Diagnostics.IncrementReturnedToPoolCount();
                 }
 
+
+                //从create队列移出当前对象并加入到PooledObjects
+                CreatedObjects.TryRemove(returnedObject);
+                 
+
                 // While adding the object back to the pool, we mark it as available.
                 returnedObject.PooledObjectInfo.State = PooledObjectState.Available;
 
                 returnedObject.OnReturnResource(returnedObject);
+
+             
                  
             }
             else
@@ -630,9 +638,9 @@ namespace Pure.Data.Pooling
                         var createdObjects = CreatedObjects.ToArray();
 
                         // All items which are not valid will be destroyed.
-                        foreach (var pooledObject in createdObjects.Where(p=>p != null))
+                        foreach (var pooledObject in createdObjects)
                         { 
-                            if (!pooledObject.ValidateObject(PooledObjectValidationContext.Outbound(pooledObject)) && CreatedObjects.TryRemove(pooledObject))
+                            if (pooledObject != null && !pooledObject.ValidateObject(PooledObjectValidationContext.Outbound(pooledObject)) && CreatedObjects.TryRemove(pooledObject))
                             {
                                 pooledObject.OnEvictResource(pooledObject);
 
@@ -659,7 +667,7 @@ namespace Pure.Data.Pooling
             newObject.PooledObjectInfo.Id = Interlocked.Increment(ref _lastPooledObjectId);
             newObject.PooledObjectInfo.State = PooledObjectState.Available;
             newObject.PooledObjectInfo.Handle = this;
-            newObject.PooledObjectInfo.LastOperateTime = DateTime.Now;
+            newObject.PooledObjectInfo.LastOperateTime = EvictionSettings.GetCurrentTime();// DateTime.Now;
 
             CreatedObjects.TryEnqueue(newObject);//加入创建的队列
 
@@ -671,7 +679,10 @@ namespace Pure.Data.Pooling
         public string ShowStatisticsInfo( ) {
 
             string msg = "ObjectsInPoolCount: " + ObjectsInPoolCount + " , "+
-                "MaximumPoolSize: " + MaximumPoolSize + " \r\n" +
+                "MaximumPoolSize: " + MaximumPoolSize + " , " +
+                "EvictEnabled: " + _evictionSettings.Enabled + " , " +
+                "EvictDelay: " + _evictionSettings.Delay + " , " +
+                "EvictPeriod: " + _evictionSettings.Period  + " \r\n" +
                 "Diagnostics -> " + Diagnostics.ToString()  
                 ;
 

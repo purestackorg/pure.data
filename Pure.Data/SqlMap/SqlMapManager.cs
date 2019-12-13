@@ -20,7 +20,7 @@ namespace Pure.Data.SqlMap
         //避免大小写 统一小写 20191115
         public string FormatSqlMapNameCase(string str) {
 
-            return str?.ToLower();
+            return str?.ToUpper();
         }
          
         /// <summary>

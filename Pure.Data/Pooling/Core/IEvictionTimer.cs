@@ -7,6 +7,11 @@ namespace Pure.Data.Pooling
 {
     public class EvictionSettings
     {
+
+        public static DateTime GetCurrentTime() {
+            return DateTime.Now;
+        }
+
         /// <summary>
         ///   Default eviction settings.
         /// </summary>

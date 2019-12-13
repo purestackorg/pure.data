@@ -86,6 +86,7 @@
               <xs:simpleType>
                 <xs:restriction base="xs:NMTOKEN">
                   <xs:enumeration value="UpperAll"/>
+                  <xs:enumeration value="LowerAll"/>
                   <xs:enumeration value="PascalCase"/>
                   <xs:enumeration value="CamelCase"/>
                   <xs:enumeration value="TitleCase"/>

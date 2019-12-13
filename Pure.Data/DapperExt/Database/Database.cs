@@ -1,4 +1,4 @@
-﻿ 
+﻿
 using System.Data;
 using System.Data.Common;
 using FluentExpressionSQL;
@@ -29,7 +29,7 @@ namespace Pure.Data
 
         #region Property And Field
 
-        private FluentExpressionSqlBuilder _FluentSqlBuilder = null; 
+        private FluentExpressionSqlBuilder _FluentSqlBuilder = null;
         public FluentExpressionSqlBuilder FluentSqlBuilder
         {
             get
@@ -52,7 +52,10 @@ namespace Pure.Data
         }
         private SqlBuilder _SqlBuilder = null;
 
-        public SqlBuilder SqlBuilder { get {
+        public SqlBuilder SqlBuilder
+        {
+            get
+            {
                 //if (_SqlBuilder == null)
                 //{
                 //    lock (DatabaseConfigPool._DatabaseSqlBuilderLock)
@@ -66,7 +69,8 @@ namespace Pure.Data
                 //}
                 //return _SqlBuilder;
                 return new SqlBuilder(this);
-            } }
+            }
+        }
 
         public string DatabaseName { get; private set; }
         public string ProviderName { get; private set; }
@@ -104,7 +108,7 @@ namespace Pure.Data
             }
         }
 
-        
+
 #if ASYNC
         private IDapperAsyncImplementor _DapperImplementor = null;
         public IDapperAsyncImplementor DapperImplementor
@@ -190,7 +194,7 @@ namespace Pure.Data
 
         public DatabaseType DatabaseType { get; private set; }
         public Stopwatch Watch { get; private set; }
-        
+
         public string LastSQL { get; set; }
         public IDataParameterCollection LastArgs { get; set; }
 
@@ -217,7 +221,7 @@ namespace Pure.Data
                             _logHelper.OutputAction = Config.OutputAction;
                             _logHelper.EnableOrmLog = Config.EnableOrmLog;
                             _logHelper.EnableInternalLog = Config.EnableInternalLog;
-                            
+
                             _logHelper.OrmLogsPath = Config.OrmLogsPath;
                             _logHelper.MaxServerLogSize = Config.MaxServerLogSize;
                             _logHelper.CategoryLogType = Config.CategoryLogType;
@@ -248,7 +252,7 @@ namespace Pure.Data
                 }
                 return _DatabaseConfig;
             }
-             
+
 
         }
 
@@ -270,7 +274,7 @@ namespace Pure.Data
         /// <summary>
         /// 创建新的连接对象
         /// </summary>
-        private void CreateAndInitConnection( IDbConnection initConnection = null)
+        private void CreateAndInitConnection(IDbConnection initConnection = null)
         {
             if (Connection != null)
             {
@@ -305,33 +309,33 @@ namespace Pure.Data
                 //    }
 
                 //    return;
-                 
+
 
                 //}
                 //else
                 //{
+                if (DbFactory == null)
+                {
+                    DbFactory = DbConnectionFactory.CreateConnection(ConnectionString, ProviderName).DbFactory;
                     if (DbFactory == null)
                     {
-                        DbFactory = DbConnectionFactory.CreateConnection(ConnectionString, ProviderName).DbFactory;
-                        if (DbFactory == null)
-                        {
-                            throw new ArgumentException("DbFactory can not be null!");
-                        }
+                        throw new ArgumentException("DbFactory can not be null!");
                     }
-                    IDbConnection conn = DbFactory.CreateConnection();
-                    if (Config.DbConnectionInit != null)
-                    {
-                        conn = Config.DbConnectionInit(conn);
-                    }
-                    Connection = conn;
-                    if (Connection == null) throw new Exception("DB Connection failed to configure.");
-                    if (Connection.State != ConnectionState.Open)
-                    {
-                        Connection.ConnectionString = ConnectionString;
+                }
+                IDbConnection conn = DbFactory.CreateConnection();
+                if (Config.DbConnectionInit != null)
+                {
+                    conn = Config.DbConnectionInit(conn);
+                }
+                Connection = conn;
+                if (Connection == null) throw new Exception("DB Connection failed to configure.");
+                if (Connection.State != ConnectionState.Open)
+                {
+                    Connection.ConnectionString = ConnectionString;
 
-                    } 
+                }
 
-                    return;
+                return;
 
                 //}
 
@@ -341,7 +345,8 @@ namespace Pure.Data
 
         }
 
-        public DbConnection CreateNewDbConnection(bool needInitAction = false) {
+        public DbConnection CreateNewDbConnection(bool needInitAction = false)
+        {
             if (DbFactory == null)
             {
                 DbFactory = DbConnectionFactory.CreateConnection(ConnectionString, ProviderName).DbFactory;
@@ -355,7 +360,7 @@ namespace Pure.Data
             {
                 conn = Config.DbConnectionInit((IDbConnection)conn) as DbConnection;
             }
-          
+
             if (conn == null) throw new Exception("DB Connection failed to configure.");
             if (conn.State != ConnectionState.Open)
             {
@@ -411,7 +416,7 @@ namespace Pure.Data
             }
 
 
-            var status  = DatabaseConfigPool.GetInitStatus(this);
+            var status = DatabaseConfigPool.GetInitStatus(this);
             if (status.HasFirstLoadFinish == false) //初始化状态
             {
                 lock (DatabaseConfigPool.FirstLoadingLock)
@@ -459,7 +464,7 @@ namespace Pure.Data
                     {
                         Snapshotter.InitGlobalIgnoreUpdatedColumns(Config.GlobalIgnoreUpdatedColumns, Config.AutoFilterEmptyValueColumnsWhenTrack);
                     }
-                     
+
 
 
 
@@ -468,10 +473,10 @@ namespace Pure.Data
                 }
 
             }
-             
+
 
         }
-     
+
         public Database(string connKey, Action<IDatabaseConfig> InitConfig = null)
         {
             InitDatabaseConfig(InitConfig);
@@ -483,8 +488,8 @@ namespace Pure.Data
         }
         public Database(string configFile, OutputActionDelegate _LogAction = null, Action<IDatabaseConfig> InitConfig = null)
         {
-           
-            if (configFile == null || configFile =="")
+
+            if (configFile == null || configFile == "")
             {
                 configFile = "PureDataConfiguration.xml";
             }
@@ -492,11 +497,11 @@ namespace Pure.Data
             var loadedInfo = PureDataConfigurationLoader.Instance.Load(configFile, this.Config, _LogAction);
             this._DatabaseConfig = loadedInfo.DatabaseConfig;
 
-            
+
             InitDatabaseConfig(InitConfig);
-           
+
             InitDbConnectionInfo(loadedInfo.DbConnectionMetaInfo);
-   
+
 
         }
         public Database(string connKey, string providerName, Action<IDatabaseConfig> InitConfig = null)
@@ -512,7 +517,7 @@ namespace Pure.Data
             var info = DbConnectionFactory.CreateConnection(connectionString, providerName);
             InitDbConnectionInfo(info);
         }
-   
+
         public Database(IDbConnection connection, Action<IDatabaseConfig> InitConfig = null)
         {
             InitDatabaseConfig(InitConfig);
@@ -552,13 +557,13 @@ namespace Pure.Data
             catch (Exception ex)
             {
                 throw new PureDataException("Execute", ex);
-                 
+
             }
             finally
             {
                 Close();
             }
-           
+
         }
         public object ExecuteScalar(string sql, object param = null, IDbTransaction transaction = null, int? commandTimeout = null, CommandType? commandType = null)
         {
@@ -603,7 +608,7 @@ namespace Pure.Data
                 {
                     commandTimeout = Config.ExecuteTimeout;
                 }
-                
+
                 return Connection.ExecuteScalar<T>(sql, param, transaction, commandTimeout, commandType, this);
             }
             catch (Exception ex)
@@ -626,7 +631,7 @@ namespace Pure.Data
             {
                 commandTimeout = Config.ExecuteTimeout;
             }
-            if (commandType== null)
+            if (commandType == null)
             {
                 commandType = CommandType.Text;
             }
@@ -992,7 +997,7 @@ namespace Pure.Data
                 Close();
             }
         }
-        public T SqlQueryFirstOrDefault<T>(string sql, object param = null, IDbTransaction transaction = null,   int? commandTimeout = null, CommandType? commandType = null)
+        public T SqlQueryFirstOrDefault<T>(string sql, object param = null, IDbTransaction transaction = null, int? commandTimeout = null, CommandType? commandType = null)
         {
 
             try
@@ -1024,7 +1029,7 @@ namespace Pure.Data
             return (DapperImplementor.Get<T>(Connection, id, transaction, commandTimeout));
         }
 
-        public T Get<T>(object id, int? commandTimeout=null) where T : class
+        public T Get<T>(object id, int? commandTimeout = null) where T : class
         {
             return (DapperImplementor.Get<T>(Connection, id, _transaction, commandTimeout));
         }
@@ -1163,7 +1168,7 @@ namespace Pure.Data
             }
             catch (Exception)
             {
-                
+
                 throw;
             }
             finally
@@ -1172,7 +1177,7 @@ namespace Pure.Data
 
                 Close();
             }
-              
+
         }
         public IDataReader GetPageReaderBySQL(int pageIndex, int pagesize, string sqltext, string orderText, IDictionary<string, object> parameters, out int totalCount)
         {
@@ -1213,7 +1218,7 @@ namespace Pure.Data
         {
             pagesize = pagesize == 0 ? Config.DefaultPageSize : pagesize;
 
-            return DapperImplementor.GetPage<T>(Connection, predicate, sort, pageIndex, pagesize,   transaction, commandTimeout, buffered);
+            return DapperImplementor.GetPage<T>(Connection, predicate, sort, pageIndex, pagesize, transaction, commandTimeout, buffered);
         }
         public IEnumerable<T> GetPage<T>(int pageIndex, int pagesize, object predicate, IList<ISort> sort, out int totalCount, int? commandTimeout = null, bool buffered = true) where T : class
         {
@@ -1227,14 +1232,14 @@ namespace Pure.Data
             pagesize = pagesize == 0 ? Config.DefaultPageSize : pagesize;
             transaction = transaction == null ? _transaction : transaction;
 
-            return DapperImplementor.GetPage<T>(Connection, pageIndex,  pagesize, out allRowsCount,  sql,  param ,  allRowsCountSql ,  transaction ,  commandTimeout ,  buffered );
+            return DapperImplementor.GetPage<T>(Connection, pageIndex, pagesize, out allRowsCount, sql, param, allRowsCountSql, transaction, commandTimeout, buffered);
         }
-        public PageDataResult<IEnumerable<T>> GetPage<T>(int pageIndex, int pagesize,   string sql, object param = null, string allRowsCountSql = null, IDbTransaction transaction = null, int? commandTimeout = null, bool buffered = true) where T : class
+        public PageDataResult<IEnumerable<T>> GetPage<T>(int pageIndex, int pagesize, string sql, object param = null, string allRowsCountSql = null, IDbTransaction transaction = null, int? commandTimeout = null, bool buffered = true) where T : class
         {
             pagesize = pagesize == 0 ? Config.DefaultPageSize : pagesize;
             transaction = transaction == null ? _transaction : transaction;
 
-            return DapperImplementor.GetPage<T>(Connection, pageIndex, pagesize,  sql, param, allRowsCountSql, transaction, commandTimeout, buffered);
+            return DapperImplementor.GetPage<T>(Connection, pageIndex, pagesize, sql, param, allRowsCountSql, transaction, commandTimeout, buffered);
         }
         public IDataReader GetPageReader<T>(int pageIndex, int pagesize, object predicate, IList<ISort> sort, out int totalCount, IDbTransaction transaction = null, int? commandTimeout = null) where T : class
         {
@@ -1243,11 +1248,11 @@ namespace Pure.Data
             return DapperImplementor.GetPageReader<T>(Connection, predicate, sort, pageIndex, pagesize, out totalCount, _transaction, commandTimeout);
         }
 
-        public PageDataResult<IDataReader> GetPageReader<T>(int pageIndex, int pagesize, object predicate, IList<ISort> sort,   IDbTransaction transaction = null, int? commandTimeout = null) where T : class
+        public PageDataResult<IDataReader> GetPageReader<T>(int pageIndex, int pagesize, object predicate, IList<ISort> sort, IDbTransaction transaction = null, int? commandTimeout = null) where T : class
         {
             pagesize = pagesize == 0 ? Config.DefaultPageSize : pagesize;
 
-            return DapperImplementor.GetPageReader<T>(Connection, predicate, sort, pageIndex, pagesize,  _transaction, commandTimeout);
+            return DapperImplementor.GetPageReader<T>(Connection, predicate, sort, pageIndex, pagesize, _transaction, commandTimeout);
         }
         #endregion
 
@@ -1270,7 +1275,7 @@ namespace Pure.Data
         #region Insert
         public void InsertBulk(DataTable dt, IDbTransaction transaction = null, int? commandTimeout = null)
         {
-            BulkOperateManage.Instance.Get(this.Config.BulkOperateClassName).Insert(this, dt); 
+            BulkOperateManage.Instance.Get(this.Config.BulkOperateClassName).Insert(this, dt);
         }
         public void InsertBulk<T>(IEnumerable<T> entities, IDbTransaction transaction = null, int? commandTimeout = null) where T : class
         {
@@ -1299,17 +1304,17 @@ namespace Pure.Data
         //    InsertBulk<T>(entities,  null, commandTimeout);
 
         //}
-        public void InsertBatch(DataTable dt, int batchSize = 10000)  
+        public void InsertBatch(DataTable dt, int batchSize = 10000)
         {
-          //  options = options ?? new BatchOptions();
+            //  options = options ?? new BatchOptions();
 
-            BulkOperateManage.Instance.Get(this.Config.BulkOperateClassName).InsertBatch(this, dt,batchSize);
+            BulkOperateManage.Instance.Get(this.Config.BulkOperateClassName).InsertBatch(this, dt, batchSize);
 
         }
-        public void InsertBatch<T>(IEnumerable<T> entities, IDbTransaction transaction = null,  int batchSize = 10000, int? commandTimeout = null) where T : class
+        public void InsertBatch<T>(IEnumerable<T> entities, IDbTransaction transaction = null, int batchSize = 10000, int? commandTimeout = null) where T : class
         {
             if (!OnInsertingInternal(new InsertContext(entities)))
-                return ;
+                return;
 
             //options = options ?? new BatchOptions();
 
@@ -1348,7 +1353,7 @@ namespace Pure.Data
         {
             //if (!OnInsertingInternal(new InsertContext(entities)))
             //    return 0;
-             InsertBatch<T>(entities, null, batchSize);
+            InsertBatch<T>(entities, null, batchSize);
         }
         public dynamic Insert<T>(T entity, IDbTransaction transaction, int? commandTimeout = null) where T : class
         {
@@ -1357,7 +1362,7 @@ namespace Pure.Data
             return DapperImplementor.Insert<T>(Connection, entity, transaction, commandTimeout);
         }
 
-        public dynamic Insert<T>(T entity, int? commandTimeout=null) where T : class
+        public dynamic Insert<T>(T entity, int? commandTimeout = null) where T : class
         {
             if (!OnInsertingInternal(new InsertContext(entity)))
                 return 0;
@@ -1383,7 +1388,7 @@ namespace Pure.Data
             return DapperImplementor.Update<T>(Connection, entity, transaction, commandTimeout);
         }
 
-        public bool Update<T>(T entity, int? commandTimeout=null) where T : class
+        public bool Update<T>(T entity, int? commandTimeout = null) where T : class
         {
             if (!OnUpdatingInternal(new UpdateContext(entity)))
                 return false;
@@ -1409,14 +1414,14 @@ namespace Pure.Data
         #endregion
 
         #region Delete
-        public bool Delete<T>(T entity, IDbTransaction transaction = null, int? commandTimeout=null) where T : class
+        public bool Delete<T>(T entity, IDbTransaction transaction = null, int? commandTimeout = null) where T : class
         {
             if (!OnDeletingInternal(new DeleteContext(entity)))
                 return false;
             return DapperImplementor.Delete(Connection, entity, transaction, commandTimeout);
         }
 
-        public bool Delete<T>(T entity, int? commandTimeout=null) where T : class
+        public bool Delete<T>(T entity, int? commandTimeout = null) where T : class
         {
             if (!OnDeletingInternal(new DeleteContext(entity)))
                 return false;
@@ -1460,11 +1465,11 @@ namespace Pure.Data
 
             return this.Delete(classMap.TableName, conditions);
         }
-        public int DeleteAll<T>(  IDbTransaction transaction = null, int? commandTimeout = null) where T : class
+        public int DeleteAll<T>(IDbTransaction transaction = null, int? commandTimeout = null) where T : class
         {
-            
+
             transaction = transaction ?? _transaction;
-            return DapperImplementor.DeleteAll<T>(Connection,   _transaction, commandTimeout);
+            return DapperImplementor.DeleteAll<T>(Connection, _transaction, commandTimeout);
         }
         public int Truncate<T>(IDbTransaction transaction = null, int? commandTimeout = null) where T : class
         {
@@ -1651,17 +1656,19 @@ namespace Pure.Data
         public void Dispose()
         {
             //if (Config.KeepConnectionAlive) return;
-           
+
             if (Connection != null)
             {
                 //if (Config.EnableConnectionPool == true)
                 //{
                 //   // Pooling.DbConnectionPoolProxy.Instance.ReturnObject(this, Connection);
-                    
+
                 //}
                 //else
                 //{
-                    if (Connection.State != ConnectionState.Closed)
+                if (Connection.State != ConnectionState.Closed)
+                {
+                    try
                     {
                         if (_transaction != null)
                         {
@@ -1670,65 +1677,102 @@ namespace Pure.Data
                         }
                         //OnConnectionClosingInternal(Connection);
                         OnConnectionClosingWithIntercept();
+                    }
+                    catch (Exception)
+                    {
+
+                        throw;
+                    }
+                    finally
+                    {
                         Connection.Close();
+
                     }
 
-                    if (Config.AutoDisposeConnection == true)
-                    {
-                        Connection.Dispose();
-                        Connection = null;
-                        //if (Config.EnableDebug)
-                        //{
-                        //    LogHelper.Debug("Connection has Disposed.");
-                        //}
-                    }
+                }
+
+                if (Config.AutoDisposeConnection == true)
+                {
+                    Connection.Dispose();
+                    Connection = null;
+                    //if (Config.EnableDebug)
+                    //{
+                    //    LogHelper.Debug("Connection has Disposed.");
+                    //}
+                }
 
                 //}
-                 
+
             }
-             
+
 
         }
 
 
-         
+
         /// <summary>
         /// 关闭数据库连接，当开启KeepConnectionAlive为true则不关闭
         /// </summary>
         public void Close()
         {
-            if (Config.KeepConnectionAlive) return;
+            //if (Config.KeepConnectionAlive) return;
+            //if (Connection == null) return;
+
+            //if (HasActiveTransaction == false)
+            //{
+
+
+            //        if (Connection.State != ConnectionState.Closed)
+            //        {
+            //            if (_transaction != null)
+            //            {
+            //                _transaction.Rollback();
+            //                OnRollbackTransactionInternal();
+            //            }
+
+            //            OnConnectionClosingWithIntercept();
+            //            Connection.Close();
+
+            //        }
+
+
+            //}
+
+
+
             if (Connection == null) return;
-
-            if (HasActiveTransaction == false)
+            if (Connection.State != ConnectionState.Closed)
             {
-
-                //if (Config.EnableConnectionPool == true)
-                //{
-                //    Pooling.DbConnectionPoolProxy.Instance.ReturnObject(this, Connection);
-                     
-                //}
-                //else
-                //{
-                    if (Connection.State != ConnectionState.Closed)
+                try
+                {
+                    if (_transaction != null)
                     {
-                        if (_transaction != null)
-                        {
-                            _transaction.Rollback();
-                            OnRollbackTransactionInternal();
-                        }
-                       // OnConnectionClosingInternal(Connection);
-                        OnConnectionClosingWithIntercept();
-                        Connection.Close();
+                        _transaction.Rollback();
+                        OnRollbackTransactionInternal();
 
                     }
-               // } 
+
+                    OnConnectionClosingWithIntercept();
+                }
+                catch (Exception)
+                {
+
+                    throw;
+                }
+                finally
+                {
+                    Connection.Close();
+
+                }
+
 
             }
-          
+
+
         }
 
-        public void OnConnectionClosingWithIntercept() {
+        public void OnConnectionClosingWithIntercept()
+        {
             OnConnectionClosingInternal(Connection);
         }
 
@@ -1749,7 +1793,7 @@ namespace Pure.Data
                 }
             }
         }
-      
+
         // Open a connection (can be nested)
         public IDatabase OpenSharedConnection()
         {
@@ -1840,7 +1884,7 @@ namespace Pure.Data
         {
             return DapperImplementor.SqlGenerator.Configuration.GetNextGuid();
         }
-        public IClassMapper GetMap(string tableName) 
+        public IClassMapper GetMap(string tableName)
         {
             return DapperImplementor.SqlGenerator.Configuration.GetMap(tableName);
         }
@@ -1861,11 +1905,11 @@ namespace Pure.Data
             var mapper = GetMap<T>();
             if (mapper == null)
             {
-                throw new ArgumentException("Cannot find IClassMapper of "+typeof(T).Name );
+                throw new ArgumentException("Cannot find IClassMapper of " + typeof(T).Name);
             }
-            return mapper.Validate(this, instance); 
+            return mapper.Validate(this, instance);
         }
-        public ValidationResult Validate<T>(T instance,  params Expression<Func<T, object>>[] propertyExpressions) where T : class
+        public ValidationResult Validate<T>(T instance, params Expression<Func<T, object>>[] propertyExpressions) where T : class
         {
             var mapper = GetMap<T>();
             if (mapper == null)
@@ -1890,7 +1934,7 @@ namespace Pure.Data
             {
                 throw new ArgumentException("Cannot find IClassMapper of " + typeof(T).Name);
             }
-             mapper.ValidateAndThrow(this, instance);
+            mapper.ValidateAndThrow(this, instance);
         }
         public void LoadAllMap(List<Assembly> MappingAssemblies = null, LoadMapperMode LoadMode = LoadMapperMode.FluentMapper)
         {
@@ -2007,7 +2051,7 @@ namespace Pure.Data
             }
             catch (Exception)
             {
-                
+
                 throw;
             }
             finally
@@ -2015,7 +2059,7 @@ namespace Pure.Data
                 SetConnectionAlive(false);
                 Close();
             }
-           
+
         }
 
         public IEnumerable<TEntity> GetPage<TEntity>(int pageIndex, int pagesize, Expression<Func<TEntity, bool>> condition, Action<FluentExpressionSQLCore<TEntity>> orderAction, out int totalCount) where TEntity : class
@@ -2045,7 +2089,7 @@ namespace Pure.Data
                 SetConnectionAlive(false);
                 Close();
             }
-           
+
 
         }
 
@@ -2171,7 +2215,7 @@ namespace Pure.Data
 
         private void OnConnectionClosingInternal(IDbConnection conn)
         {
-         
+
             if (Config.EnableIntercept)
             {
                 foreach (var interceptor in Config.Interceptors.OfType<IConnectionInterceptor>())
@@ -2209,7 +2253,7 @@ namespace Pure.Data
         #endregion
 
 
-       
+
         #region Batch Command
         /// <summary>
         /// 创建批处理命令
@@ -2374,7 +2418,7 @@ namespace Pure.Data
         #endregion
 
         #region Queryable
-        public SqlQuery<T> Queryable<T>( ) where T : class
+        public SqlQuery<T> Queryable<T>() where T : class
         {
             return new SqlQuery<T>(this.FluentSqlBuilder);
         }
@@ -2387,9 +2431,9 @@ namespace Pure.Data
             return BackupHelper.Instance.Backup<T>(this, option);
         }
 
-        public string GenerateCode( )
+        public string GenerateCode()
         {
-             return CodeGenHelper.Instance.Gen(this );
+            return CodeGenHelper.Instance.Gen(this);
         }
 
         public Migration.Framework.ITransformationProvider CreateTransformationProvider(bool isCache = true)
@@ -2426,8 +2470,8 @@ namespace Pure.Data
         /// <returns></returns>
         public int UpdateOnly<T>(object bindedObj = null, IDictionary<string, object> _PrimaryKeyValues = null, params string[] onlyProperties) where T : class
         {
-            var sqlParamsContext =UpdateOnlyImpl<T>(bindedObj, _PrimaryKeyValues, onlyProperties);
-            return this.Execute(sqlParamsContext.Sql , sqlParamsContext.Parameters);
+            var sqlParamsContext = UpdateOnlyImpl<T>(bindedObj, _PrimaryKeyValues, onlyProperties);
+            return this.Execute(sqlParamsContext.Sql, sqlParamsContext.Parameters);
 
         }
 
@@ -2570,7 +2614,7 @@ namespace Pure.Data
             }
 
 
-            
+
 
 
             if (this.DatabaseType == DatabaseType.Oracle && LobConverter.Enable == true)

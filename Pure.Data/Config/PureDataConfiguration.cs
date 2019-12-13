@@ -947,6 +947,10 @@ namespace Pure.Data
         /// </summary>
         UpperAll = 1,
         /// <summary>
+        /// 全小写Camel PROJECTWORKER
+        /// </summary>
+        LowerAll = 9,
+        /// <summary>
         /// 第一个词的首字母，以及后面每个词的首字母都大写 . ProjectWorker
         /// </summary>
         PascalCase = 2,
