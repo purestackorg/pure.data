@@ -133,101 +133,23 @@ namespace Pure.Data
         {
             Pool.ReturnPooledDatabase(this); //返还当前的数据库
 
-            //if (Config.KeepConnectionAlive) return;
-
-            if (_connection != null)
-            {
-                //if (Config.EnableConnectionPool == true)
-                //{
-                //   // Pooling.DbConnectionPoolProxy.Instance.ReturnObject(this, Connection);
-
-                //}
-                //else
-                //{
-                if (_connection.State != ConnectionState.Closed)
-                {
-
-                    try
-                    {
-                        if (_transaction != null)
-                        {
-                            _transaction.Rollback();
-                            OnRollbackTransactionInternal();
-                        }
-                        //OnConnectionClosingInternal(Connection);
-                        OnConnectionClosingWithIntercept();
-                    }
-                    catch (Exception)
-                    {
-
-                        throw;
-                    }
-                    finally
-                    {
-                        _connection.Close();
-
-                    }
-                     
-                }
-
-                //if (IsPooled == false) //这个很关键，避免导致connection为null的错误
-                //{
-                //    if (Config.AutoDisposeConnection == true)
-                //    {
-                //        Connection.Dispose();
-                //        Connection = null;
-                //        //if (Config.EnableDebug)
-                //        //{
-                //        //    LogHelper.Debug("Connection has Disposed.");
-                //        //}
-                //    }
-                //}
-
-
-                //}
-
-            }
+            this.CloseReally();
         }
 
         public void DisposeInternal() {
+
+            this.CloseReally();
+
             if (_connection != null)
-            {
-                //if (Config.EnableConnectionPool == true)
-                //{
-                //   // Pooling.DbConnectionPoolProxy.Instance.ReturnObject(this, Connection);
-
-                //}
-                //else
-                //{
-                if (_connection.State != ConnectionState.Closed)
-                {
-
-                    try
-                    {
-                        if (_transaction != null)
-                        {
-                            _transaction.Rollback();
-                            OnRollbackTransactionInternal();
-                        }
-                        //OnConnectionClosingInternal(Connection);
-                        OnConnectionClosingWithIntercept();
-                    }
-                    catch (Exception)
-                    {
-
-                        throw;
-                    }
-                    finally
-                    {
-                        _connection.Close();
-
-                    } 
-                }
-
+            { 
                 _connection.Dispose();
-                _connection = null;
-
+                _connection = null; 
             }
+        }
+
+       ~PooledDatabase()
+        {
+            this.CloseReally();
         }
 
         public void Dispose()
@@ -235,37 +157,10 @@ namespace Pure.Data
             ReturnPooledDatabase(); // 自动返回池里 
 
         }
-        /// <summary>
-        /// 返还给数据库池，关闭数据库连接，当开启KeepConnectionAlive为true则不关闭
-        /// </summary>
-        public void Close()
+
+        public void CloseReally()
         {
-
-            //if (Config.KeepConnectionAlive) return;
-            //if (_connection == null) return;
-
-            //if (HasActiveTransaction == false)
-            //{
-
-
-            //    if (_connection.State != ConnectionState.Closed)
-            //    {
-            //        if (_transaction != null)
-            //        {
-            //            _transaction.Rollback();
-            //            OnRollbackTransactionInternal();
-
-            //        }
-
-            //        OnConnectionClosingWithIntercept();
-            //        _connection.Close();
-
-            //    }
-
-            //}
-
-            if (_connection == null) return;
-            if (_connection.State != ConnectionState.Closed)
+            if (_connection != null && _connection.State != ConnectionState.Closed)
             {
                 try
                 {
@@ -287,8 +182,28 @@ namespace Pure.Data
                     _connection.Close();
 
                 } 
+            }
+        }
+
+
+        /// <summary>
+        /// 返还给数据库池，关闭数据库连接，当开启KeepConnectionAlive为true则不关闭
+        /// </summary>
+        public void Close()
+        {
+
+            if (Config.KeepConnectionAlive) return;
+            if (_connection == null) return;
+
+            if (HasActiveTransaction == false)
+            {
+
+                this.CloseReally();
+
+
 
             }
+             
         }
 
 

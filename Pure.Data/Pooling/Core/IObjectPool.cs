@@ -346,7 +346,10 @@ namespace Pure.Data.Pooling
                 DestroyPooledObject(dequeuedObjectToDestroy);
             }
 
-
+            while (CreatedObjects.TryDequeue(out var dequeuedObjectToDestroy))
+            {
+                DestroyPooledObject(dequeuedObjectToDestroy);
+            }
         }
 
         /// <summary>
@@ -659,6 +662,7 @@ namespace Pure.Data.Pooling
 
         public void TryEnqueueCreatedObject(T newObject) {
             CreatedObjects.TryEnqueue(newObject); 
+            //PooledObjects.TryEnqueue(newObject);
         }
 
         private T PrepareNewPooledObject(T newObject)
@@ -669,8 +673,8 @@ namespace Pure.Data.Pooling
             newObject.PooledObjectInfo.Handle = this;
             newObject.PooledObjectInfo.LastOperateTime = EvictionSettings.GetCurrentTime();// DateTime.Now;
 
-            CreatedObjects.TryEnqueue(newObject);//加入创建的队列
-
+            //CreatedObjects.TryEnqueue(newObject);
+            TryEnqueueCreatedObject(newObject);//加入创建的队列
             newObject.OnCreateResource(newObject);
             return newObject;
         }

@@ -179,6 +179,7 @@ namespace Pure.Data
 
         void EnsureOpenConnection();
         void Close();
+        void CloseReally();
         void OnConnectionClosingWithIntercept();
         ITransaction GetTransaction(IsolationLevel isolationLevel = IsolationLevel.ReadCommitted);
         void SetTransaction(IDbTransaction tran);

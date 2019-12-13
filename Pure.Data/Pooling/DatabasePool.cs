@@ -113,14 +113,14 @@ namespace Pure.Data
                     policy.OnReleaseResource?.Invoke(pooledObj);
 
                     var resource = pooledObj as PooledDatabase;
-                    resource?.Close();
+                    resource?.CloseReally();
                 };
                 db.OnResetState = (pooledObj) =>
                 {
                     policy.OnResetState?.Invoke(pooledObj);
 
                     var resource = pooledObj as PooledDatabase;
-                    resource?.Close();
+                    resource?.CloseReally();
                 };
 
                 db.OnEvictResource = (pooledObj) =>
@@ -128,7 +128,7 @@ namespace Pure.Data
                     policy.OnEvictResource?.Invoke(pooledObj);
 
                     var resource = pooledObj as PooledDatabase;
-                    resource?.Close();
+                    resource?.CloseReally();
                 };
                 db.OnValidateObject = (pooledObj) =>
                 {
@@ -156,20 +156,20 @@ namespace Pure.Data
                 {
                     policy.OnReleaseResource?.Invoke(pooledObj);
                     var resource = pooledObj as PooledDatabase;
-                    resource?.Close();
+                    resource?.CloseReally();
                 };
                 db.OnResetState = (pooledObj) =>
                 {
                     policy.OnResetState?.Invoke(pooledObj);
                     var resource = pooledObj as PooledDatabase;
-                    resource?.Close();
+                    resource?.CloseReally();
                 };
 
                 db.OnEvictResource = (pooledObj) =>
                 {
                     policy.OnEvictResource?.Invoke(pooledObj);
                     var resource = pooledObj as PooledDatabase;
-                    resource?.Close();
+                    resource?.CloseReally();
                 };
                 db.OnValidateObject = (pooledObj) =>
                 {
