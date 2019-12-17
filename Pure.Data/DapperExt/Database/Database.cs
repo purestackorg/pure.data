@@ -556,6 +556,7 @@ namespace Pure.Data
             }
             catch (Exception ex)
             {
+                this.CloseReally();
                 throw new PureDataException("Execute", ex);
 
             }
@@ -587,6 +588,7 @@ namespace Pure.Data
             }
             catch (Exception ex)
             {
+                this.CloseReally();
                 throw new PureDataException("ExecuteScalar", ex);
             }
             finally
@@ -613,6 +615,7 @@ namespace Pure.Data
             }
             catch (Exception ex)
             {
+                this.CloseReally();
                 throw new PureDataException("ExecuteScalar", ex);
 
             }
@@ -623,19 +626,31 @@ namespace Pure.Data
         }
         public IDataReader ExecuteReader(string sql, object param = null, IDbTransaction transaction = null, int? commandTimeout = null, CommandType? commandType = null)
         {
-            if (transaction == null)
+            try
             {
-                transaction = Transaction;
+
+
+                if (transaction == null)
+                {
+                    transaction = Transaction;
+                }
+                if (commandTimeout == null || !commandTimeout.HasValue)
+                {
+                    commandTimeout = Config.ExecuteTimeout;
+                }
+                if (commandType == null)
+                {
+                    commandType = CommandType.Text;
+                }
+                return Connection.ExecuteReader(sql, param, transaction, commandTimeout, commandType, this);
             }
-            if (commandTimeout == null || !commandTimeout.HasValue)
+            catch (Exception ex)
             {
-                commandTimeout = Config.ExecuteTimeout;
+                this.CloseReally();
+                throw new PureDataException("ExecuteReader", ex);
+
             }
-            if (commandType == null)
-            {
-                commandType = CommandType.Text;
-            }
-            return Connection.ExecuteReader(sql, param, transaction, commandTimeout, commandType, this);
+
         }
         public List<T> ExecuteList<T>(string sql, object param = null, IDbTransaction transaction = null, bool buffer = true, int? commandTimeout = null, CommandType? commandType = null)
         {
@@ -647,6 +662,7 @@ namespace Pure.Data
             }
             catch (Exception ex)
             {
+                this.CloseReally();
                 throw new PureDataException("ExecuteList", ex);
 
             }
@@ -675,6 +691,7 @@ namespace Pure.Data
             catch (Exception ex)
             {
 
+                this.CloseReally();
                 throw new PureDataException("ExecuteListWithRowDelegate", ex);
 
             }
@@ -703,6 +720,7 @@ namespace Pure.Data
             catch (Exception ex)
             {
 
+                this.CloseReally();
                 throw new PureDataException("ExecuteListByEmit", ex);
 
             }
@@ -739,6 +757,7 @@ namespace Pure.Data
             catch (Exception ex)
             {
 
+                this.CloseReally();
                 throw new PureDataException("ExecuteModel", ex);
 
             }
@@ -768,6 +787,7 @@ namespace Pure.Data
             catch (Exception ex)
             {
 
+                this.CloseReally();
                 throw new PureDataException("ExecuteModelByEmit", ex);
 
             }
@@ -796,6 +816,7 @@ namespace Pure.Data
             catch (Exception ex)
             {
 
+                this.CloseReally();
                 throw new PureDataException("ExecuteDataTable", ex);
 
             }
@@ -824,6 +845,7 @@ namespace Pure.Data
             catch (Exception ex)
             {
 
+                this.CloseReally();
                 throw new PureDataException("ExecuteDataTableWithRowDelegate", ex);
 
             }
@@ -852,6 +874,7 @@ namespace Pure.Data
             catch (Exception ex)
             {
 
+                this.CloseReally();
                 throw new PureDataException("ExecuteDataSet", ex);
 
             }
@@ -881,6 +904,7 @@ namespace Pure.Data
             catch (Exception ex)
             {
 
+                this.CloseReally();
                 throw new PureDataException("ExecuteDictionary", ex);
 
             }
@@ -908,6 +932,7 @@ namespace Pure.Data
             }
             catch (Exception ex)
             {
+                this.CloseReally();
                 throw new PureDataException("ExecuteExpandoObject", ex);
 
             }
@@ -935,6 +960,7 @@ namespace Pure.Data
             }
             catch (Exception ex)
             {
+                this.CloseReally();
                 throw new PureDataException("ExecuteExpandoObject", ex);
 
             }
@@ -963,6 +989,7 @@ namespace Pure.Data
             }
             catch (Exception ex)
             {
+                this.CloseReally();
                 throw new PureDataException("ExecuteExpandoObjects", ex);
 
             }
@@ -989,6 +1016,7 @@ namespace Pure.Data
             }
             catch (Exception ex)
             {
+                this.CloseReally();
                 throw new PureDataException("SqlQuery", ex);
 
             }
@@ -1011,6 +1039,7 @@ namespace Pure.Data
             }
             catch (Exception ex)
             {
+                this.CloseReally();
                 throw new PureDataException("SqlQueryFirstOrDefault", ex);
 
             }
@@ -1178,6 +1207,33 @@ namespace Pure.Data
                 Close();
             }
 
+        }
+
+        public IEnumerable<dynamic> GetPageExpandoObjectsBySQL(int pageIndex, int pagesize, string sqltext, string orderText, IDictionary<string, object> parameters, out int totalCount)
+        { 
+            try
+            {
+
+                var result = GetPageReaderBySQL(pageIndex, pagesize, sqltext, orderText, parameters, out totalCount);
+                if (result != null)
+                {
+                    IEnumerable<dynamic> data = result.ToExpandoObjects(true, this);
+
+                    return data;
+                }
+                else
+                    return null;
+            }
+            catch (Exception ex)
+            {
+                this.CloseReally();
+                throw new PureDataException("GetPageExpandoObjectsBySQL", ex);
+
+            }
+            finally
+            {
+                Close();
+            }
         }
         public IDataReader GetPageReaderBySQL(int pageIndex, int pagesize, string sqltext, string orderText, IDictionary<string, object> parameters, out int totalCount)
         {
@@ -1625,6 +1681,7 @@ namespace Pure.Data
                 {
                     RollbackTransaction();
                 }
+                this.CloseReally();
                 throw new PureDataException("RunInTransaction", ex);
 
             }
@@ -1645,6 +1702,7 @@ namespace Pure.Data
                 {
                     RollbackTransaction();
                 }
+                this.CloseReally();
                 throw new PureDataException("RunInTransaction", ex);
 
             }
@@ -1689,7 +1747,7 @@ namespace Pure.Data
             {
                 try
                 {
-                    if (_transaction != null)
+                    if (_transaction != null && HasActiveTransaction == true)
                     {
                         _transaction.Rollback();
                         OnRollbackTransactionInternal();
@@ -1728,7 +1786,9 @@ namespace Pure.Data
 
             }
 
-             
+            //this.CloseReally();
+
+
 
 
         }

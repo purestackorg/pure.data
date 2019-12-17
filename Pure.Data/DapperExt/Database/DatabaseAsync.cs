@@ -65,22 +65,66 @@ namespace Pure.Data
         /// <returns></returns>
         public static async Task<int> ExecuteAsync(this IDatabase db, string sql, object param = null, IDbTransaction transaction = null, int? commandTimeout = null, CommandType? commandType = null)
         {
-             
-            return  await GetDbConnection(db).ExecuteAsync(sql, param, GetDbTransaction(db, transaction), GetCommandTimeout( db, commandTimeout ), commandType, db);
+            try
+            {
+                return await GetDbConnection(db).ExecuteAsync(sql, param, GetDbTransaction(db, transaction), GetCommandTimeout(db, commandTimeout), commandType, db);
+
+            }
+            catch (Exception ex)
+            {
+                db.CloseReally();
+                throw new PureDataException("ExecuteAsync", ex);
+            }
+            finally
+            {
+                db.Close();
+            }
         }
         public static async Task<object> ExecuteScalarAsync(this IDatabase db, string sql, object param = null, IDbTransaction transaction = null, int? commandTimeout = null, CommandType? commandType = null)
         {
-              
-            return await GetDbConnection(db).ExecuteScalarAsync(sql, param, GetDbTransaction(db, transaction), GetCommandTimeout(db, commandTimeout), commandType, db);
+            try
+            {
+                return await GetDbConnection(db).ExecuteScalarAsync(sql, param, GetDbTransaction(db, transaction), GetCommandTimeout(db, commandTimeout), commandType, db);
+
+            }
+            catch (Exception ex)
+            {
+                db.CloseReally();
+                throw new PureDataException("ExecuteScalarAsync", ex);
+            }
+            finally
+            {
+                db.Close();
+            }
         }
         public static async Task<T> ExecuteScalarAsync<T>(this IDatabase db, string sql, object param = null, IDbTransaction transaction = null, int? commandTimeout = null, CommandType? commandType = null)
         {
-            return await GetDbConnection(db).ExecuteScalarAsync<T>(sql, param, GetDbTransaction(db, transaction), GetCommandTimeout(db, commandTimeout), commandType, db);
+            try
+            {
+                return await GetDbConnection(db).ExecuteScalarAsync<T>(sql, param, GetDbTransaction(db, transaction), GetCommandTimeout(db, commandTimeout), commandType, db);
+
+            }
+            catch (Exception ex)
+            {
+                db.CloseReally();
+                throw new PureDataException("ExecuteReaderAsync", ex);
+            }
+            finally
+            {
+                db.Close();
+            }
         }
         public static async Task<IDataReader> ExecuteReaderAsync(this IDatabase db, string sql, object param = null, IDbTransaction transaction = null, int? commandTimeout = null, CommandType? commandType = null)
         {
-              
-            return await GetDbConnection(db).ExecuteReaderAsync(sql, param, GetDbTransaction(db, transaction), GetCommandTimeout(db, commandTimeout), commandType, db);
+            try
+            { 
+                return await GetDbConnection(db).ExecuteReaderAsync(sql, param, GetDbTransaction(db, transaction), GetCommandTimeout(db, commandTimeout), commandType, db); 
+            }
+            catch (Exception ex)
+            {
+                db.CloseReally();
+                throw new PureDataException("ExecuteReaderAsync", ex); 
+            }
         }
         public static async Task<List<T>> ExecuteListAsync<T>(this IDatabase db, string sql, object param = null, IDbTransaction transaction = null, bool buffer = true, int? commandTimeout = null, CommandType? commandType = null)
         {
@@ -103,7 +147,7 @@ namespace Pure.Data
             }
             catch (Exception ex)
             {
-
+                db.CloseReally();
                 throw new PureDataException("ExecuteListWithRowDelegateAsync", ex);
 
             }
@@ -130,7 +174,7 @@ namespace Pure.Data
             }
             catch (Exception ex)
             {
-
+                db.CloseReally();
                 throw new PureDataException("ExecuteListByEmitAsync", ex);
 
             }
@@ -159,7 +203,7 @@ namespace Pure.Data
             }
             catch (Exception ex)
             {
-
+                db.CloseReally();
                 throw new PureDataException("ExecuteModelAsync", ex);
 
             }
@@ -188,7 +232,7 @@ namespace Pure.Data
             }
             catch (Exception ex)
             {
-
+                db.CloseReally();
                 throw new PureDataException("ExecuteModelByEmitAsync", ex);
 
             }
@@ -216,7 +260,7 @@ namespace Pure.Data
             }
             catch (Exception ex)
             {
-
+                db.CloseReally();
                 throw new PureDataException("ExecuteDataTableAsync", ex);
 
             }
@@ -242,7 +286,7 @@ namespace Pure.Data
             }
             catch (Exception ex)
             {
-
+                db.CloseReally();
                 throw new PureDataException("ExecuteDataTableWithRowDelegateAsync", ex);
 
             }
@@ -269,7 +313,7 @@ namespace Pure.Data
             }
             catch (Exception ex)
             {
-
+                db.CloseReally();
                 throw new PureDataException("ExecuteDataSetAsync", ex);
 
             }
@@ -296,7 +340,7 @@ namespace Pure.Data
             }
             catch (Exception ex)
             {
-
+                db.CloseReally();
                 throw new PureDataException("ExecuteDictionaryAsync", ex);
 
             }
@@ -323,7 +367,7 @@ namespace Pure.Data
             }
             catch (Exception ex)
             {
-
+                db.CloseReally();
                 throw new PureDataException("ExecuteExpandoObjectAsync", ex);
 
             }
@@ -350,7 +394,7 @@ namespace Pure.Data
             }
             catch (Exception ex)
             {
-
+                db.CloseReally();
                 throw new PureDataException("ExecuteExpandoObjectsAsync", ex);
 
             }

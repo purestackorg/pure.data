@@ -404,83 +404,83 @@ namespace Pure.Data.SqlMap
             return sql;
         }
 
-        private object TryGetOrSetCache(Func<object> func)
-        {
-            object o = null;
+        //private object TryGetOrSetCache(Func<object> func)
+        //{
+        //    object o = null;
 
-            if (Statement.HasCache == false)
-            {
+        //    if (Statement.HasCache == false)
+        //    {
 
-                if (func != null)
-                {
-                    o = func();
-                }
-                return o;
-            }
-            else
-            {
-                if (Statement != null && Context != null)
-                {
-                    o = CacheManager.Instance[Context];
+        //        if (func != null)
+        //        {
+        //            o = func();
+        //        }
+        //        return o;
+        //    }
+        //    else
+        //    {
+        //        if (Statement != null && Context != null)
+        //        {
+        //            o = CacheManager.Instance[Context];
 
-                    if (o == null)
-                    {
-                        if (func != null)
-                        {
-                            o = func();
-                        }
-                        CacheManager.Instance[Context] = o;
-                        return o;
+        //            if (o == null)
+        //            {
+        //                if (func != null)
+        //                {
+        //                    o = func();
+        //                }
+        //                CacheManager.Instance[Context] = o;
+        //                return o;
 
-                    }
-                    else
-                    {
-                        return o;
-                    }
-                }
+        //            }
+        //            else
+        //            {
+        //                return o;
+        //            }
+        //        }
 
-                return o;
-            }
+        //        return o;
+        //    }
             
-        }
-        private async  Task<object> TryGetOrSetCacheAsync( Func<Task<object>> func)
-        {
-            object o = null;
+        //}
+        //private async  Task<object> TryGetOrSetCacheAsync( Func<Task<object>> func)
+        //{
+        //    object o = null;
 
-            if (Statement.HasCache == false)
-            {
+        //    if (Statement.HasCache == false)
+        //    {
 
-                if (func != null)
-                {
-                    o = await func();
-                }
-                return o;
-            }
-            else
-            {
-                if (Statement != null && Context != null)
-                {
-                    o = CacheManager.Instance[Context];
+        //        if (func != null)
+        //        {
+        //            o = await func();
+        //        }
+        //        return o;
+        //    }
+        //    else
+        //    {
+        //        if (Statement != null && Context != null)
+        //        {
+        //            o = CacheManager.Instance[Context];
 
-                    if (o == null)
-                    {
-                        if (func != null)
-                        {
-                            o = await func();
-                        }
-                        CacheManager.Instance[Context] = o;
-                        return o;
+        //            if (o == null)
+        //            {
+        //                if (func != null)
+        //                {
+        //                    o = await func();
+        //                }
+        //                CacheManager.Instance[Context] = o;
+        //                return o;
 
-                    }
-                    else
-                    {
-                        return o;
-                    }
-                }
+        //            }
+        //            else
+        //            {
+        //                return o;
+        //            }
+        //        }
 
-                return o;
-            }
-        }
+        //        return o;
+        //    }
+        //}
 
         /// <summary>
         /// 获取实际执行的SQL和参数集合
@@ -649,6 +649,7 @@ namespace Pure.Data.SqlMap
             catch (Exception ex)
             {
                 //LogError(ex);
+                database?.CloseReally();
                 throw new PureDataException("SqlMapStatement", ex);
             }
             finally
@@ -725,6 +726,7 @@ namespace Pure.Data.SqlMap
             catch (Exception ex)
             {
                 //LogError(ex);
+                database?.CloseReally();
                 throw new PureDataException("SqlMapStatement", ex);
             }
             //finally
@@ -800,6 +802,7 @@ namespace Pure.Data.SqlMap
             catch (Exception ex)
             {
                 //LogError(ex);
+                database?.CloseReally();
                 throw new PureDataException("SqlMapStatement", ex);
             }
             finally
@@ -821,7 +824,10 @@ namespace Pure.Data.SqlMap
         {
             try
             {
-                var o = TryGetOrSetCache(() =>
+
+                List<T> o = null;
+
+                if (Statement.HasCache == false)
                 {
                     string sql = this.Sql;
                     var filterParameters = FilterParameters(sql, this.Parameters);
@@ -830,21 +836,61 @@ namespace Pure.Data.SqlMap
                     var result = database.SqlQuery<T>(sql, filterParameters, transaction, buffer, commandTimeout, commandType).ToList();
 
                     return result;
-                    //if (result != null)
-                    //{
-                    //    List<T> data = result.ToList<T>(true);
+                }
+                else
+                {
+                    if (Statement != null && Context != null)
+                    {
+                        o = CacheManager.Instance[Context] as List<T>;
 
-                    //    return data;
-                    //}
-                    //else
-                    //    return null;
-                });
+                        if (o == null)
+                        {
+                            string sql = this.Sql;
+                            var filterParameters = FilterParameters(sql, this.Parameters);
+                            sql = FilterSql(sql, filterParameters);
 
-                return o as List<T>;
+                            var result = database.SqlQuery<T>(sql, filterParameters, transaction, buffer, commandTimeout, commandType).ToList();
+
+                            o= result;
+                            CacheManager.Instance[Context] = o;
+                            return o  ;
+
+                        }
+                        else
+                        {
+                            return o;
+                        }
+                    }
+
+                    return o;
+                }
+
+
+                //var o = TryGetOrSetCache(() =>
+                //{
+                //    string sql = this.Sql;
+                //    var filterParameters = FilterParameters(sql, this.Parameters);
+                //    sql = FilterSql(sql, filterParameters);
+
+                //    var result = database.SqlQuery<T>(sql, filterParameters, transaction, buffer, commandTimeout, commandType).ToList();
+
+                //    return result;
+                //    //if (result != null)
+                //    //{
+                //    //    List<T> data = result.ToList<T>(true);
+
+                //    //    return data;
+                //    //}
+                //    //else
+                //    //    return null;
+                //});
+
+                //return o as List<T>;
             }
             catch (Exception ex)
             {
                 //LogError(ex);
+                database?.CloseReally();
 
                 throw new PureDataException("SqlMapStatement", ex);
             }
@@ -868,23 +914,68 @@ namespace Pure.Data.SqlMap
         {
             try
             {
-                var o = TryGetOrSetCache(() =>
+
+                List<T> o = null;
+
+                if (Statement.HasCache == false)
                 {
+
                     var sql = this.Sql;
                     var filterParameters = FilterParameters(sql, this.Parameters);
                     sql = FilterSql(sql, filterParameters);
 
                     var result = database.ExecuteListWithRowDelegate<T>(sql, filterParameters, transaction, commandTimeout, commandType).ToList();
 
-                    return result;
+                    o= result;
+                    return o;
+                }
+                else
+                {
+                    if (Statement != null && Context != null)
+                    {
+                        o = CacheManager.Instance[Context] as List<T>;
 
-                });
+                        if (o == null)
+                        {
+                            var sql = this.Sql;
+                            var filterParameters = FilterParameters(sql, this.Parameters);
+                            sql = FilterSql(sql, filterParameters);
 
-                return o as List<T>;
+                            var result = database.ExecuteListWithRowDelegate<T>(sql, filterParameters, transaction, commandTimeout, commandType).ToList();
+
+                            o= result;
+                            CacheManager.Instance[Context] = o;
+                            return o;
+
+                        }
+                        else
+                        {
+                            return o;
+                        }
+                    }
+
+                    return o;
+                }
+
+
+                //var o = TryGetOrSetCache(() =>
+                //{
+                //    var sql = this.Sql;
+                //    var filterParameters = FilterParameters(sql, this.Parameters);
+                //    sql = FilterSql(sql, filterParameters);
+
+                //    var result = database.ExecuteListWithRowDelegate<T>(sql, filterParameters, transaction, commandTimeout, commandType).ToList();
+
+                //    return result;
+
+                //});
+
+                //return o as List<T>;
             }
             catch (Exception ex)
             {
                 //LogError(ex);
+                database?.CloseReally();
 
                 throw new PureDataException("SqlMapStatement", ex);
             }
@@ -906,7 +997,9 @@ namespace Pure.Data.SqlMap
         {
             try
             {
-                var o = TryGetOrSetCache(() =>
+                List<T> o = null;
+
+                if (Statement.HasCache == false)
                 {
 
                     var result = ExecuteReader(transaction, commandTimeout, commandType);
@@ -914,18 +1007,65 @@ namespace Pure.Data.SqlMap
                     {
                         List<T> data = result.ToListByEmit<T>(true);
 
-                        return data;
+                        o= data;
                     }
                     else
-                        return null;
-                });
+                        o= null;
+                    return o;
+                }
+                else
+                {
+                    if (Statement != null && Context != null)
+                    {
+                        o = CacheManager.Instance[Context] as List<T>;
 
-                return o as List<T>;
+                        if (o == null)
+                        {
+                            var result = ExecuteReader(transaction, commandTimeout, commandType);
+                            if (result != null)
+                            {
+                                List<T> data = result.ToListByEmit<T>(true);
+
+                                o =  data;
+                            }
+                            else
+                                o= null;
+                            CacheManager.Instance[Context] = o;
+                            return o;
+
+                        }
+                        else
+                        {
+                            return o;
+                        }
+                    }
+
+                    return o;
+                }
+
+
+
+                //var o = TryGetOrSetCache(() =>
+                //{
+
+                //    var result = ExecuteReader(transaction, commandTimeout, commandType);
+                //    if (result != null)
+                //    {
+                //        List<T> data = result.ToListByEmit<T>(true);
+
+                //        return data;
+                //    }
+                //    else
+                //        return null;
+                //});
+
+                //return o as List<T>;
 
             }
             catch (Exception ex)
             {
                 //LogError(ex);
+                database?.CloseReally();
 
                 throw new PureDataException("SqlMapStatement", ex);
             }
@@ -948,25 +1088,72 @@ namespace Pure.Data.SqlMap
 
             try
             {
-                var o = TryGetOrSetCache(() =>
+
+                T o = default(T);
+
+                if (Statement.HasCache == false)
                 {
 
                     var result = ExecuteReader(transaction, commandTimeout, commandType);
                     if (result != null)
                     {
                         T data = result.ToModel<T>(true, database);
-                        return data;
+                        o= data;
                     }
                     else
-                        return default(T);
-                });
+                        o= default(T);
+                    return o;
+                }
+                else
+                {
+                    if (Statement != null && Context != null)
+                    {
+                        o = (T)CacheManager.Instance[Context] ;
 
-                return (T)o;
+                        if (o == null)
+                        {
+                            var result = ExecuteReader(transaction, commandTimeout, commandType);
+                            if (result != null)
+                            {
+                                T data = result.ToModel<T>(true, database);
+                                o= data;
+                            }
+                            else
+                                o= default(T);
+                            CacheManager.Instance[Context] = o;
+                            return o;
+
+                        }
+                        else
+                        {
+                            return o;
+                        }
+                    }
+
+                    return o;
+                }
+
+
+                //var o = TryGetOrSetCache(() =>
+                //{
+
+                //    var result = ExecuteReader(transaction, commandTimeout, commandType);
+                //    if (result != null)
+                //    {
+                //        T data = result.ToModel<T>(true, database);
+                //        return data;
+                //    }
+                //    else
+                //        return default(T);
+                //});
+
+                //return (T)o;
 
             }
             catch (Exception ex)
             {
                 //LogError(ex);
+                database?.CloseReally();
 
                 throw new PureDataException("SqlMapStatement", ex);
             }
@@ -990,24 +1177,71 @@ namespace Pure.Data.SqlMap
 
             try
             {
-                var o = TryGetOrSetCache(() =>
+                T o = default(T);
+
+                if (Statement.HasCache == false)
                 {
+
                     var result = ExecuteReader(transaction, commandTimeout, commandType);
                     if (result != null)
                     {
                         T data = result.ToModelByEmit<T>(true);
-                        return data;
+                        o = data;
                     }
                     else
-                        return default(T);
-                });
+                        o = default(T);
+                    return o;
+                }
+                else
+                {
+                    if (Statement != null && Context != null)
+                    {
+                        o = (T)CacheManager.Instance[Context];
 
-                return (T)o;
+                        if (o == null)
+                        {
+                            var result = ExecuteReader(transaction, commandTimeout, commandType);
+                            if (result != null)
+                            {
+                                T data = result.ToModelByEmit<T>(true);
+                                o = data;
+                            }
+                            else
+                                o = default(T);
+                            CacheManager.Instance[Context] = o;
+                            return o;
+
+                        }
+                        else
+                        {
+                            return o;
+                        }
+                    }
+
+                    return o;
+                }
+
+
+
+                //var o = TryGetOrSetCache(() =>
+                //{
+                //    var result = ExecuteReader(transaction, commandTimeout, commandType);
+                //    if (result != null)
+                //    {
+                //        T data = result.ToModelByEmit<T>(true);
+                //        return data;
+                //    }
+                //    else
+                //        return default(T);
+                //});
+
+                //return (T)o;
 
             }
             catch (Exception ex)
             {
                 //LogError(ex);
+                database?.CloseReally();
 
                 throw new PureDataException("SqlMapStatement", ex);
             }
@@ -1029,26 +1263,71 @@ namespace Pure.Data.SqlMap
 
             try
             {
-                var o = TryGetOrSetCache(() =>
-                {
+                DataTable o = null;
 
+                if (Statement.HasCache == false)
+                {
                     var result = ExecuteReader(transaction, commandTimeout, commandType);
                     if (result != null)
                     {
                         DataTable data = result.ToDataTable(true);
-                        return data;
+                        o = data;
                     }
                     else
-                        return null;
-                });
+                        o = null;
+                    return o;
+                }
+                else
+                {
+                    if (Statement != null && Context != null)
+                    {
+                        o = CacheManager.Instance[Context] as DataTable;
 
-                return o as System.Data.DataTable;
+                        if (o == null)
+                        {
+                            var result = ExecuteReader(transaction, commandTimeout, commandType);
+                            if (result != null)
+                            {
+                                DataTable data = result.ToDataTable(true);
+                                o= data;
+                            }
+                            else
+                                o= null;
+                            CacheManager.Instance[Context] = o;
+                            return o;
+
+                        }
+                        else
+                        {
+                            return o;
+                        }
+                    }
+
+                    return o;
+                }
+
+
+
+                //var o = TryGetOrSetCache(() =>
+                //{
+
+                //    var result = ExecuteReader(transaction, commandTimeout, commandType);
+                //    if (result != null)
+                //    {
+                //        DataTable data = result.ToDataTable(true);
+                //        return data;
+                //    }
+                //    else
+                //        return null;
+                //});
+
+                //return o as System.Data.DataTable;
 
             }
             catch (Exception ex)
             {
                 //LogError(ex);
-
+                database?.CloseReally();
                 throw new PureDataException("SqlMapStatement", ex);
             }
             finally
@@ -1069,7 +1348,9 @@ namespace Pure.Data.SqlMap
 
             try
             {
-                var o = TryGetOrSetCache(() =>
+                DataTable o = null;
+
+                if (Statement.HasCache == false)
                 {
                     var sql = this.Sql;
                     var filterParameters = FilterParameters(sql, this.Parameters);
@@ -1077,15 +1358,56 @@ namespace Pure.Data.SqlMap
 
                     var result = database.ExecuteDataTableWithRowDelegate(sql, filterParameters, transaction, commandTimeout, commandType);
 
-                    return result;
-                });
+                    o = result;
+                    return o;
+                }
+                else
+                {
+                    if (Statement != null && Context != null)
+                    {
+                        o = CacheManager.Instance[Context] as DataTable;
 
-                return o as System.Data.DataTable;
+                        if (o == null)
+                        {
+                            var sql = this.Sql;
+                            var filterParameters = FilterParameters(sql, this.Parameters);
+                            sql = FilterSql(sql, filterParameters);
+
+                            var result = database.ExecuteDataTableWithRowDelegate(sql, filterParameters, transaction, commandTimeout, commandType);
+
+                            o = result;
+                            CacheManager.Instance[Context] = o;
+                            return o;
+
+                        }
+                        else
+                        {
+                            return o;
+                        }
+                    }
+
+                    return o;
+                }
+
+
+                //var o = TryGetOrSetCache(() =>
+                //{
+                //    var sql = this.Sql;
+                //    var filterParameters = FilterParameters(sql, this.Parameters);
+                //    sql = FilterSql(sql, filterParameters);
+
+                //    var result = database.ExecuteDataTableWithRowDelegate(sql, filterParameters, transaction, commandTimeout, commandType);
+
+                //    return result;
+                //});
+
+                //return o as System.Data.DataTable;
 
             }
             catch (Exception ex)
             {
                 //LogError(ex);
+                database?.CloseReally();
 
                 throw new PureDataException("SqlMapStatement", ex);
             }
@@ -1106,24 +1428,68 @@ namespace Pure.Data.SqlMap
 
             try
             {
-                var o = TryGetOrSetCache(() =>
+                DataSet o = null;
+
+                if (Statement.HasCache == false)
                 {
                     var result = ExecuteReader(transaction, commandTimeout, commandType);
                     if (result != null)
                     {
                         var data = result.ToDataSet(true);
-                        return data;
+                        o = data;
                     }
                     else
-                        return null;
-                });
+                        o = null;
+                    return o;
+                }
+                else
+                {
+                    if (Statement != null && Context != null)
+                    {
+                        o = CacheManager.Instance[Context] as DataSet;
 
-                return o as System.Data.DataSet;
+                        if (o == null)
+                        {
+                            var result = ExecuteReader(transaction, commandTimeout, commandType);
+                            if (result != null)
+                            {
+                                var data = result.ToDataSet(true);
+                                o = data;
+                            }
+                            else
+                                o = null;
+                            CacheManager.Instance[Context] = o;
+                            return o;
+
+                        }
+                        else
+                        {
+                            return o;
+                        }
+                    }
+
+                    return o;
+                }
+
+                //var o = TryGetOrSetCache(() =>
+                //{
+                //    var result = ExecuteReader(transaction, commandTimeout, commandType);
+                //    if (result != null)
+                //    {
+                //        var data = result.ToDataSet(true);
+                //        return data;
+                //    }
+                //    else
+                //        return null;
+                //});
+
+                //return o as System.Data.DataSet;
 
             }
             catch (Exception ex)
             {
                 //LogError(ex);
+                database?.CloseReally();
 
                 throw new PureDataException("SqlMapStatement", ex);
             }
@@ -1144,24 +1510,69 @@ namespace Pure.Data.SqlMap
 
             try
             {
-                var o = TryGetOrSetCache(() =>
+
+                Dictionary<TKey, TValue> o = null;
+
+                if (Statement.HasCache == false)
                 {
                     var result = ExecuteReader(transaction, commandTimeout, commandType);
                     if (result != null)
                     {
                         Dictionary<TKey, TValue> data = result.ToDictionary<TKey, TValue>(true);
-                        return data;
+                        o = data;
                     }
                     else
-                        return null;
-                });
+                        o = null;
+                    return o;
+                }
+                else
+                {
+                    if (Statement != null && Context != null)
+                    {
+                        o = CacheManager.Instance[Context] as Dictionary<TKey, TValue>;
 
-                return o as Dictionary<TKey, TValue>;
+                        if (o == null)
+                        {
+                            var result = ExecuteReader(transaction, commandTimeout, commandType);
+                            if (result != null)
+                            {
+                                Dictionary<TKey, TValue> data = result.ToDictionary<TKey, TValue>(true);
+                                o = data;
+                            }
+                            else
+                                o = null;
+                            CacheManager.Instance[Context] = o;
+                            return o;
+
+                        }
+                        else
+                        {
+                            return o;
+                        }
+                    }
+
+                    return o;
+                }
+
+                //var o = TryGetOrSetCache(() =>
+                //{
+                //    var result = ExecuteReader(transaction, commandTimeout, commandType);
+                //    if (result != null)
+                //    {
+                //        Dictionary<TKey, TValue> data = result.ToDictionary<TKey, TValue>(true);
+                //        return data;
+                //    }
+                //    else
+                //        return null;
+                //});
+
+                //return o as Dictionary<TKey, TValue>;
 
             }
             catch (Exception ex)
             {
                 //LogError(ex);
+                database?.CloseReally();
 
                 throw new PureDataException("SqlMapStatement", ex);
             }
@@ -1182,25 +1593,70 @@ namespace Pure.Data.SqlMap
 
             try
             {
-                var o = TryGetOrSetCache(() =>
+                dynamic o = new object();
+
+                if (Statement.HasCache == false)
                 {
                     var result = ExecuteReader(transaction, commandTimeout, commandType);
                     if (result != null)
                     {
                         dynamic data = result.ToExpandoObject(true, database);
-                        return data;
+                        o = data;
                     }
                     else
-                        return null;
-                });
+                        o = null;
+                    return o;
+                }
+                else
+                {
+                    if (Statement != null && Context != null)
+                    {
+                        o = CacheManager.Instance[Context] as dynamic;
 
-                return o as dynamic;
+                        if (o == null)
+                        {
+                            var result = ExecuteReader(transaction, commandTimeout, commandType);
+                            if (result != null)
+                            {
+                                dynamic data = result.ToExpandoObject(true, database);
+                                o = data;
+                            }
+                            else
+                                o = null;
+                            CacheManager.Instance[Context] = o;
+                            return o;
+
+                        }
+                        else
+                        {
+                            return o;
+                        }
+                    }
+
+                    return o;
+                }
+
+
+                //var o = TryGetOrSetCache(() =>
+                //{
+                //    var result = ExecuteReader(transaction, commandTimeout, commandType);
+                //    if (result != null)
+                //    {
+                //        dynamic data = result.ToExpandoObject(true, database);
+                //        return data;
+                //    }
+                //    else
+                //        return null;
+                //});
+
+                //return o as dynamic;
 
 
             }
             catch (Exception ex)
             {
                 //LogError(ex);
+                database?.CloseReally();
 
                 throw new PureDataException("SqlMapStatement", ex);
             }
@@ -1225,24 +1681,70 @@ namespace Pure.Data.SqlMap
 
             try
             {
-                var o = TryGetOrSetCache(() =>
+
+                IEnumerable<dynamic> o = null;
+
+                if (Statement.HasCache == false)
                 {
                     var result = ExecuteReader(transaction, commandTimeout, commandType);
                     if (result != null)
                     {
                         IEnumerable<dynamic> data = result.ToExpandoObjects(true, database);
-                        return data;
+                        o = data;
                     }
                     else
-                        return null;
-                });
+                        o = null;
+                    return o;
+                }
+                else
+                {
+                    if (Statement != null && Context != null)
+                    {
+                        o = CacheManager.Instance[Context] as IEnumerable<dynamic>;
 
-                return o as IEnumerable<dynamic>;
+                        if (o == null)
+                        {
+                            var result = ExecuteReader(transaction, commandTimeout, commandType);
+                            if (result != null)
+                            {
+                                IEnumerable<dynamic> data = result.ToExpandoObjects(true, database);
+                                o = data;
+                            }
+                            else
+                                o = null;
+                            CacheManager.Instance[Context] = o;
+                            return o;
+
+                        }
+                        else
+                        {
+                            return o;
+                        }
+                    }
+
+                    return o;
+                }
+
+
+                //var o = TryGetOrSetCache(() =>
+                //{
+                //    var result = ExecuteReader(transaction, commandTimeout, commandType);
+                //    if (result != null)
+                //    {
+                //        IEnumerable<dynamic> data = result.ToExpandoObjects(true, database);
+                //        return data;
+                //    }
+                //    else
+                //        return null;
+                //});
+
+                //return o as IEnumerable<dynamic>;
 
             }
             catch (Exception ex)
             {
                 //LogError(ex);
+                database?.CloseReally();
 
                 throw new PureDataException("SqlMapStatement", ex);
             }
@@ -1387,6 +1889,7 @@ namespace Pure.Data.SqlMap
             catch (Exception ex)
             {
                 //LogError(ex);
+                database?.CloseReally();
                 throw new PureDataException("SqlMapStatement", ex);
             }
             finally
@@ -1410,19 +1913,59 @@ namespace Pure.Data.SqlMap
         {
             try
             {
-                var o =  await TryGetOrSetCacheAsync(async () =>
+                List<T> o = null;
+
+                if (Statement.HasCache == false)
                 {
+
                     string sql = this.Sql;
                     var filterParameters = FilterParameters(sql, this.Parameters);
                     sql = FilterSql(sql, filterParameters);
-                    var result = await database.ExecuteListAsync<T>(sql, filterParameters, transaction, buffer, commandTimeout, commandType) ;
-                    return result;
-                });
-                return o as List<T>;
+                    var result = await database.ExecuteListAsync<T>(sql, filterParameters, transaction, buffer, commandTimeout, commandType);
+                    o = result;
+                    return o;
+                }
+                else
+                {
+                    if (Statement != null && Context != null)
+                    {
+                        o = CacheManager.Instance[Context] as List<T>;
+
+                        if (o == null)
+                        {
+                            string sql = this.Sql;
+                            var filterParameters = FilterParameters(sql, this.Parameters);
+                            sql = FilterSql(sql, filterParameters);
+                            var result = await database.ExecuteListAsync<T>(sql, filterParameters, transaction, buffer, commandTimeout, commandType);
+                            o= result;
+                            CacheManager.Instance[Context] = o;
+                            return o;
+
+                        }
+                        else
+                        {
+                            return o;
+                        }
+                    }
+
+                    return o;
+                }
+
+
+                //var o =  await TryGetOrSetCacheAsync(async () =>
+                //{
+                //    string sql = this.Sql;
+                //    var filterParameters = FilterParameters(sql, this.Parameters);
+                //    sql = FilterSql(sql, filterParameters);
+                //    var result = await database.ExecuteListAsync<T>(sql, filterParameters, transaction, buffer, commandTimeout, commandType) ;
+                //    return result;
+                //});
+                //return o as List<T>;
             }
             catch (Exception ex)
             {
                 //LogError(ex);
+                database?.CloseReally();
 
                 throw new PureDataException("SqlMapStatement", ex);
             }
@@ -1446,23 +1989,64 @@ namespace Pure.Data.SqlMap
         {
             try
             {
-                var o = await TryGetOrSetCacheAsync(async () =>
+                List<T> o = null;
+
+                if (Statement.HasCache == false)
                 {
-                    var sql = this.Sql;
+
+                    string sql = this.Sql;
                     var filterParameters = FilterParameters(sql, this.Parameters);
                     sql = FilterSql(sql, filterParameters);
+                    var result = await  database.ExecuteListWithRowDelegateAsync<T>(sql, filterParameters, transaction, commandTimeout, commandType);
+                    o = result;
+                    return o;
+                }
+                else
+                {
+                    if (Statement != null && Context != null)
+                    {
+                        o = CacheManager.Instance[Context] as List<T>;
 
-                    var result = await database.ExecuteListWithRowDelegateAsync<T>(sql, filterParameters, transaction, commandTimeout, commandType) ;
+                        if (o == null)
+                        {
+                            string sql = this.Sql;
+                            var filterParameters = FilterParameters(sql, this.Parameters);
+                            sql = FilterSql(sql, filterParameters);
+                            var result = await database.ExecuteListWithRowDelegateAsync<T>(sql, filterParameters, transaction, commandTimeout, commandType);
+                            o = result;
+                            CacheManager.Instance[Context] = o;
+                            return o;
 
-                    return result;
+                        }
+                        else
+                        {
+                            return o;
+                        }
+                    }
 
-                });
+                    return o;
+                }
 
-                return o as List<T>;
+
+
+                //var o = await TryGetOrSetCacheAsync(async () =>
+                //{
+                //    var sql = this.Sql;
+                //    var filterParameters = FilterParameters(sql, this.Parameters);
+                //    sql = FilterSql(sql, filterParameters);
+
+                //    var result = await database.ExecuteListWithRowDelegateAsync<T>(sql, filterParameters, transaction, commandTimeout, commandType) ;
+
+                //    return result;
+
+                //});
+
+                //return o as List<T>;
             }
             catch (Exception ex)
             {
                 //LogError(ex);
+                database?.CloseReally();
 
                 throw new PureDataException("SqlMapStatement", ex);
             }
@@ -1484,7 +2068,10 @@ namespace Pure.Data.SqlMap
         {
             try
             {
-                var o =await TryGetOrSetCacheAsync(async () =>
+
+                List<T> o = null;
+
+                if (Statement.HasCache == false)
                 {
 
                     var result = await ExecuteReaderAsync(transaction, commandTimeout, commandType);
@@ -1492,18 +2079,63 @@ namespace Pure.Data.SqlMap
                     {
                         List<T> data = result.ToListByEmit<T>(true);
 
-                        return data;
+                        o = data;
                     }
                     else
-                        return null;
-                });
+                        o = null;
+                    return o;
+                }
+                else
+                {
+                    if (Statement != null && Context != null)
+                    {
+                        o = CacheManager.Instance[Context] as List<T>;
 
-                return o as List<T>;
+                        if (o == null)
+                        {
+                            var result = await ExecuteReaderAsync(transaction, commandTimeout, commandType);
+                            if (result != null)
+                            {
+                                List<T> data = result.ToListByEmit<T>(true);
+
+                                o= data;
+                            }
+                            else
+                                o= null;
+                            CacheManager.Instance[Context] = o;
+                            return o;
+
+                        }
+                        else
+                        {
+                            return o;
+                        }
+                    }
+
+                    return o;
+                }
+
+                //var o =await TryGetOrSetCacheAsync(async () =>
+                //{
+
+                //    var result = await ExecuteReaderAsync(transaction, commandTimeout, commandType);
+                //    if (result != null)
+                //    {
+                //        List<T> data = result.ToListByEmit<T>(true);
+
+                //        return data;
+                //    }
+                //    else
+                //        return null;
+                //});
+
+                //return o as List<T>;
 
             }
             catch (Exception ex)
             {
                 //LogError(ex);
+                database?.CloseReally();
 
                 throw new PureDataException("SqlMapStatement", ex);
             }
@@ -1526,26 +2158,71 @@ namespace Pure.Data.SqlMap
 
             try
             {
-                
-                var o =await TryGetOrSetCacheAsync(async () =>
+               T o = default(T);
+
+                if (Statement.HasCache == false)
                 {
 
                     var result = await ExecuteReaderAsync(transaction, commandTimeout, commandType);
                     if (result != null)
                     {
                         T data = result.ToModel<T>(true, database);
-                        return data;
+
+                        o = data;
                     }
                     else
-                        return default(T);
-                });
+                        o = default(T);
+                    return o;
+                }
+                else
+                {
+                    if (Statement != null && Context != null)
+                    {
+                        o = (T)CacheManager.Instance[Context] ;
 
-                return (T)o;
+                        if (o == null)
+                        {
+                            var result = await ExecuteReaderAsync(transaction, commandTimeout, commandType);
+                            if (result != null)
+                            {
+                                T data = result.ToModel<T>(true, database);
+
+                                o = data;
+                            }
+                            else
+                                o = default(T);
+                            CacheManager.Instance[Context] = o;
+                            return o;
+
+                        }
+                        else
+                        {
+                            return o;
+                        }
+                    }
+
+                    return o;
+                }
+                //var o =await TryGetOrSetCacheAsync(async () =>
+                //{
+
+                //    var result = await ExecuteReaderAsync(transaction, commandTimeout, commandType);
+                //    if (result != null)
+                //    {
+                //        T data = result.ToModel<T>(true, database);
+                //        return data;
+                //    }
+                //    else
+                //        return default(T);
+                //});
+
+                //return (T)o;
 
             }
             catch (Exception ex)
             {
                 //LogError(ex);
+                database?.CloseReally();
 
                 throw new PureDataException("SqlMapStatement", ex);
             }
@@ -1569,24 +2246,70 @@ namespace Pure.Data.SqlMap
 
             try
             {
-                var o = await TryGetOrSetCacheAsync(async () =>
+                T o = default(T);
+
+                if (Statement.HasCache == false)
                 {
+
                     var result = await ExecuteReaderAsync(transaction, commandTimeout, commandType);
                     if (result != null)
                     {
                         T data = result.ToModelByEmit<T>(true);
-                        return data;
+                        o = data;
                     }
                     else
-                        return default(T);
-                });
+                        o = default(T);
+                    return o;
+                }
+                else
+                {
+                    if (Statement != null && Context != null)
+                    {
+                        o = (T)CacheManager.Instance[Context];
 
-                return (T)o;
+                        if (o == null)
+                        {
+                            var result = await ExecuteReaderAsync(transaction, commandTimeout, commandType);
+                            if (result != null)
+                            {
+                                T data = result.ToModelByEmit<T>(true);
+                                o = data;
+                            }
+                            else
+                                o = default(T);
+                            CacheManager.Instance[Context] = o;
+                            return o;
+
+                        }
+                        else
+                        {
+                            return o;
+                        }
+                    }
+
+                    return o;
+                }
+
+
+                //var o = await TryGetOrSetCacheAsync(async () =>
+                //{
+                //    var result = await ExecuteReaderAsync(transaction, commandTimeout, commandType);
+                //    if (result != null)
+                //    {
+                //        T data = result.ToModelByEmit<T>(true);
+                //        return data;
+                //    }
+                //    else
+                //        return default(T);
+                //});
+
+                //return (T)o;
 
             }
             catch (Exception ex)
             {
                 //LogError(ex);
+                database?.CloseReally();
 
                 throw new PureDataException("SqlMapStatement", ex);
             }
@@ -1608,25 +2331,71 @@ namespace Pure.Data.SqlMap
 
             try
             {
-                var o = await TryGetOrSetCacheAsync(async () =>
+                DataTable o = null;
+
+                if (Statement.HasCache == false)
                 {
 
                     var result = await ExecuteReaderAsync(transaction, commandTimeout, commandType);
                     if (result != null)
                     {
                         DataTable data = result.ToDataTable(true);
-                        return data;
+                        o = data;
                     }
                     else
-                        return null;
-                });
+                        o = null;
+                    return o;
+                }
+                else
+                {
+                    if (Statement != null && Context != null)
+                    {
+                        o = CacheManager.Instance[Context] as DataTable;
 
-                return o as System.Data.DataTable;
+                        if (o == null)
+                        {
+                            var result = await ExecuteReaderAsync(transaction, commandTimeout, commandType);
+                            if (result != null)
+                            {
+                                DataTable data = result.ToDataTable(true);
+
+                                o = data;
+                            }
+                            else
+                                o = null;
+                            CacheManager.Instance[Context] = o;
+                            return o;
+
+                        }
+                        else
+                        {
+                            return o;
+                        }
+                    }
+
+                    return o;
+                }
+
+                //var o = await TryGetOrSetCacheAsync(async () =>
+                //{
+
+                //    var result = await ExecuteReaderAsync(transaction, commandTimeout, commandType);
+                //    if (result != null)
+                //    {
+                //        DataTable data = result.ToDataTable(true);
+                //        return data;
+                //    }
+                //    else
+                //        return null;
+                //});
+
+                //return o as System.Data.DataTable;
 
             }
             catch (Exception ex)
             {
                 //LogError(ex);
+                database?.CloseReally();
 
                 throw new PureDataException("SqlMapStatement", ex);
             }
@@ -1648,28 +2417,71 @@ namespace Pure.Data.SqlMap
 
             try
             {
+                DataTable o = null;
 
-                var o = await TryGetOrSetCacheAsync(async () =>
+                if (Statement.HasCache == false)
                 {
+
                     var result = await ExecuteReaderAsync(transaction, commandTimeout, commandType);
                     if (result != null)
                     {
                         DataTable data = result.ToDataTableWithRowDelegate(true, database);
-                         
-                        return data;
+                        o = data;
                     }
                     else
-                        return null;
-                });
+                        o = null;
+                    return o;
+                }
+                else
+                {
+                    if (Statement != null && Context != null)
+                    {
+                        o = CacheManager.Instance[Context] as DataTable;
+
+                        if (o == null)
+                        {
+                            var result = await ExecuteReaderAsync(transaction, commandTimeout, commandType);
+                            if (result != null)
+                            {
+                                DataTable data = result.ToDataTableWithRowDelegate(true, database);
+                                o = data;
+                            }
+                            else
+                                o = null;
+                            CacheManager.Instance[Context] = o;
+                            return o;
+
+                        }
+                        else
+                        {
+                            return o;
+                        }
+                    }
+
+                    return o;
+                }
+                //var o = await TryGetOrSetCacheAsync(async () =>
+                //{
+                //    var result = await ExecuteReaderAsync(transaction, commandTimeout, commandType);
+                //    if (result != null)
+                //    {
+                //        DataTable data = result.ToDataTableWithRowDelegate(true, database);
+                         
+                //        return data;
+                //    }
+                //    else
+                //        return null;
+                //});
 
 
                 
-                return o as System.Data.DataTable;
+                //return o as System.Data.DataTable;
 
             }
             catch (Exception ex)
             {
                 //LogError(ex);
+                database?.CloseReally();
 
                 throw new PureDataException("SqlMapStatement", ex);
             }
@@ -1690,24 +2502,70 @@ namespace Pure.Data.SqlMap
 
             try
             {
-                var o = await TryGetOrSetCacheAsync(async () =>
+
+                DataSet o = null;
+
+                if (Statement.HasCache == false)
                 {
+
                     var result = await ExecuteReaderAsync(transaction, commandTimeout, commandType);
                     if (result != null)
                     {
                         var data = result.ToDataSet(true);
-                        return data;
+                        o = data;
                     }
                     else
-                        return null;
-                });
+                        o = null;
+                    return o;
+                }
+                else
+                {
+                    if (Statement != null && Context != null)
+                    {
+                        o = CacheManager.Instance[Context] as DataSet;
 
-                return o as System.Data.DataSet;
+                        if (o == null)
+                        {
+                            var result = await ExecuteReaderAsync(transaction, commandTimeout, commandType);
+                            if (result != null)
+                            {
+                                var data = result.ToDataSet(true);
+
+                                o = data;
+                            }
+                            else
+                                o = null;
+                            CacheManager.Instance[Context] = o;
+                            return o;
+
+                        }
+                        else
+                        {
+                            return o;
+                        }
+                    }
+
+                    return o;
+                }
+                //var o = await TryGetOrSetCacheAsync(async () =>
+                //{
+                //    var result = await ExecuteReaderAsync(transaction, commandTimeout, commandType);
+                //    if (result != null)
+                //    {
+                //        var data = result.ToDataSet(true);
+                //        return data;
+                //    }
+                //    else
+                //        return null;
+                //});
+
+                //return o as System.Data.DataSet;
 
             }
             catch (Exception ex)
             {
                 //LogError(ex);
+                database?.CloseReally();
 
                 throw new PureDataException("SqlMapStatement", ex);
             }
@@ -1728,24 +2586,71 @@ namespace Pure.Data.SqlMap
 
             try
             {
-                var o = await TryGetOrSetCacheAsync(async () =>
+                Dictionary<TKey, TValue> o = null;
+
+                if (Statement.HasCache == false)
                 {
+
                     var result = await ExecuteReaderAsync(transaction, commandTimeout, commandType);
                     if (result != null)
                     {
+
                         Dictionary<TKey, TValue> data = result.ToDictionary<TKey, TValue>(true);
-                        return data;
+                        o = data;
                     }
                     else
-                        return null;
-                });
+                        o = null;
+                    return o;
+                }
+                else
+                {
+                    if (Statement != null && Context != null)
+                    {
+                        o = CacheManager.Instance[Context] as Dictionary<TKey, TValue>;
 
-                return o as Dictionary<TKey, TValue>;
+                        if (o == null)
+                        {
+                            var result = await ExecuteReaderAsync(transaction, commandTimeout, commandType);
+                            if (result != null)
+                            {
+
+                                Dictionary<TKey, TValue> data = result.ToDictionary<TKey, TValue>(true);
+                                o = data;
+                            }
+                            else
+                                o = null;
+                            CacheManager.Instance[Context] = o;
+                            return o;
+
+                        }
+                        else
+                        {
+                            return o;
+                        }
+                    }
+
+                    return o;
+                }
+
+                //var o = await TryGetOrSetCacheAsync(async () =>
+                //{
+                //    var result = await ExecuteReaderAsync(transaction, commandTimeout, commandType);
+                //    if (result != null)
+                //    {
+                //        Dictionary<TKey, TValue> data = result.ToDictionary<TKey, TValue>(true);
+                //        return data;
+                //    }
+                //    else
+                //        return null;
+                //});
+
+                //return o as Dictionary<TKey, TValue>;
 
             }
             catch (Exception ex)
             {
                 //LogError(ex);
+                database?.CloseReally();
 
                 throw new PureDataException("SqlMapStatement", ex);
             }
@@ -1766,25 +2671,71 @@ namespace Pure.Data.SqlMap
 
             try
             {
-                var o = await TryGetOrSetCacheAsync(async () =>
+                dynamic o = null;
+
+                if (Statement.HasCache == false)
                 {
+
                     var result = await ExecuteReaderAsync(transaction, commandTimeout, commandType);
                     if (result != null)
                     {
                         dynamic data = result.ToExpandoObject(true, database);
-                        return data;
+                        o = data;
                     }
                     else
-                        return null;
-                });
+                        o = null;
+                    return o;
+                }
+                else
+                {
+                    if (Statement != null && Context != null)
+                    {
+                        o = CacheManager.Instance[Context] as dynamic;
 
-                return o as dynamic;
+                        if (o == null)
+                        {
+                            var result = await ExecuteReaderAsync(transaction, commandTimeout, commandType);
+                            if (result != null)
+                            {
+                                dynamic data = result.ToExpandoObject(true, database);
+                                o = data;
+                            }
+                            else
+                                o = null;
+                            CacheManager.Instance[Context] = o;
+                            return o;
+
+                        }
+                        else
+                        {
+                            return o;
+                        }
+                    }
+
+                    return o;
+                }
+
+
+                //var o = await TryGetOrSetCacheAsync(async () =>
+                //{
+                //    var result = await ExecuteReaderAsync(transaction, commandTimeout, commandType);
+                //    if (result != null)
+                //    {
+                //        dynamic data = result.ToExpandoObject(true, database);
+                //        return data;
+                //    }
+                //    else
+                //        return null;
+                //});
+
+                //return o as dynamic;
 
 
             }
             catch (Exception ex)
             {
                 //LogError(ex);
+                database?.CloseReally();
 
                 throw new PureDataException("SqlMapStatement", ex);
             }
@@ -1809,24 +2760,71 @@ namespace Pure.Data.SqlMap
 
             try
             {
-                var o = await TryGetOrSetCacheAsync(async () =>
+                IEnumerable<dynamic> o = null;
+
+                if (Statement.HasCache == false)
                 {
+
                     var result = await ExecuteReaderAsync(transaction, commandTimeout, commandType);
                     if (result != null)
                     {
                         IEnumerable<dynamic> data = result.ToExpandoObjects(true, database);
-                        return data;
+
+                        o = data;
                     }
                     else
-                        return null;
-                });
+                        o = null;
+                    return o;
+                }
+                else
+                {
+                    if (Statement != null && Context != null)
+                    {
+                        o = CacheManager.Instance[Context] as IEnumerable<dynamic>;
 
-                return o as IEnumerable<dynamic>;
+                        if (o == null)
+                        {
+                            var result = await ExecuteReaderAsync(transaction, commandTimeout, commandType);
+                            if (result != null)
+                            {
+                                IEnumerable<dynamic> data = result.ToExpandoObjects(true, database);
+
+                                o = data;
+                            }
+                            else
+                                o = null;
+                            CacheManager.Instance[Context] = o;
+                            return o;
+
+                        }
+                        else
+                        {
+                            return o;
+                        }
+                    }
+
+                    return o;
+                }
+
+                //var o = await TryGetOrSetCacheAsync(async () =>
+                //{
+                //    var result = await ExecuteReaderAsync(transaction, commandTimeout, commandType);
+                //    if (result != null)
+                //    {
+                //        IEnumerable<dynamic> data = result.ToExpandoObjects(true, database);
+                //        return data;
+                //    }
+                //    else
+                //        return null;
+                //});
+
+                //return o as IEnumerable<dynamic>;
 
             }
             catch (Exception ex)
             {
                 //LogError(ex);
+                database?.CloseReally();
 
                 throw new PureDataException("SqlMapStatement", ex);
             }

@@ -144,6 +144,8 @@ namespace Pure.Data
             }
             catch (Exception ex)
             {
+                Database?.CloseReally();
+
                 throw new PureDataException("DapperAsyncImplementor", ex);
 
             }
@@ -289,6 +291,7 @@ namespace Pure.Data
             }
             catch (Exception ex)
             {
+                Database?.CloseReally();
                 throw new PureDataException("DapperImplementorAsync", ex);
             }
             finally
@@ -388,6 +391,7 @@ namespace Pure.Data
             catch (Exception ex)
             {
 
+                Database?.CloseReally();
                 throw new PureDataException("DapperImplementorAsync", ex);
             }
             finally
@@ -414,6 +418,7 @@ namespace Pure.Data
             }
             catch (Exception ex)
             {
+                Database?.CloseReally();
 
                 throw new PureDataException("DapperImplementor", ex);
             }
@@ -463,6 +468,7 @@ namespace Pure.Data
             }
             catch (Exception ex)
             {
+                Database?.CloseReally();
                 throw new PureDataException("DapperImplementorAsync", ex);
             }
             finally
@@ -531,6 +537,7 @@ namespace Pure.Data
             }
             catch (Exception ex)
             {
+                Database?.CloseReally();
 
                 throw new PureDataException("DapperImplementor", ex);
             }
@@ -555,8 +562,8 @@ namespace Pure.Data
             
                 IClassMapper classMap = SqlGenerator.Configuration.GetMap<T>();
                 IPredicate predicate = GetIdPredicate(classMap, id);
-                //return (await GetListAsync<T>(connection, classMap, predicate, null, transaction, commandTimeout)).FirstOrDefault();
-            return (await GetAsync<T>(connection, classMap, predicate, null, transaction, commandTimeout)) ;
+              return (await GetListAsync<T>(connection, classMap, predicate, null, transaction, commandTimeout)).FirstOrDefault();
+            //return (await GetAsync<T>(connection, classMap, predicate, null, transaction, commandTimeout)) ;
            
         }
 
@@ -611,17 +618,28 @@ namespace Pure.Data
         }
         protected Task<IDataReader> GetPageReaderAsync<T>(IDbConnection connection, IClassMapper classMap, IPredicate predicate, IList<ISort> sort, int page, int resultsPerPage, IDbTransaction transaction, int? commandTimeout, out int totalCount) where T : class
         {
-            Dictionary<string, object> parameters = new Dictionary<string, object>();
-            string sql = SqlGenerator.SelectPaged(classMap, predicate, sort, page, resultsPerPage, parameters);
-            DynamicParameters dynamicParameters = new DynamicParameters();
-            foreach (var parameter in parameters)
+            try
             {
-                dynamicParameters.Add(parameter.Key, parameter.Value);
+                Dictionary<string, object> parameters = new Dictionary<string, object>();
+                string sql = SqlGenerator.SelectPaged(classMap, predicate, sort, page, resultsPerPage, parameters);
+                DynamicParameters dynamicParameters = new DynamicParameters();
+                foreach (var parameter in parameters)
+                {
+                    dynamicParameters.Add(parameter.Key, parameter.Value);
+                }
+
+                totalCount = Count<T>(connection, predicate, transaction, commandTimeout);// connection.Count<T>(predicate);
+
+                return connection.ExecuteReaderAsync(sql, dynamicParameters, transaction, commandTimeout, CommandType.Text, Database);
             }
+            catch (Exception ex)
+            {
+                Database?.CloseReally();
 
-            totalCount = Count<T>(connection, predicate, transaction, commandTimeout);// connection.Count<T>(predicate);
-
-            return connection.ExecuteReaderAsync(sql, dynamicParameters, transaction, commandTimeout, CommandType.Text, Database);
+                throw new PureDataException("DapperImplementor", ex);
+            }
+            
+         
         }
         /// <summary>
         /// The asynchronous counterpart to <see cref="IDapperImplementor.GetSet{T}"/>.
@@ -657,6 +675,7 @@ namespace Pure.Data
             }
             catch (Exception ex)
             {
+                Database?.CloseReally();
                 throw new PureDataException("DapperImplementorAsync", ex);
             }
             finally
@@ -681,6 +700,7 @@ namespace Pure.Data
             }
             catch (Exception ex)
             {
+                Database?.CloseReally();
                 throw new PureDataException("DapperImplementor", ex);
             }
             finally
@@ -701,6 +721,7 @@ namespace Pure.Data
             }
             catch (Exception ex)
             {
+                Database?.CloseReally();
                 throw new PureDataException("DapperImplementor", ex);
             }
             finally
@@ -736,6 +757,7 @@ namespace Pure.Data
             }
             catch (Exception ex)
             {
+                Database?.CloseReally();
                 throw new PureDataException("DapperImplementorAsync", ex);
             }
             finally
@@ -765,6 +787,7 @@ namespace Pure.Data
             }
             catch (Exception ex)
             {
+                Database?.CloseReally();
                 throw new PureDataException("DapperImplementorAsync", ex);
             }
             finally
@@ -796,6 +819,7 @@ namespace Pure.Data
             }
             catch (Exception ex)
             {
+                Database?.CloseReally();
                 throw new PureDataException("DapperImplementorAsync", ex);
             }
             finally
@@ -827,6 +851,7 @@ namespace Pure.Data
             }
             catch (Exception ex)
             {
+                Database?.CloseReally();
                 throw new PureDataException("DapperImplementorAsync", ex);
             }
             finally
@@ -868,6 +893,7 @@ namespace Pure.Data
             }
             catch (Exception ex)
             {
+                Database?.CloseReally();
 
                 throw new PureDataException("DapperImplementor", ex);
             }
@@ -926,6 +952,7 @@ namespace Pure.Data
             }
             catch (Exception ex)
             {
+                Database?.CloseReally();
 
                 throw new PureDataException("DapperImplementor", ex);
             }
@@ -962,6 +989,7 @@ namespace Pure.Data
             }
             catch (Exception ex)
             {
+                Database?.CloseReally();
 
                 throw new PureDataException("DapperImplementor", ex);
             }
@@ -1011,28 +1039,42 @@ namespace Pure.Data
 
         protected async Task<SequenceReaderResultReader> GetMultipleBySequenceAsync(IDbConnection connection, GetMultiplePredicate predicate, IDbTransaction transaction, int? commandTimeout)
         {
-            IList<SqlMapper.GridReader> items = new List<SqlMapper.GridReader>();
-            foreach (var item in predicate.Items)
+            try
             {
-                Dictionary<string, object> parameters = new Dictionary<string, object>();
-                IClassMapper classMap = SqlGenerator.Configuration.GetMap(item.Type);
-                IPredicate itemPredicate = item.Value as IPredicate;
-                if (itemPredicate == null && item.Value != null)
+
+
+
+                IList<SqlMapper.GridReader> items = new List<SqlMapper.GridReader>();
+                foreach (var item in predicate.Items)
                 {
-                    itemPredicate = GetPredicate(classMap, item.Value);
-                }
-                string sql = SqlGenerator.Select(classMap, itemPredicate, item.Sort, parameters);
-                DynamicParameters dynamicParameters = new DynamicParameters();
-                foreach (var parameter in parameters)
-                {
-                    dynamicParameters.Add(parameter.Key, parameter.Value);
+                    Dictionary<string, object> parameters = new Dictionary<string, object>();
+                    IClassMapper classMap = SqlGenerator.Configuration.GetMap(item.Type);
+                    IPredicate itemPredicate = item.Value as IPredicate;
+                    if (itemPredicate == null && item.Value != null)
+                    {
+                        itemPredicate = GetPredicate(classMap, item.Value);
+                    }
+                    string sql = SqlGenerator.Select(classMap, itemPredicate, item.Sort, parameters);
+                    DynamicParameters dynamicParameters = new DynamicParameters();
+                    foreach (var parameter in parameters)
+                    {
+                        dynamicParameters.Add(parameter.Key, parameter.Value);
+                    }
+
+                    SqlMapper.GridReader queryResult = await connection.QueryMultipleAsync(sql, dynamicParameters, transaction, commandTimeout, CommandType.Text, Database);
+                    items.Add(queryResult);
                 }
 
-                SqlMapper.GridReader queryResult = await connection.QueryMultipleAsync(sql, dynamicParameters, transaction, commandTimeout, CommandType.Text, Database);
-                items.Add(queryResult);
+                return new SequenceReaderResultReader(items);
+
             }
+            catch (Exception ex)
+            {
+                Database?.CloseReally();
 
-            return new SequenceReaderResultReader(items);
+                throw new PureDataException("DapperImplementor", ex);
+            }
+        
         }
 
 

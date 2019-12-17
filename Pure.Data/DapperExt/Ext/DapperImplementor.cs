@@ -64,7 +64,10 @@ namespace Pure.Data
             IClassMapper classMap = SqlGenerator.Configuration.GetMap<T>();
             IPredicate predicate = GetIdPredicate(classMap, id);
 
-            T result = Get<T>(connection, classMap, predicate, null, transaction, commandTimeout, true); // GetList<T>(connection, classMap, predicate, null, transaction, commandTimeout, true).FirstOrDefault();
+            T result = GetList<T>(connection, classMap, predicate, null, transaction, commandTimeout, true).FirstOrDefault();
+            //T result = Get<T>(connection, classMap, predicate, null, transaction, commandTimeout, true); 
+
+            // 
             return result;
         }
 
@@ -131,6 +134,7 @@ namespace Pure.Data
             }
             catch (Exception ex)
             {
+                Database?.CloseReally();
                 throw new PureDataException("DapperImplementor", ex);
 
             }
@@ -336,6 +340,7 @@ namespace Pure.Data
             }
             catch (Exception ex)
             { 
+                Database?.CloseReally();
                 throw new PureDataException("Insert", ex);
             }
             finally
@@ -437,6 +442,7 @@ namespace Pure.Data
             catch (Exception ex)
             {
 
+                Database?.CloseReally();
                 throw new PureDataException("DapperImplementor", ex);
             }
             finally
@@ -460,6 +466,7 @@ namespace Pure.Data
             }
             catch (Exception ex)
             {
+                Database?.CloseReally();
                 throw new PureDataException("DapperImplementor", ex);
             }
             finally
@@ -543,6 +550,7 @@ namespace Pure.Data
             catch (Exception ex)
             {
 
+                Database?.CloseReally();
                                throw new PureDataException("DapperImplementor", ex);
             }
             finally
@@ -630,6 +638,7 @@ namespace Pure.Data
             catch (Exception ex)
             {
 
+                Database?.CloseReally();
                                throw new PureDataException("DapperImplementor", ex);
             }
             finally
@@ -664,6 +673,7 @@ namespace Pure.Data
             catch (Exception ex)
             {
 
+                Database?.CloseReally();
                                throw new PureDataException("DapperImplementor", ex);
             }
             finally
@@ -702,6 +712,7 @@ namespace Pure.Data
             catch (Exception ex)
             {
 
+                Database?.CloseReally();
                                throw new PureDataException("DapperImplementor", ex);
             }
             finally
@@ -732,7 +743,7 @@ namespace Pure.Data
             }
             catch (Exception ex)
             {
-
+                Database?.CloseReally();
                 throw new PureDataException("DapperImplementor", ex);
             }
             finally
@@ -800,6 +811,7 @@ namespace Pure.Data
             }
             catch (Exception ex)
             {
+                Database?.CloseReally();
 
                 throw new PureDataException("DapperImplementor", ex);
             }
@@ -815,19 +827,32 @@ namespace Pure.Data
 
         protected PageDataResult<IDataReader> GetPageReader<T>(IDbConnection connection, IClassMapper classMap, IPredicate predicate, IList<ISort> sort, int page, int resultsPerPage, IDbTransaction transaction, int? commandTimeout ) where T : class
         {
-            Dictionary<string, object> parameters = new Dictionary<string, object>();
-            string sql = SqlGenerator.SelectPaged(classMap, predicate, sort, page, resultsPerPage, parameters);
-            DynamicParameters dynamicParameters = new DynamicParameters();
-            foreach (var parameter in parameters)
+            try
             {
-                dynamicParameters.Add(parameter.Key, parameter.Value);
+
+                Dictionary<string, object> parameters = new Dictionary<string, object>();
+                string sql = SqlGenerator.SelectPaged(classMap, predicate, sort, page, resultsPerPage, parameters);
+                DynamicParameters dynamicParameters = new DynamicParameters();
+                foreach (var parameter in parameters)
+                {
+                    dynamicParameters.Add(parameter.Key, parameter.Value);
+                }
+
+                int totalCount = Count<T>(connection, predicate, transaction, commandTimeout);// connection.Count<T>(predicate);
+
+                var data = connection.ExecuteReader(sql, dynamicParameters, transaction, commandTimeout, CommandType.Text, Database);
+
+                return new PageDataResult<IDataReader>(page, resultsPerPage, totalCount, data);
+
+
             }
+            catch (Exception ex)
+            {
+                Database?.CloseReally();
 
-            int totalCount = Count<T>(connection, predicate, transaction, commandTimeout);// connection.Count<T>(predicate);
-
-            var data= connection.ExecuteReader(sql, dynamicParameters, transaction, commandTimeout, CommandType.Text, Database);
-
-            return new PageDataResult<IDataReader>(page, resultsPerPage, totalCount, data);
+                throw new PureDataException("DapperImplementor", ex);
+            }
+             
         }
 
         protected PageDataResult<IEnumerable<T>> GetPage<T>(IDbConnection connection, IClassMapper classMap, IPredicate predicate, IList<ISort> sort, int page, int resultsPerPage, IDbTransaction transaction, int? commandTimeout, bool buffered ) where T : class
@@ -850,6 +875,7 @@ namespace Pure.Data
             }
             catch (Exception ex)
             {
+                Database?.CloseReally();
                   throw new PureDataException("DapperImplementor", ex);
             }
             finally
@@ -879,6 +905,7 @@ namespace Pure.Data
             catch (Exception ex)
             {
 
+                Database?.CloseReally();
                                throw new PureDataException("DapperImplementor", ex);
             }
             finally
@@ -903,6 +930,7 @@ namespace Pure.Data
             }
             catch (Exception ex)
             {
+                Database?.CloseReally();
                                throw new PureDataException("DapperImplementor", ex);
             }
             finally
@@ -924,6 +952,7 @@ namespace Pure.Data
             }
             catch (Exception ex)
             {
+                Database?.CloseReally();
                                throw new PureDataException("DapperImplementor", ex);
             }
             finally
@@ -952,6 +981,7 @@ namespace Pure.Data
             catch (Exception ex)
             {
 
+                Database?.CloseReally();
                                throw new PureDataException("DapperImplementor", ex);
             }
             finally
@@ -1094,28 +1124,40 @@ namespace Pure.Data
 
         protected SequenceReaderResultReader GetMultipleBySequence(IDbConnection connection, GetMultiplePredicate predicate, IDbTransaction transaction, int? commandTimeout)
         {
-            IList<SqlMapper.GridReader> items = new List<SqlMapper.GridReader>();
-            foreach (var item in predicate.Items)
+            try
             {
-                Dictionary<string, object> parameters = new Dictionary<string, object>();
-                IClassMapper classMap = SqlGenerator.Configuration.GetMap(item.Type);
-                IPredicate itemPredicate = item.Value as IPredicate;
-                if (itemPredicate == null && item.Value != null)
+                IList<SqlMapper.GridReader> items = new List<SqlMapper.GridReader>();
+                foreach (var item in predicate.Items)
                 {
-                    itemPredicate = GetPredicate(classMap, item.Value);
-                }
-                string sql = SqlGenerator.Select(classMap, itemPredicate, item.Sort, parameters);
-                DynamicParameters dynamicParameters = new DynamicParameters();
-                foreach (var parameter in parameters)
-                {
-                    dynamicParameters.Add(parameter.Key, parameter.Value);
+                    Dictionary<string, object> parameters = new Dictionary<string, object>();
+                    IClassMapper classMap = SqlGenerator.Configuration.GetMap(item.Type);
+                    IPredicate itemPredicate = item.Value as IPredicate;
+                    if (itemPredicate == null && item.Value != null)
+                    {
+                        itemPredicate = GetPredicate(classMap, item.Value);
+                    }
+                    string sql = SqlGenerator.Select(classMap, itemPredicate, item.Sort, parameters);
+                    DynamicParameters dynamicParameters = new DynamicParameters();
+                    foreach (var parameter in parameters)
+                    {
+                        dynamicParameters.Add(parameter.Key, parameter.Value);
+                    }
+
+                    SqlMapper.GridReader queryResult = connection.QueryMultiple(sql, dynamicParameters, transaction, commandTimeout, CommandType.Text, Database);
+                    items.Add(queryResult);
                 }
 
-                SqlMapper.GridReader queryResult = connection.QueryMultiple(sql, dynamicParameters, transaction, commandTimeout, CommandType.Text, Database);
-                items.Add(queryResult);
+                return new SequenceReaderResultReader(items);
+
+
             }
+            catch (Exception ex)
+            {
+                Database?.CloseReally();
 
-            return new SequenceReaderResultReader(items);
+                throw new PureDataException("DapperImplementor", ex);
+            }
+           
         }
 
       

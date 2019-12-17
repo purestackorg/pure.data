@@ -1351,8 +1351,19 @@ namespace FluentExpressionSQL
         {
             if (ExecuteReaderAction != null)
             {
-                string sql = this.ToSqlString();
-                return ExecuteReaderAction(sql);
+                try
+                { 
+                    string sql = this.ToSqlString();
+                    return ExecuteReaderAction(sql);
+                }
+                catch (Exception ex)
+                {
+                    Database?.CloseReally();
+
+                    throw new PureDataException("DapperImplementor", ex);
+                }
+               
+               
             }
             else
                 throw new Exception("ExecuteReaderAction 不能为空！");
@@ -1366,8 +1377,30 @@ namespace FluentExpressionSQL
         {
             if (ExecuteScalarAction != null)
             {
-                string sql = this.ToSqlString();
-                return ExecuteScalarAction(sql);
+
+                try
+                {
+
+                    string sql = this.ToSqlString();
+                    return ExecuteScalarAction(sql);
+
+                }
+                catch (Exception ex)
+                {
+                    Database?.CloseReally();
+
+                    throw new PureDataException("DapperImplementor", ex);
+                }
+                finally
+                {
+                    if (Database != null)
+                    {
+                        Database.Close();
+                    }
+                }
+
+
+
             }
             else
                 throw new Exception("ExecuteScalar 不能为空！");
@@ -1381,8 +1414,30 @@ namespace FluentExpressionSQL
         {
             if (ExecuteDelegateAction != null)
             {
-                string sql = this.ToSqlString();
-                return ExecuteDelegateAction(sql);
+
+                try
+                {
+
+                    string sql = this.ToSqlString();
+                    return ExecuteDelegateAction(sql);
+
+                }
+                catch (Exception ex)
+                {
+                    Database?.CloseReally();
+
+                    throw new PureDataException("DapperImplementor", ex);
+                }
+                finally
+                {
+                    if (Database != null)
+                    {
+                        Database.Close();
+                    }
+                }
+
+
+
             }
             else
                 throw new Exception("ExecuteDelegateAction 不能为空！");
@@ -1405,7 +1460,7 @@ namespace FluentExpressionSQL
             }
             catch (Exception ex)
             {
-
+                Database.CloseReally();
                 throw new PureDataException("FluentExpressionSQLCore", ex);
             }
             finally
@@ -1439,6 +1494,7 @@ namespace FluentExpressionSQL
             }
             catch (Exception ex)
             {
+                Database.CloseReally();
 
                 throw new PureDataException("FluentExpressionSQLCore", ex);
             }
@@ -1475,6 +1531,7 @@ namespace FluentExpressionSQL
             }
             catch (Exception ex)
             {
+                Database.CloseReally();
 
                 throw new PureDataException("FluentExpressionSQLCore", ex);
             }
@@ -1509,6 +1566,7 @@ namespace FluentExpressionSQL
             }
             catch (Exception ex)
             {
+                Database.CloseReally();
 
                 throw new PureDataException("FluentExpressionSQLCore", ex);
             }
@@ -1545,6 +1603,7 @@ namespace FluentExpressionSQL
             }
             catch (Exception ex)
             {
+                Database.CloseReally();
 
                 throw new PureDataException("FluentExpressionSQLCore", ex);
             }
@@ -1578,6 +1637,7 @@ namespace FluentExpressionSQL
             catch (Exception ex)
             {
 
+                Database.CloseReally();
                 throw new PureDataException("FluentExpressionSQLCore", ex);
             }
             finally
@@ -1604,6 +1664,7 @@ namespace FluentExpressionSQL
             }
             catch (Exception ex)
             {
+                Database.CloseReally();
 
                 throw new PureDataException("FluentExpressionSQLCore", ex);
             }
@@ -1637,6 +1698,7 @@ namespace FluentExpressionSQL
             }
             catch (Exception ex)
             {
+                Database.CloseReally();
 
                 throw new PureDataException("FluentExpressionSQLCore", ex);
             }
@@ -1670,6 +1732,7 @@ namespace FluentExpressionSQL
             }
             catch (Exception ex)
             {
+                Database.CloseReally();
 
                 throw new PureDataException("FluentExpressionSQLCore", ex);
             }
@@ -1703,6 +1766,7 @@ namespace FluentExpressionSQL
             }
             catch (Exception ex)
             {
+                Database.CloseReally();
 
                 throw new PureDataException("FluentExpressionSQLCore", ex);
             }
@@ -1736,6 +1800,7 @@ namespace FluentExpressionSQL
             }
             catch (Exception ex)
             {
+                Database.CloseReally();
 
                 throw new PureDataException("FluentExpressionSQLCore", ex);
             }
@@ -1812,6 +1877,7 @@ namespace FluentExpressionSQL
             }
             catch (Exception ex)
             {
+                Database.CloseReally();
 
                 throw new PureDataException("FluentExpressionSQLCore", ex);
             }
@@ -1846,6 +1912,7 @@ namespace FluentExpressionSQL
             }
             catch (Exception ex)
             {
+                Database.CloseReally();
 
                 throw new PureDataException("FluentExpressionSQLCore", ex);
             }
@@ -1882,6 +1949,7 @@ namespace FluentExpressionSQL
             }
             catch (Exception ex)
             {
+                Database.CloseReally();
 
                 throw new PureDataException("FluentExpressionSQLCore", ex);
             }
@@ -1916,6 +1984,7 @@ namespace FluentExpressionSQL
             }
             catch (Exception ex)
             {
+                Database.CloseReally();
 
                 throw new PureDataException("FluentExpressionSQLCore", ex);
             }
@@ -1952,6 +2021,7 @@ namespace FluentExpressionSQL
             }
             catch (Exception ex)
             {
+                Database.CloseReally();
 
                 throw new PureDataException("FluentExpressionSQLCore", ex);
             }
@@ -1984,6 +2054,7 @@ namespace FluentExpressionSQL
             }
             catch (Exception ex)
             {
+                Database.CloseReally();
 
                 throw new PureDataException("FluentExpressionSQLCore", ex);
             }
@@ -2019,6 +2090,7 @@ namespace FluentExpressionSQL
             }
             catch (Exception ex)
             {
+                Database.CloseReally();
 
                 throw new PureDataException("FluentExpressionSQLCore", ex);
             }
@@ -2052,6 +2124,7 @@ namespace FluentExpressionSQL
             }
             catch (Exception ex)
             {
+                Database.CloseReally();
 
                 throw new PureDataException("FluentExpressionSQLCore", ex);
             }
@@ -2085,6 +2158,7 @@ namespace FluentExpressionSQL
             }
             catch (Exception ex)
             {
+                Database.CloseReally();
 
                 throw new PureDataException("FluentExpressionSQLCore", ex);
             }
@@ -2118,6 +2192,7 @@ namespace FluentExpressionSQL
             }
             catch (Exception ex)
             {
+                Database.CloseReally();
 
                 throw new PureDataException("FluentExpressionSQLCore", ex);
             }
@@ -2151,6 +2226,7 @@ namespace FluentExpressionSQL
             }
             catch (Exception ex)
             {
+                Database.CloseReally();
 
                 throw new PureDataException("FluentExpressionSQLCore", ex);
             }

@@ -1593,6 +1593,7 @@ this IDbConnection cnn, string sql, object param = null, IDbTransaction transact
             }
             if (exception != null)
             {
+                database?.CloseReally();
                 throw new PureDataException("OnExceptionInternal", exception);
             }
         }

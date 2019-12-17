@@ -12,10 +12,12 @@ namespace Pure.Data
             {
                 database.Connection.Close();
             }
-            if (database.Config.EnableDebug )
+            if (database.Config.EnableDebug)
             {
-                database.LogHelper.Error(exception);
-                
+                string connStr = "    (conn: " + database.Connection?.GetHashCode() + ", status: " + database.Connection?.State + ")";
+                //database.LogHelper.Error(exception);
+                database.LogHelper.Write("Error at: "+database?.LastSQL+ connStr, exception, MessageType.Error);
+
             }
 
         }

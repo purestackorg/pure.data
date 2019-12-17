@@ -172,7 +172,10 @@ public static DataTable ToDataTable(this IDataReader reader, bool autoClose = tr
                 }
                 throw new PureDataException("DataReaderExtensions", ex);
             }
-
+            finally
+            {
+                database?.Close();
+            }
 
         }
         public static Dictionary<TKey, TValue> ToDictionary<TKey, TValue>(this IDataReader reader, bool autoClose = true)
@@ -330,6 +333,10 @@ public static DataTable ToDataTable(this IDataReader reader, bool autoClose = tr
                 }
                 throw new PureDataException("DataReaderExtensions", ex);
             }
+            finally
+            {
+                database?.Close();
+            }
         }
 
         public static T ToModelByEmit<T>(this IDataReader dr, bool autoClose = true)
@@ -446,7 +453,10 @@ public static DataTable ToDataTable(this IDataReader reader, bool autoClose = tr
                 }
                 throw new PureDataException("DataReaderExtensions", ex);
             }
-
+            finally
+            {
+                database?.Close();
+            }
         }
 
         public static List<T> ToListByEmit<T>(this IDataReader dr, bool autoClose = true)
@@ -610,7 +620,10 @@ public static DataTable ToDataTable(this IDataReader reader, bool autoClose = tr
                 }
                 throw new PureDataException("DataReaderExtensions", ex);
             }
-
+            finally
+            {
+                database?.Close();
+            }
         }
         /// <summary>
         ///     Enumerates to expando objects in this collection.
@@ -680,7 +693,10 @@ public static DataTable ToDataTable(this IDataReader reader, bool autoClose = tr
                 }
                 throw new PureDataException("DataReaderExtensions", ex);
             }
-
+            finally
+            {
+                database?.Close();
+            }
 
         }
 

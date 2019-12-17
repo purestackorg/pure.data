@@ -103,10 +103,12 @@ namespace Pure.Data
             }
             catch (Exception ex)
             {
+                this.CloseReally();
                 throw new PureDataException("RunInAction", ex);
             }
             finally
             {
+                this.Close();
                 ReturnPooledDatabase();
 
             }
@@ -121,10 +123,12 @@ namespace Pure.Data
             }
             catch (Exception ex)
             {
+                this.CloseReally();
                 throw new PureDataException("RunInAction", ex);
             }
             finally
             {
+                this.Close();
                 ReturnPooledDatabase();
             }
         }
@@ -164,7 +168,7 @@ namespace Pure.Data
             {
                 try
                 {
-                    if (_transaction != null)
+                    if (_transaction != null && HasActiveTransaction == true)
                     {
                         _transaction.Rollback();
                         OnRollbackTransactionInternal();
@@ -174,12 +178,12 @@ namespace Pure.Data
                 }
                 catch (Exception)
                 {
-
+                    _connection?.Close();
                     throw;
                 }
                 finally
                 {
-                    _connection.Close();
+                    _connection?.Close();
 
                 } 
             }
@@ -199,11 +203,13 @@ namespace Pure.Data
             {
 
                 this.CloseReally();
-
-
-
+                
             }
-             
+            //this.CloseReally();
+
+            //返回数据库连接池
+            this.ReturnPooledDatabase();
+
         }
 
 
@@ -709,6 +715,7 @@ namespace Pure.Data
             }
             catch (Exception ex)
             {
+                this.CloseReally();
                 throw new PureDataException("Execute", ex);
 
             }
@@ -740,6 +747,7 @@ namespace Pure.Data
             }
             catch (Exception ex)
             {
+                this.CloseReally();
                 throw new PureDataException("ExecuteScalar", ex);
             }
             finally
@@ -766,6 +774,7 @@ namespace Pure.Data
             }
             catch (Exception ex)
             {
+                this.CloseReally();
                 throw new PureDataException("ExecuteScalar", ex);
 
             }
@@ -776,19 +785,31 @@ namespace Pure.Data
         }
         public IDataReader ExecuteReader(string sql, object param = null, IDbTransaction transaction = null, int? commandTimeout = null, CommandType? commandType = null)
         {
-            if (transaction == null)
+
+            try
             {
-                transaction = Transaction;
+
+                if (transaction == null)
+                {
+                    transaction = Transaction;
+                }
+                if (commandTimeout == null || !commandTimeout.HasValue)
+                {
+                    commandTimeout = Config.ExecuteTimeout;
+                }
+                if (commandType == null)
+                {
+                    commandType = CommandType.Text;
+                }
+                return Connection.ExecuteReader(sql, param, transaction, commandTimeout, commandType, this);
             }
-            if (commandTimeout == null || !commandTimeout.HasValue)
+            catch (Exception ex)
             {
-                commandTimeout = Config.ExecuteTimeout;
+                this.CloseReally();
+                throw new PureDataException("ExecuteReader", ex);
+
             }
-            if (commandType == null)
-            {
-                commandType = CommandType.Text;
-            }
-            return Connection.ExecuteReader(sql, param, transaction, commandTimeout, commandType, this);
+             
         }
         public List<T> ExecuteList<T>(string sql, object param = null, IDbTransaction transaction = null, bool buffer = true, int? commandTimeout = null, CommandType? commandType = null)
         {
@@ -800,6 +821,7 @@ namespace Pure.Data
             }
             catch (Exception ex)
             {
+                this.CloseReally();
                 throw new PureDataException("ExecuteList", ex);
 
             }
@@ -828,6 +850,7 @@ namespace Pure.Data
             catch (Exception ex)
             {
 
+                this.CloseReally();
                 throw new PureDataException("ExecuteListWithRowDelegate", ex);
 
             }
@@ -856,6 +879,7 @@ namespace Pure.Data
             catch (Exception ex)
             {
 
+                this.CloseReally();
                 throw new PureDataException("ExecuteListByEmit", ex);
 
             }
@@ -891,6 +915,7 @@ namespace Pure.Data
             catch (Exception ex)
             {
 
+                this.CloseReally();
                 throw new PureDataException("ExecuteModel", ex);
 
             }
@@ -920,6 +945,7 @@ namespace Pure.Data
             catch (Exception ex)
             {
 
+                this.CloseReally();
                 throw new PureDataException("ExecuteModelByEmit", ex);
 
             }
@@ -948,6 +974,7 @@ namespace Pure.Data
             catch (Exception ex)
             {
 
+                this.CloseReally();
                 throw new PureDataException("ExecuteDataTable", ex);
 
             }
@@ -976,6 +1003,7 @@ namespace Pure.Data
             catch (Exception ex)
             {
 
+                this.CloseReally();
                 throw new PureDataException("ExecuteDataTableWithRowDelegate", ex);
 
             }
@@ -1004,6 +1032,7 @@ namespace Pure.Data
             catch (Exception ex)
             {
 
+                this.CloseReally();
                 throw new PureDataException("ExecuteDataSet", ex);
 
             }
@@ -1033,6 +1062,7 @@ namespace Pure.Data
             catch (Exception ex)
             {
 
+                this.CloseReally();
                 throw new PureDataException("ExecuteDictionary", ex);
 
             }
@@ -1060,6 +1090,7 @@ namespace Pure.Data
             }
             catch (Exception ex)
             {
+                this.CloseReally();
                 throw new PureDataException("ExecuteExpandoObject", ex);
 
             }
@@ -1087,6 +1118,7 @@ namespace Pure.Data
             }
             catch (Exception ex)
             {
+                this.CloseReally();
                 throw new PureDataException("ExecuteExpandoObject", ex);
 
             }
@@ -1115,6 +1147,7 @@ namespace Pure.Data
             }
             catch (Exception ex)
             {
+                this.CloseReally();
                 throw new PureDataException("ExecuteExpandoObjects", ex);
 
             }
@@ -1141,6 +1174,7 @@ namespace Pure.Data
             }
             catch (Exception ex)
             {
+                this.CloseReally();
                 throw new PureDataException("SqlQueryFirstOrDefault", ex);
 
             }
@@ -1163,6 +1197,7 @@ namespace Pure.Data
             }
             catch (Exception ex)
             {
+                this.CloseReally();
                 throw new PureDataException("SqlQuery", ex);
 
             }
@@ -1330,6 +1365,32 @@ namespace Pure.Data
                 Close();
             }
 
+        }
+        public IEnumerable<dynamic> GetPageExpandoObjectsBySQL(int pageIndex, int pagesize, string sqltext, string orderText, IDictionary<string, object> parameters, out int totalCount)
+        {
+            try
+            {
+
+                var result = GetPageReaderBySQL(pageIndex, pagesize, sqltext, orderText, parameters, out totalCount);
+                if (result != null)
+                {
+                    IEnumerable<dynamic> data = result.ToExpandoObjects(true, this);
+
+                    return data;
+                }
+                else
+                    return null;
+            }
+            catch (Exception ex)
+            {
+                this.CloseReally();
+                throw new PureDataException("GetPageExpandoObjectsBySQL", ex);
+
+            }
+            finally
+            {
+                Close();
+            }
         }
         public IDataReader GetPageReaderBySQL(int pageIndex, int pagesize, string sqltext, string orderText, IDictionary<string, object> parameters, out int totalCount)
         {
@@ -1646,6 +1707,8 @@ namespace Pure.Data
         /// Start a new transaction, can be nested, every call must be
         ///	matched by a call to AbortTransaction or CompleteTransaction
         /// Use `using (var scope=db.Transaction) { scope.Complete(); }` to ensure correct semantics
+        /// https://stackoverflow.com/questions/31711951/ef-transaction-and-async 不要用于多个异步的方法内，应该异步组合数据，同步提交
+        /// TL;DR: You are better off doing everything you can in parallel and then commiting everything in a serial way.
         /// </summary>
         /// <param name="isolationLevel"></param>
         public void BeginTransaction(IsolationLevel isolationLevel = IsolationLevel.ReadCommitted)
@@ -1778,6 +1841,7 @@ namespace Pure.Data
                 {
                     RollbackTransaction();
                 }
+                this.CloseReally();
                 throw new PureDataException("RunInTransaction", ex);
             }
             //finally
@@ -1801,6 +1865,7 @@ namespace Pure.Data
                 {
                     RollbackTransaction();
                 }
+                this.CloseReally();
                 throw new PureDataException("RunInTransaction", ex);
             }
             //finally

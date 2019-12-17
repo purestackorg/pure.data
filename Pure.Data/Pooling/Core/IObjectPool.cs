@@ -379,6 +379,14 @@ namespace Pure.Data.Pooling
                     pooledObject = CreatePooledObject();
                 }
 
+                ////每次都设置最新事件
+                //
+                if (pooledObject.PooledObjectInfo.State != PooledObjectState.Available)
+                {
+                    continue;
+                }
+                pooledObject.PooledObjectInfo.LastOperateTime = EvictionSettings.GetCurrentTime();// DateTime.Now;
+
                 if (!pooledObject.ValidateObject(PooledObjectValidationContext.Outbound(pooledObject)))
                 {
                     DestroyPooledObject(pooledObject);

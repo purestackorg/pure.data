@@ -10,7 +10,7 @@ namespace Pure.Data
         {
             if (conn.State == ConnectionState.Open)
             {
-                string str = string.Format(database.DatabaseName + " was opened!" + conn.GetHashCode());
+                string str = string.Format(database.DatabaseName + " was opened! " + conn.GetHashCode());
                 database.LogHelper.Warning(str);
                
             }
@@ -21,7 +21,7 @@ namespace Pure.Data
         {
             if ( conn.State != ConnectionState.Closed)
             {
-                string str = string.Format(database.DatabaseName + " was closing!" + conn.GetHashCode());
+                string str = string.Format(database.DatabaseName + " was closing! " + conn.GetHashCode());
                 database.LogHelper.Warning(str);
             }
 

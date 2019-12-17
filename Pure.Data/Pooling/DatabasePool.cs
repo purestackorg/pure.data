@@ -73,13 +73,13 @@ namespace Pure.Data
             //{
             //    policyConfig(policy);
             //}
-//#if NET45
-//            currentDatabaseLocal = new ThreadLocal<PooledDatabase>();
+#if NET45
+            currentDatabaseLocal = new ThreadLocal<PooledDatabase>();
 
-//#else
-//            currentDatabaseLocal = new AsyncLocal<PooledDatabase>();
+#else
+            currentDatabaseLocal = new AsyncLocal<PooledDatabase>();
 
-//#endif
+#endif
 
             int maximumRetained = policy.MaxPoolSize;
 
@@ -186,16 +186,16 @@ namespace Pure.Data
             {
                 maximumRetained = Environment.ProcessorCount * 2;
             }
-//#if NET45 
-//        currentDatabaseLocal = new ThreadLocal<PooledDatabase>();
+#if NET45
+        currentDatabaseLocal = new ThreadLocal<PooledDatabase>();
 
-//#else
-//        currentDatabaseLocal = new AsyncLocal<PooledDatabase>();
+#else
+            currentDatabaseLocal = new AsyncLocal<PooledDatabase>();
 
-//#endif
+#endif
 
 
-        Pool = new ObjectPool<PooledDatabase>(maximumRetained, () =>
+            Pool = new ObjectPool<PooledDatabase>(maximumRetained, () =>
             {
                 PooledDatabase db = createFunc();
                 db.SetPool(this); //设置池
@@ -203,13 +203,13 @@ namespace Pure.Data
             }
             , evictSetting, null);
         }
-//#if NET45 
-//        private static ThreadLocal<PooledDatabase> currentDatabaseLocal = null;
+#if NET45
+        private static ThreadLocal<PooledDatabase> currentDatabaseLocal = null;
 
-//#else
-//               private static AsyncLocal<PooledDatabase> currentDatabaseLocal = null;
+#else
+        private static AsyncLocal<PooledDatabase> currentDatabaseLocal = null;
 
-//#endif
+#endif
         public PooledDatabase GetPooledDatabase()
         {
             //PooledDatabase obj = Pool.GetObject();
@@ -290,17 +290,22 @@ namespace Pure.Data
 
             // Local copy, since the buffer might change.
             var pooledObjects = Pool.PooledObjects.ToArray();
+            var createdObjects = Pool.CreatedObjects.ToArray();
+            msg += "\r\n-------- Pool Info --------\r\n";
+            msg += "Total:" + (pooledObjects.Length + createdObjects.Length)+ " , createdObjects:"+ createdObjects.Length;
+            msg += " , " + "Open:" + (pooledObjects.Count(p => p.Connection.State == ConnectionState.Open) + createdObjects.Count(p => p.Connection.State == ConnectionState.Open)) ;
+            msg += " , " + "Closed:" + (pooledObjects.Count(p => p.Connection.State == ConnectionState.Closed) + createdObjects.Count(p => p.Connection.State == ConnectionState.Closed)) ;
+
             msg += "\r\n-------- Pool Object List --------\r\n";
             // All items which are not valid will be destroyed.
             foreach (var pooledObject in pooledObjects)
             {
                 if (pooledObject != null)
                 {
-                    msg += "Conn:"+ pooledObject.Connection.GetHashCode() + ", State:" + pooledObject.Connection.State+", "+ pooledObject.PooledObjectInfo.ToString()+ "\r\n";
+                    msg += "Conn:"+ pooledObject.Connection.GetHashCode() + ", ConnState:" + pooledObject.Connection.State+", "+ pooledObject.PooledObjectInfo.ToString()+ "\r\n";
                 }
             }
 
-            var createdObjects = Pool.CreatedObjects.ToArray();
             msg += "-------- Create Object List --------\r\n";
             // All items which are not valid will be destroyed.
             foreach (var pooledObject in createdObjects)

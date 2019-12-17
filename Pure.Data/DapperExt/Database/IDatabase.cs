@@ -136,6 +136,7 @@ namespace Pure.Data
         IEnumerable<TEntity> GetPageByWhere<TEntity>(int pageIndex, int pagesize, string condition, string orderStr, out int totalCount) where TEntity : class;
         List<TEntity> GetPageBySQL<TEntity>(int pageIndex, int pagesize, string sqltext, string orderText, IDictionary<string, object> parameters, out int totalCount) where TEntity : class;
        IDataReader GetPageReaderBySQL(int pageIndex, int pagesize, string sqltext, string orderText, IDictionary<string, object> parameters, out int totalCount) ;
+        IEnumerable<dynamic> GetPageExpandoObjectsBySQL(int pageIndex, int pagesize, string sqltext, string orderText, IDictionary<string, object> parameters, out int totalCount);
         IEnumerable<TEntity> GetPage<TEntity>(int pageIndex, int pagesize, Expression<Func<TEntity, bool>> condition, Action<FluentExpressionSQLCore<TEntity>> orderAction, out int totalCount) where TEntity : class;
         string GetSqlOfPage(int pageIndex, int pagesize, string sql, IDictionary<string, object> parameters);
         string GetSqlOfCount(string sql);

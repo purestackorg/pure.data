@@ -14,6 +14,9 @@ namespace Pure.Data
             {
                 database.LastSQL = cmd.CommandText;
                 database.LastArgs = cmd.Parameters;// (from IDataParameter parameter in cmd.Parameters select parameter.Value).ToArray();
+
+                string connStr = "    (conn: " + database.Connection?.GetHashCode() + ", status: " + database.Connection?.State + ")";
+
                 if (database.Config.LogWithRawSql == true) //输入RawSQL
                 {
                      
@@ -30,7 +33,7 @@ namespace Pure.Data
 
                     string str = SqlMap.SqlMapStatement.ParseRawSQL(cmd.CommandText,  ps, database.SqlDialectProvider, false, ParameterPrefix, "");
 
-                    database.LogHelper.Debug(str);
+                    database.LogHelper.Debug(str + connStr);
 
                 }
                 else
@@ -77,8 +80,9 @@ namespace Pure.Data
                     database.Watch.Stop();
                     
                 }
+                string connStr = "    (conn: " + database.Connection?.GetHashCode() + ", status: " + database.Connection?.State + ")";
                 
-                database.LogHelper.Debug("Elapsed:" + database.Watch.ElapsedMilliseconds +" ms");
+                database.LogHelper.Debug("Elapsed:" + database.Watch.ElapsedMilliseconds +" ms"+ connStr);
                 //database.Watch.Reset();
 
             }
