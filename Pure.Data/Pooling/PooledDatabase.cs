@@ -50,6 +50,11 @@ namespace Pure.Data
         private static object oEnsureConnectionLock = new object();
         public void EnsureConnectionNotNull()
         {
+            LastSQL = "";
+            LastArgs = null;
+            Watch?.Reset();
+
+
             if (_connection == null)
             {
                 lock (oEnsureConnectionLock)
