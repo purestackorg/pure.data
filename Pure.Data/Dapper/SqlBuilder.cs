@@ -475,18 +475,23 @@ namespace Pure.Data
                             builder.AppendFormat(temp, type, item.FieldName.ToSqlFilter(table, Database), "NOT IN", inValue2);
                             parameters.Add(parameterName, item.FieldValue);
                             break;
-                        case ConditionalType.LikeLeft:
+                        case ConditionalType.StartsWith:
                             builder.AppendFormat(temp, type, item.FieldName.ToSqlFilter(table, Database), "LIKE", parameterName);
                             parameters.Add(parameterName, item.FieldValue + "%");
+                            break;
+                        case ConditionalType.EndsWith:
+                            builder.AppendFormat(temp, type, item.FieldName.ToSqlFilter(table, Database), "LIKE", parameterName);
+                            parameters.Add(parameterName, "%" + item.FieldValue);
                             break;
                         case ConditionalType.NoLike:
                             builder.AppendFormat(temp, type, item.FieldName.ToSqlFilter(table, Database), " NOT LIKE", parameterName);
                             parameters.Add(parameterName, item.FieldValue + "%");
                             break;
-                        case ConditionalType.LikeRight:
+                        case ConditionalType.Exact:
                             builder.AppendFormat(temp, type, item.FieldName.ToSqlFilter(table, Database), "LIKE", parameterName);
-                            parameters.Add(parameterName, "%" + item.FieldValue);
+                            parameters.Add(parameterName, item.FieldValue );
                             break;
+                       
                         case ConditionalType.NoEqual:
                             builder.AppendFormat(temp, type, item.FieldName.ToSqlFilter(table, Database), "<>", parameterName);
                             parameters.Add(parameterName, item.FieldValue);
@@ -494,6 +499,12 @@ namespace Pure.Data
                         case ConditionalType.IsNullOrEmpty:
                             builder.AppendFormat("{0} ({1}) OR ({2}) ", type, item.FieldName.ToSqlFilter(table, Database) + " IS NULL ", item.FieldName.ToSqlFilter(table, Database) + " = '' ");
                             parameters.Add(parameterName, item.FieldValue);
+                            break;
+                        case ConditionalType.IsNull:
+                            builder.AppendFormat(temp, type, item.FieldName.ToSqlFilter(table, Database), " IS ", "NULL"); 
+                            break;
+                        case ConditionalType.IsNotNull:
+                            builder.AppendFormat(temp, type, item.FieldName.ToSqlFilter(table, Database), " IS NOT ", "NULL");
                             break;
                         case ConditionalType.IsNot:
                             if (item.FieldValue == null)
@@ -722,13 +733,17 @@ namespace Pure.Data
         LessThanOrEqual = 5,
         In = 6,
         NotIn = 7,
-        LikeLeft = 8,
-        LikeRight = 9,
+        EndsWith = 8,
+        StartsWith = 9,
         NoEqual = 10,
         IsNullOrEmpty = 11,
         IsNot = 12,
         NoLike = 13,
-        Regex = 14,
+        Exact = 14,
+
+        IsNull = 15,
+        IsNotNull = 16,
+        Regex = 25,
     }
     public enum WhereType
     {

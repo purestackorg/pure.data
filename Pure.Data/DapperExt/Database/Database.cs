@@ -1714,6 +1714,13 @@ namespace Pure.Data
         ~Database()
         {
             this.CloseReally();
+            if (Connection != null)
+            {
+
+                Connection.Dispose();
+                Connection = null;
+
+            }
         }
 
         public void Dispose()
@@ -1724,17 +1731,16 @@ namespace Pure.Data
             {
                 this.CloseReally();
 
-                if (Config.AutoDisposeConnection == true)
-                {
-                    Connection.Dispose();
-                    Connection = null;
-                    //if (Config.EnableDebug)
-                    //{
-                    //    LogHelper.Debug("Connection has Disposed.");
-                    //}
-                }
-
+                //if (Config.AutoDisposeConnection == true)
+                //{
+                //    Connection.Dispose();
+                //    Connection = null;
+                //    //if (Config.EnableDebug)
+                //    //{
+                //    //    LogHelper.Debug("Connection has Disposed.");
+                //    //}
                 //}
+                 
 
             }
 

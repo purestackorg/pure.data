@@ -244,6 +244,7 @@ namespace Pure.Data.Migration.Providers.Mysql
                 }
             }
 
+            Database.EnsureOpenConnection();
             //this will return everything for the DB
             var schema = ((System.Data.Common.DbConnection)Database.Connection).GetSchema("COLUMNS");// ((System.Data.Common.DbConnection)_connection).GetSchema("COLUMNS");
 
@@ -315,7 +316,7 @@ namespace Pure.Data.Migration.Providers.Mysql
 
             TABLE_SQL = TABLE_SQL + schemaStr;
 
-            using (IDataReader reader = Database.ExecuteReader(string.Format(TABLE_SQL, _schemaName)))
+            using (IDataReader reader =  ExecuteQuery(string.Format(TABLE_SQL, _schemaName)))
             {
                 while (reader.Read())
                 {
@@ -326,7 +327,7 @@ namespace Pure.Data.Migration.Providers.Mysql
                     tables.Add(tbl);
                 }
             }
-
+            Database.EnsureOpenConnection();
             //this will return everything for the DB
             var schema = ((System.Data.Common.DbConnection)Database.Connection).GetSchema("COLUMNS");// ((System.Data.Common.DbConnection)_connection).GetSchema("COLUMNS");
 
