@@ -831,11 +831,12 @@ namespace FluentExpressionSQL
                 .StripQuotedStrings('`')
                 .ToLower();
 
-            foreach (var illegalFragment in illegalFragments)
-            {
-                if ((fragmentToVerify.IndexOf(illegalFragment, StringComparison.Ordinal) >= 0))
-                    throw new ArgumentException("检测SQL中存在非法字符串: " + sqlFragment);
-            }
+            //20200312  处理91445122MA518END13 91440300MA5FENDX1D  这种情况会报错 END的问题
+            //foreach (var illegalFragment in illegalFragments)
+            //{
+            //    if ((fragmentToVerify.IndexOf(illegalFragment, StringComparison.Ordinal) >= 0))
+            //        throw new ArgumentException("检测SQL中存在非法字符串: " + sqlFragment);
+            //}
 
             return sqlFragment;
         }
