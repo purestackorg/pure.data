@@ -726,3 +726,327 @@ SELECT DISTINCT CAST('2017/9/5 16:03:29' AS DATETIME) AS  现在时间, '23' AS 
 
 
 
+
+> ### SQLMAP (Mybatis风格)
+
+```xml
+<?xml version="1.0" encoding="utf-8" ?>
+<SqlMap Scope="PURE.CUSTOM.NAMESPACE.TB_USER"  xmlns="http://PureData.net/schemas/SqlMap.xsd">
+  <!--以下是缓存配置-->
+  <Caches>
+ 
+    <!--<Cache Id="TB_USER.LruCache" Type="Lru">
+      <Parameter Key="CacheSize" Value="100"/>
+      <FlushInterval Hours="0" Minutes="10" Seconds="0"/>
+      <FlushOnExecute Statement="TB_USER.Insert"/>
+      <FlushOnExecute Statement="TB_USER.Update"/>
+    </Cache>-->
+
+  </Caches>
+  <!--以下是SQL片段-->
+  <Statements>
+    <!--查询参数条件,用于Include引用-->
+    <Statement Id="QueryParams">
+     <Variable Property="Name"></Variable>
+      <Dynamic Prepend="Where">
+        <IsTrue Property="Yes">
+          1=1
+        </IsTrue>
+        <IsFalse Prepend="And" Property="No">
+          2=2
+        </IsFalse>
+        <IsNotEmpty Property="Name" Prepend="And">
+          Name Like Concat('%',:Name,'-%')
+        </IsNotEmpty>
+
+
+        <Foreach Prepend="And" Property="LikeNames" Index="index" Item="Name" Open="(" Separator="Or" Close=")">
+          Name Like Concat('%',?Name,'%')
+        </Foreach>
+      </Dynamic>
+
+      <Switch Prepend="Order By" Property="OrderBy">
+        <Case CompareValue="1">
+          Id Desc
+        </Case>
+        <Case CompareValue="2">
+          Id Asc
+        </Case>
+        <Case CompareValue="3">
+          Name Desc
+        </Case>
+      </Switch>
+
+    </Statement>
+    
+    
+    
+    
+    <!--获取数据列 - Include-->
+    <Statement Id="GetListInclude" Cache="TB_USER.LruCache">
+      SELECT T.* From TB_USER T
+      <Include RefId="QueryParams" />
+       
+    </Statement>
+    <!--新增-->
+    <Statement Id="Insert">
+      INSERT INTO TB_USER
+      (Name)
+      VALUES
+      (:Name)
+    </Statement>
+    <!--删除-->
+    <Statement Id="Delete">
+      Delete TB_USER
+      Where Id=:Id
+    </Statement>
+  
+    <!--更新-->
+    <Statement Id="Update">
+      UPDATE TB_USER
+      SET
+      Name = :Name
+      Where Id=:Id
+    </Statement>
+    <!--获取数据列-->
+    <Statement Id="GetList">
+      Select * From TB_USER T Where 1=1
+      <IsNotEmpty Prepend="And T.Id" Property="Ids" In="true" />
+      <IsNotEmpty Prepend="And" Property="Name">
+        And T.Name Like '%'+ :Name + '%'
+      </IsNotEmpty>
+      Order By Id Desc
+    </Statement>
+    <!--多条件组合查询-->
+    <Statement Id="GetListCombine">
+      Select  * From TB_USER T Where 1=1
+      <IsNotEmpty  Property="Name">
+        <IsGreaterEqual Property="Id" CompareValue="5">
+          <IsLessThan Property="Id" CompareValue="100">
+            And T.Name Like '%:Name%'
+            And T.Id >= :Id
+          </IsLessThan>
+        </IsGreaterEqual>
+      </IsNotEmpty>
+      Order By Id Desc
+    </Statement>
+    <!--获取分页数据-->
+    <Statement Id="GetListByPage">
+      Select TT.* From
+      (Select ROW_NUMBER() Over(Order By T.Id Desc) Row_Index,T.
+      * From TB_USER T
+      <Include RefId="QueryParams"/>) TT
+      Where TT.Row_Index Between ((:PageIndex-1)*:PageSize+1) An
+      d (:PageIndex*:PageSize)
+    </Statement>
+    <!--获取记录数-->
+    <Statement Id="GetRecord">
+      Select Count(1) From TB_USER T
+      <Include RefId="QueryParams"/>
+    </Statement>
+    <!--获取表映射实体-->
+    <Statement Id="GetEntity">
+      Select T.* From TB_USER T
+      Where 1=1
+      <IsNotEmpty Prepend="And" Property="Id">
+        T.Id=:Id
+      </IsNotEmpty>
+    </Statement>
+    <!--是否存在该记录-->
+    <Statement Id="IsExist">
+      Select Count(1) From TB_USER T
+      <Include RefId="QueryParams"/>
+    </Statement>
+
+
+    <!--Foreach 获取数据列-->
+    <Statement Id="GetListByFor"  >
+      Select * From TB_USER T Where 1=1
+      <Foreach Prepend="And" Property="LikeNames" Index="index" Item="item" Open="(" Separator="Or" Close=")">
+        Name Like Concat('%',:item.Name,'%') and Id > :index  and Id > :item.Id
+      </Foreach>
+    </Statement>
+
+
+<!--Test属性中判断脚本
+特殊字符比较
+
+""标识字符串 
+''标识字符
+
+字符标识
+<if test="chr=='1'"></if>
+
+字符串标识
+<if test='str=="1"'></if>
+
+例如：<if test='id != null and id > 28'></if>
+
+mybatis对于这种大于小于等等还有另一种形式。
+
+例如：<if test='id != null and id gt 28'></if>
+
+对应关系：
+
+    and           对应             &&
+ 
+    or            对应             ||
+    
+    gt            对应             >
+
+    gte           对应             >=
+
+    lt            对应             <(会报错  相关联的 "test" 属性值不能包含 '<' 字符)
+
+    lte           对应             <=(会报错  相关联的 "test" 属性值不能包含 '<' 字符)
+    
+    eq            对应             ==
+
+    neq           对应             !=
+ 
+    
+    -->
+
+    <!--If 条件标签-->
+    <Statement Id="GetListIfTest">
+      Select * From TB_USER T Where 1=1
+      <If Test='Ids!=null and Ids.Length > 0  '>
+        and T.Id in #{Ids}
+      </If> 
+      <If Test='Name != "6662" '>
+        and T.Name != '6662'
+      </If>
+
+    </Statement>
+
+    <!--Bind 标签-->
+    <Statement Id="GetListBindTest">
+      Select * From TB_USER T Where 1=1
+      <Bind Name="bindName1" Value="22"></Bind>
+      <Bind Name="bindName2" Value='"hello"'></Bind>
+
+      <If Test='bindName1 lte 1000 and bindName2 != null   and  bindName2.Length > 0  '>
+        and T.Id = #{bindName1}
+      </If> 
+
+    </Statement>
+    
+    <!--Choose 标签-->
+    <Statement Id="GetListChooseTest">
+      Select * From TB_USER T Where 1=1 
+      <Choose>
+        <When Test='Name != null and Name == "liweisi"'>
+          and Name=#{Name}
+        </When>
+        <When Test='ID > 0'>
+          and ID=#{ID}
+        </When>
+        <Otherwise>
+          and Name='otherwise'
+        </Otherwise>
+      </Choose>
+
+    </Statement>
+
+    <!--Trim 标签-->
+    <Statement Id="GetListTrimTest">
+      Select * From TB_USER T
+
+      <Trim Prefix="WHERE " PrefixOverrides="AND |OR ">
+        <If Test="Name!=null  ">
+          and Name=#{Name}
+        </If>
+        <If Test=" Nam!=null">
+          and Name=#{Nam}
+        </If>
+      </Trim>
+
+
+    </Statement>
+    
+    <!--Set and Where 标签-->
+    <Statement Id="updateUserSetTest" >
+      update TB_USER
+      <Set>
+        <If Test="Name!=null  ">
+          Name=#{Name}
+        </If>
+      </Set>
+      <Where>
+        <If Test="ID!=null  ">
+          ID=#{ID}
+        </If>
+      </Where>
+    </Statement>
+
+    <!--Foreach Include If 标签-->
+    <Statement Id="GetListForeachIncludeIfTest"  >
+      Select * From TB_USER T Where 1=1
+      <Foreach Prepend="And" Property="LikeNames" Index="index" Item="item" Open="(" Separator="Or" Close=")">
+        <If Test='Name=="546"' >
+          Name Like  '%#{item.Name}%' and Id > #{index}  and Id > #{item.Id}
+
+        </If>
+        <If Test="Nam != null" >
+          Name =#{item.Name}
+
+        </If>
+      </Foreach>
+    </Statement>
+
+
+    <!--包括
+              Where 
+              Any 
+              All 
+              FirstOrDefault 
+              First 
+              LastOrDefault 
+              Last 
+              SingleOrDefault 
+              Single 
+              Count 
+              LongCount 
+              Average(Long,Double,Float,Decimal)
+              Sum(Long,Double,Float,Decimal)
+              Max(Long,Double,Float,Decimal)
+              Min(Long,Double,Float,Decimal)
+
+-->
+    <!--Linq部分函数支持-->
+    <Statement Id="GetListLinqTest"  >
+      Select * From TB_USER T Where 1=1
+      <If Test="Name != ''" >
+        and Name = ${Name}
+      </If>
+      <If Test='LikeNames.Where("p.Id>22").Count() > 0' >
+        <Bind Name="MaxID" Value='LikeNames.Max("p.Id")'></Bind>
+        and Id = ${MaxID}
+      </If>
+
+    </Statement>
+    
+    
+  </Statements>
+</SqlMap>
+
+
+
+```
+
+### 
+
+
+通过这种方式的调用SQLMAP执行：
+
+
+```c#
+
+var db = DbMocker.NewDataBase();
+var resultGetListLinqTest = db.QuerySqlMap("TB_USER", "GetListLinqTest", new { Name = "fsdsd", ID = 2, Nam = "23", LikeNames = dd, Ids = new long[] { 1, 2, 3, 4 } });
+db.LogHelper.Write(resultGetListLinqTest.RawSql);
+
+```
+
+
+
