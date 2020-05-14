@@ -1,6 +1,9 @@
 # pure.data
 pure.data支持.Net core 和 .NetFramework4.5+的ORM框架，底层采用dapper，性能强劲，稳定，既能利用Linq强编码提示，又可利用Mybatis风格管理SQL。
 
+https://github.com/purestackorg/pure.data
+
+
 包含如下功能：
 1.支持多种配置方式xml，数据库连接字符串，连接对象
 
@@ -20,7 +23,9 @@ pure.data支持.Net core 和 .NetFramework4.5+的ORM框架，底层采用dapper�
 
 9.附加代码生成工具
 
-10.....很多功能，自行挖掘
+10.插件系统，可以注入多种Execute Event
+
+11.....很多功能，自行挖掘
 
 
 
@@ -38,33 +43,7 @@ public class TestDbContext : DbContext
             : base("TestKey", config => //TestKey 对应web.config里面ConnectionString的key
             {
 
-                config.ExecuteTimeout = GDCIC.Core.Toolset.AppConfigHelper.Get<int>("ExecuteTimeout", 30);//数据库执行超时时间
-                config.EnableOrmLog = GDCIC.Core.Toolset.AppConfigHelper.Get<bool>("EnableOrmLog", true);//是否启用日志追踪
-                config.EnableDebug = GDCIC.Core.Toolset.AppConfigHelper.Get<bool>("EnableDebug", true);//是否启用调试模式，只有true才能输出SQL
-                config.EnableIntercept = GDCIC.Core.Toolset.AppConfigHelper.Get<bool>("EnableIntercept", true); //是否启用侦听中断，用于嵌入自定义代码
-                config.KeepConnectionAlive = GDCIC.Core.Toolset.AppConfigHelper.Get<bool>("KeepConnectionAlive", false);  //是否一直保持数据库连接
-                config.AutoMigrate = GDCIC.Core.Toolset.AppConfigHelper.Get<bool>("AutoMigrate", true);//是否自动迁移数据库脚本，用于CodeFirst模式
-                config.EnableAutoMigrateDebug = GDCIC.Core.Toolset.AppConfigHelper.Get<bool>("EnableAutoMigrateDebug", true);//是否启用自动迁移数据库的调试模式输出SQL
-                config.EnableAutoMigrateLog = GDCIC.Core.Toolset.AppConfigHelper.Get<bool>("EnableAutoMigrateLog", true);//是否启用自动迁移数据库的调试模式输出本地LOG
-                config.AutoMigrateOnContainTable = GDCIC.Core.Toolset.AppConfigHelper.Get<string>("AutoMigrateOnContainTable", "");//仅包含的指定表名才能自动迁移
-                config.EnableSqlMap = GDCIC.Core.Toolset.AppConfigHelper.Get<bool>("EnableSqlMap", false);//是否启用Mybatis数据类似的SqlMap脚本模式
-                //config.SqlMapPaths.Add(GDCIC.Core.Toolset.AppConfigHelper.Get<string>("SqlMapPaths", "sqlmap/sql_dev.xml"));//加入SqlMap的文件路径
-
-                if (config.EnableDebug == true)//此代码用于Profiler监听SQL， 可以移除
-                {
-                    config.DbConnectionInit = (conn) =>
-                    {
-
-                        if ( ProfilingSession.Current == null)
-                        {
-                            return conn;
-                        } 
-                        var dbProfiler = new Pure.Profiler.Data.DbProfiler(Pure.Profiler.ProfilingSession.Current.Profiler);
-
-                        conn = new Pure.Profiler.Data.ProfiledDbConnection(conn, dbProfiler);
-                        return conn;
-                    };
-                }
+                //自行配置...
 
             })
         {
@@ -1047,6 +1026,3 @@ var resultGetListLinqTest = db.QuerySqlMap("TB_USER", "GetListLinqTest", new { N
 db.LogHelper.Write(resultGetListLinqTest.RawSql);
 
 ```
-
-
-
