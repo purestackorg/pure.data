@@ -10,13 +10,13 @@ pure.data支持.Net core 和 .NetFramework4.5+的ORM框架，底层采用dapper�
 
 4.支持数据库连接池
 
-5. 支持FluetValidation自动验证实体
+5.支持FluetValidation自动验证实体
 
-6. 主从读写分离
+6.主从读写分离
 
-7. 批量导入、导出，生成SQL 脚本
+7.批量导入、导出，生成SQL 脚本
 
-8. 数据备份与还原、数据导入导出
+8.数据备份与还原、数据导入导出
 
 9.附加代码生成工具
 
