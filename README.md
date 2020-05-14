@@ -1,5 +1,5 @@
 # pure.data
-pure.data支持.Net core 和 .NetFramework4.5+的ORM框架，底层采用dapper，提高执行效率
+pure.data支持.Net core 和 .NetFramework4.5+的ORM框架，底层采用dapper，性能强劲，稳定，既能利用Linq强编码提示，又可利用Mybatis风格管理SQL。
 
 包含如下功能：
 1.支持多种配置方式xml，数据库连接字符串，连接对象
